@@ -189,7 +189,7 @@
             <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800 shadow-2xl">
                 <img id="zoom-target-img" src="" alt="" class="zoom-image w-full h-full object-cover">
             </div>
-            <p class="text-center text-xs text-gray-400 font-medium tracking-wide flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-red-400"></i> Hover cursor over target details to inspect grading textures.</p>
+            <p class="text-center text-xs text-gray-400 font-medium tracking-wide flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-red-400"></i> Hover mouse over card textures to magnify parameters.</p>
         </div>
     </div>
 
@@ -303,32 +303,6 @@
         ];
         let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567", items_ordered: [1, 2], order_status: "Pending" }];
 
-        async function initializeSessionRecovery() {
-            if (!supabaseClient) return;
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user) {
-                    let { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
-                    if(prof) { 
-                        currentUserProfile = prof; 
-                    } else if(session.user.user_metadata) {
-                        currentUserProfile = {
-                            id: session.user.id,
-                            name: session.user.user_metadata.name || session.user.email.split('@')[0],
-                            address: session.user.user_metadata.address || "Metro Manila",
-                            phone: session.user.user_metadata.phone || "None"
-                        };
-                    }
-                    if (currentUserProfile) {
-                        document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
-                        document.getElementById('nav-logout-btn').classList.remove('hidden'); // Expose the logout button explicitly
-                    }
-                }
-            } catch (err) {
-                console.warn("Session vault processing skipped: ", err.message);
-            }
-        }
-
         async function fetchLiveInventory() {
             if (!supabaseClient) {
                 items = DEMO_FALLBACK_ITEMS;
@@ -433,11 +407,10 @@
         }
         window.closeAuthModal = function() { document.getElementById('auth-modal').style.display = 'none'; }
         
-        // PROACTIVE DISPATCH ENGINE: Explicitly handles pure structural sign out processes
+        // PROACTIVE DISPATCH ENGINE: Clean structural logouts with safe server callbacks
         window.executeSecureLogout = async function() {
             if(confirm("Log out of your active account profile context?")) {
                 currentUserProfile = null;
-                // ADDED AWAIT: Forces browser to wait until session is completely deleted from the database
                 if(supabaseClient) {
                     await supabaseClient.auth.signOut();
                 }
@@ -513,18 +486,18 @@
             itemSummaryCounts.forEach(id => {
                 const matchItem = items.find(i => i.id === id);
                 if (!matchItem) return;
-                const quant = cart.filter(cid => cid === id).length;
-                runningSum += (matchItem.price * quant);
+                const MathQuant = cart.filter(cid => cid === id).length;
+                runningSum += (matchItem.price * MathQuant);
                 
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center text-gray-300 py-1 border-b border-gray-800/40 last:border-0";
                 div.innerHTML = `
                     <div class="flex items-center gap-2">
-                        <span class="text-red-400 font-mono font-bold">${quant}x</span>
+                        <span class="text-red-400 font-mono font-bold">${MathQuant}x</span>
                         <span>${matchItem.name}</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-gray-200">₱${(matchItem.price * quant).toLocaleString()}</span>
+                        <span class="font-bold text-gray-200">₱${(matchItem.price * MathQuant).toLocaleString()}</span>
                         <button onclick="removeFromCart(${id}); openCheckoutModal();" class="text-red-400 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 `;
@@ -683,8 +656,11 @@
         }
 
         window.purgeOrderLogRecord = async function(id) {
-            if(!confirm("Purge record permanently?")) return;
-            if(supabaseClient) { await supabaseClient.from('Orders').delete().eq('id', id); }
+            if(!confirm("Purge record permanently from cloud storage?")) return;
+            if(supabaseClient) {
+                const { error } = await supabaseClient.from('Orders').delete().eq('id', id);
+                if(error) { alert(`Delete Action Blocked: ${error.message}`); return; }
+            }
             await renderAdminOrdersLedger();
         }
 
@@ -780,6 +756,42 @@
         document.getElementById('rarity-select').addEventListener('change', renderGrid);
         document.getElementById('sort-select').addEventListener('change', renderGrid);
 
+        // REAL-TIME SESSION VAULT RADAR INITIALIZATION
+        if (supabaseClient) {
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                if (session && session.user) {
+                    try {
+                        let { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
+                        if (prof) {
+                            currentUserProfile = prof;
+                        } else if (session.user.user_metadata) {
+                            currentUserProfile = {
+                                id: session.user.id,
+                                name: session.user.user_metadata.name || session.user.email.split('@')[0],
+                                address: session.user.user_metadata.address || "Metro Manila",
+                                phone: session.user.user_metadata.phone || "None"
+                            };
+                        }
+                        
+                        if (currentUserProfile) {
+                            document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
+                            document.getElementById('nav-logout-btn').classList.remove('hidden');
+                            await fetchBuyerRealtimeOrders();
+                        }
+                    } catch (err) {
+                        console.warn("Profile state sync delay:", err.message);
+                    }
+                } else {
+                    currentUserProfile = null;
+                    document.getElementById('auth-btn-text').innerText = "Sign In / Register";
+                    document.getElementById('nav-logout-btn').classList.add('hidden');
+                    document.getElementById('buyer-tracker-box').classList.add('hidden');
+                }
+                renderGrid();
+            });
+        }
+
+        // Fetch master inventory lists on entry
         fetchLiveInventory();
     </script>
 </body>
