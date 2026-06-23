@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Proactive Magnifier Matrix Styles */
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -31,6 +30,7 @@
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
+    <!-- NAVIGATION BAR CONTROLLER -->
     <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -67,6 +67,7 @@
     </nav>
 
     <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- SIDEBAR FILTERS -->
         <aside class="lg:col-span-1 bg-[#1e1e1e] p-5 rounded-xl border border-gray-800 space-y-5 h-fit sticky top-20">
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
@@ -99,6 +100,7 @@
             </div>
         </aside>
 
+        <!-- GRID MAIN BOARD -->
         <main class="lg:col-span-3">
             <div class="flex justify-between items-center mb-4 text-xs text-gray-400 font-medium">
                 <span id="results-count">Loading cards from inventory database...</span>
@@ -108,6 +110,7 @@
         </main>
     </div>
 
+    <!-- CUSTOMER PROFILE MANAGEMENT AUTH MODAL -->
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -142,6 +145,7 @@
         </div>
     </div>
 
+    <!-- CART CHECKOUT TRAY -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -183,6 +187,7 @@
         </div>
     </div>
 
+    <!-- INTENSITY TEXTURE ZOOM DETAILS OVERLAY MODAL -->
     <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none">
         <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
@@ -193,6 +198,7 @@
         </div>
     </div>
 
+    <!-- SERVER AUTHENTICATED ENCRYPTED CONTROL PANEL SYSTEM -->
     <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
@@ -200,6 +206,7 @@
                 <button onclick="closeAdminPanel()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1 rounded text-gray-300">Close Dashboard</button>
             </div>
 
+            <!-- SERVER SIDE GATEKEEPER SIGN IN PORTAL -->
             <div id="admin-auth-gate" class="py-12 text-center space-y-4 max-w-sm mx-auto">
                 <p class="text-xs text-gray-400">Sign in using your master Supabase administrator email credentials to unlock catalog write permissions.</p>
                 <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
@@ -208,6 +215,7 @@
             </div>
 
             <div id="admin-workspace" class="hidden space-y-8">
+                <!-- INVENTORY STOCK MODULE -->
                 <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
                     <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -245,6 +253,7 @@
                     </form>
                 </div>
 
+                <!-- ORDERS CONTROL LEDGER -->
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
                     <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
@@ -267,6 +276,7 @@
         </div>
     </div>
 
+    <!-- FOOTER NODE LINK -->
     <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
         <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
         <p>
@@ -326,7 +336,7 @@
             await fetchBuyerRealtimeOrders();
         }
 
-        /* --- REALTIME CUSTOMER LOG QUEUE TRACKER EXTRACTION --- */
+        /* --- LOG CAPTURE VECTORS --- */
         async function fetchBuyerRealtimeOrders() {
             if(!supabaseClient || !currentUserProfile || !currentUserProfile.id) return;
             try {
@@ -354,7 +364,7 @@
             } catch(e) { console.warn("Failed tracking customer order vectors:", e); }
         }
 
-        /* --- SECURE ADMIN ACCOUNT AUTHFULL VALIDATION --- */
+        /* --- ADMIN SECURITY CHECKS --- */
         window.verifyAdminAuth = async function() {
             const email = document.getElementById('admin-email-input').value;
             const password = document.getElementById('admin-pass-input').value;
@@ -372,7 +382,7 @@
             }
         }
 
-        /* --- INVENTORY WRITE PORTAL CONTROLLER --- */
+        /* --- UPLOADS CONTROLLER --- */
         document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!supabaseClient) { alert("Production database client not loaded."); return; }
@@ -400,20 +410,19 @@
             }
         });
 
-        /* --- BUYER AUTHENTICATION FLOWS --- */
+        /* --- AUTH CONTROLLER --- */
         window.openAuthModal = function() {
-            if(currentUserProfile) return; // Ignore click actions if explicitly signed in already
+            if(currentUserProfile) return; 
             document.getElementById('auth-modal').style.display = 'flex';
         }
         window.closeAuthModal = function() { document.getElementById('auth-modal').style.display = 'none'; }
         
-        // PROACTIVE DISPATCH ENGINE: Clean structural logouts with safe server callbacks
         window.executeSecureLogout = async function() {
             if(confirm("Log out of your active account profile context?")) {
-                currentUserProfile = null;
                 if(supabaseClient) {
                     await supabaseClient.auth.signOut();
                 }
+                currentUserProfile = null;
                 document.getElementById('auth-btn-text').innerText = "Sign In / Register";
                 document.getElementById('nav-logout-btn').classList.add('hidden');
                 document.getElementById('buyer-tracker-box').classList.add('hidden');
@@ -447,35 +456,16 @@
                         if (error) throw error;
                         if(data.user) {
                             await supabaseClient.from('profiles').insert([{ id: data.user.id, name, address, phone }]);
-                            currentUserProfile = { id: data.user.id, name, address, phone };
                         }
                     } else {
                         let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                         if (error) throw error;
-                        
-                        let { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
-                        if(prof) { 
-                            currentUserProfile = prof; 
-                        } else if(data.user.user_metadata) {
-                            currentUserProfile = {
-                                id: data.user.id,
-                                name: data.user.user_metadata.name || name,
-                                address: data.user.user_metadata.address || address,
-                                phone: data.user.user_metadata.phone || phone
-                            };
-                        }
                     }
                 } catch(err) { alert(`Auth Process Error: ${err.message}`); return; }
             }
-
-            if(!currentUserProfile) currentUserProfile = { id: "guest", name, address, phone };
-            document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
-            document.getElementById('nav-logout-btn').classList.remove('hidden');
-            closeAuthModal();
-            await fetchBuyerRealtimeOrders();
         });
 
-        /* --- CHECKOUT COMPILATION SYSTEM --- */
+        /* --- CHECKOUT --- */
         window.openCheckoutModal = function() {
             if(cart.length === 0) { alert("Your cart is empty."); return; }
             const tray = document.getElementById('checkout-items-list');
@@ -486,18 +476,18 @@
             itemSummaryCounts.forEach(id => {
                 const matchItem = items.find(i => i.id === id);
                 if (!matchItem) return;
-                const MathQuant = cart.filter(cid => cid === id).length;
-                runningSum += (matchItem.price * MathQuant);
+                const quant = cart.filter(cid => cid === id).length;
+                runningSum += (matchItem.price * quant);
                 
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center text-gray-300 py-1 border-b border-gray-800/40 last:border-0";
                 div.innerHTML = `
                     <div class="flex items-center gap-2">
-                        <span class="text-red-400 font-mono font-bold">${MathQuant}x</span>
+                        <span class="text-red-400 font-mono font-bold">${quant}x</span>
                         <span>${matchItem.name}</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-gray-200">₱${(matchItem.price * MathQuant).toLocaleString()}</span>
+                        <span class="font-bold text-gray-200">₱${(matchItem.price * quant).toLocaleString()}</span>
                         <button onclick="removeFromCart(${id}); openCheckoutModal();" class="text-red-400 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 `;
@@ -554,7 +544,7 @@
             renderGrid();
         });
 
-        /* --- HIGHER FIDELITY OPTIMIZED ZOOM CONTROLLER --- */
+        /* --- OPTIMIZED ZOOM CONTROLLER --- */
         window.launchZoomModal = function(imgSrc) {
             const targetImg = document.getElementById('zoom-target-img');
             targetImg.src = imgSrc;
@@ -562,10 +552,7 @@
             document.getElementById('zoom-modal').style.display = 'flex';
             lucide.createIcons();
         }
-        
-        window.closeZoomModal = function() {
-            document.getElementById('zoom-modal').style.display = 'none';
-        }
+        window.closeZoomModal = function() { document.getElementById('zoom-modal').style.display = 'none'; }
 
         document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
             const rect = e.currentTarget.getBoundingClientRect();
@@ -574,10 +561,8 @@
             e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
         });
 
-        /* --- SYSTEM MONITOR CHANNELS --- */
-        window.openAdminPanel = function() { 
-            document.getElementById('admin-modal').style.display = 'flex'; 
-        }
+        /* --- ADMIN WORKSPACE --- */
+        window.openAdminPanel = function() { document.getElementById('admin-modal').style.display = 'flex'; }
         window.closeAdminPanel = function() {
             document.getElementById('admin-modal').style.display = 'none';
             document.getElementById('admin-auth-gate').classList.remove('hidden');
@@ -656,15 +641,12 @@
         }
 
         window.purgeOrderLogRecord = async function(id) {
-            if(!confirm("Purge record permanently from cloud storage?")) return;
-            if(supabaseClient) {
-                const { error } = await supabaseClient.from('Orders').delete().eq('id', id);
-                if(error) { alert(`Delete Action Blocked: ${error.message}`); return; }
-            }
+            if(!confirm("Purge record permanently?")) return;
+            if(supabaseClient) { await supabaseClient.from('Orders').delete().eq('id', id); }
             await renderAdminOrdersLedger();
         }
 
-        /* --- VISUAL INTERFACE LAYERS --- */
+        /* --- INTERFACE DISPLAY GRID --- */
         window.togglePhoto = function(id, view) {
             let rowObj = items.find(i => i.id === id);
             if(rowObj) { rowObj.viewState = view; renderGrid(); }
@@ -688,6 +670,8 @@
 
         function renderGrid() {
             const grid = document.getElementById('product-grid');
+            if (!grid) return;
+            
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const rarity = document.getElementById('rarity-select').value;
             const sortBy = document.getElementById('sort-select').value;
@@ -756,7 +740,7 @@
         document.getElementById('rarity-select').addEventListener('change', renderGrid);
         document.getElementById('sort-select').addEventListener('change', renderGrid);
 
-        // REAL-TIME SESSION VAULT RADAR INITIALIZATION
+        /* --- ACTIVE STATE OBSERVER PIPELINE CONTROLS --- */
         if (supabaseClient) {
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 if (session && session.user) {
@@ -779,7 +763,7 @@
                             await fetchBuyerRealtimeOrders();
                         }
                     } catch (err) {
-                        console.warn("Profile state sync delay:", err.message);
+                        console.warn("Profile cache sync delay: ", err.message);
                     }
                 } else {
                     currentUserProfile = null;
@@ -787,11 +771,12 @@
                     document.getElementById('nav-logout-btn').classList.add('hidden');
                     document.getElementById('buyer-tracker-box').classList.add('hidden');
                 }
+                // FIXED LAYOUT DISPATCH: Keeps catalog grid rendering detached from background loading states
                 renderGrid();
             });
         }
 
-        // Fetch master inventory lists on entry
+        // Run primary catalog assembly immediately on load
         fetchLiveInventory();
     </script>
 </body>
