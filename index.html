@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Micro-Precision Zoom Engine Rules */
+        /* Proactive Magnifier Matrix Styles */
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -46,10 +46,16 @@
                     <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-gray-400"></i>
                 </div>
                 
-                <button onclick="openAuthModal()" id="auth-status-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
-                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
-                    <span id="auth-btn-text">Sign In / Register</span>
-                </button>
+                <div class="flex items-center gap-2" id="nav-auth-wrapper">
+                    <button onclick="openAuthModal()" id="auth-status-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span id="auth-btn-text">Sign In / Register</span>
+                    </button>
+                    <button onclick="executeSecureLogout()" id="nav-logout-btn" class="hidden bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/30 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
 
                 <button onclick="openCheckoutModal()" class="relative bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow">
                     <i data-lucide="shopping-cart" class="w-4 h-4"></i>
@@ -276,7 +282,6 @@
         
         let supabaseClient = null;
         if(SUPABASE_URL.indexOf("your-project-id") === -1) {
-            // Master config properties actively lock down memory leakage across reloads
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
                     persistSession: true,
@@ -298,7 +303,6 @@
         ];
         let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567", items_ordered: [1, 2], order_status: "Pending" }];
 
-        // SESSION RECOVERY HANDLER: Auto-hooks on setup to pull saved token logs cleanly
         async function initializeSessionRecovery() {
             if (!supabaseClient) return;
             try {
@@ -317,6 +321,7 @@
                     }
                     if (currentUserProfile) {
                         document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
+                        document.getElementById('nav-logout-btn').classList.remove('hidden'); // Expose the logout button explicitly
                     }
                 }
             } catch (err) {
@@ -423,20 +428,26 @@
 
         /* --- BUYER AUTHENTICATION FLOWS --- */
         window.openAuthModal = function() {
-            if(currentUserProfile) {
-                if(confirm("Log out of account?")) {
-                    currentUserProfile = null;
-                    supabaseClient.auth.signOut();
-                    document.getElementById('auth-btn-text').innerText = "Sign In / Register";
-                    document.getElementById('buyer-tracker-box').classList.add('hidden');
-                    alert("Account signed out.");
-                }
-                return;
-            }
+            if(currentUserProfile) return; // Ignore click actions if explicitly signed in already
             document.getElementById('auth-modal').style.display = 'flex';
         }
         window.closeAuthModal = function() { document.getElementById('auth-modal').style.display = 'none'; }
         
+        // PROACTIVE DISPATCH ENGINE: Explicitly handles pure structural sign out processes
+        window.executeSecureLogout = async function() {
+            if(confirm("Log out of your active account profile context?")) {
+                currentUserProfile = null;
+                if(supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                }
+                document.getElementById('auth-btn-text').innerText = "Sign In / Register";
+                document.getElementById('nav-logout-btn').classList.add('hidden');
+                document.getElementById('buyer-tracker-box').classList.add('hidden');
+                alert("Account signed out successfully.");
+                window.location.reload();
+            }
+        }
+
         window.toggleAuthMode = function() {
             isRegisterMode = !isRegisterMode;
             document.getElementById('auth-title').innerHTML = isRegisterMode ? `<i data-lucide="user-plus" class="text-red-500"></i> Create Buyer Account` : `<i data-lucide="log-in" class="text-red-500"></i> Sign In to Account`;
@@ -485,6 +496,7 @@
 
             if(!currentUserProfile) currentUserProfile = { id: "guest", name, address, phone };
             document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
+            document.getElementById('nav-logout-btn').classList.remove('hidden');
             closeAuthModal();
             await fetchBuyerRealtimeOrders();
         });
@@ -568,7 +580,7 @@
             renderGrid();
         });
 
-        /* --- RELATIVE TARGET ELEMENT BOUNDARY ZOOM TRACKER --- */
+        /* --- HIGHER FIDELITY OPTIMIZED ZOOM CONTROLLER --- */
         window.launchZoomModal = function(imgSrc) {
             const targetImg = document.getElementById('zoom-target-img');
             targetImg.src = imgSrc;
@@ -581,7 +593,6 @@
             document.getElementById('zoom-modal').style.display = 'none';
         }
 
-        // Direct item boundary listener completely prevents frame freezing anomalies
         document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -589,7 +600,7 @@
             e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
         });
 
-        /* --- SYSTEM MONITOR ADMINISTRATIVE WORKSPACES --- */
+        /* --- SYSTEM MONITOR CHANNELS --- */
         window.openAdminPanel = function() { 
             document.getElementById('admin-modal').style.display = 'flex'; 
         }
@@ -671,15 +682,12 @@
         }
 
         window.purgeOrderLogRecord = async function(id) {
-            if(!confirm("Purge record permanently from cloud storage?")) return;
-            if(supabaseClient) {
-                const { error } = await supabaseClient.from('Orders').delete().eq('id', id);
-                if(error) { alert(`Delete Action Blocked: ${error.message}`); return; }
-            }
+            if(!confirm("Purge record permanently?")) return;
+            if(supabaseClient) { await supabaseClient.from('Orders').delete().eq('id', id); }
             await renderAdminOrdersLedger();
         }
 
-        /* --- DISPLAY MAPPING RENDERERS --- */
+        /* --- VISUAL INTERFACE LAYERS --- */
         window.togglePhoto = function(id, view) {
             let rowObj = items.find(i => i.id === id);
             if(rowObj) { rowObj.viewState = view; renderGrid(); }
@@ -771,11 +779,7 @@
         document.getElementById('rarity-select').addEventListener('change', renderGrid);
         document.getElementById('sort-select').addEventListener('change', renderGrid);
 
-        // SEQUENTIAL ASYNCHRONOUS ENGINE LIFECYCLE
-        (async () => {
-            await initializeSessionRecovery();
-            await fetchLiveInventory();
-        })();
+        fetchLiveInventory();
     </script>
 </body>
 </html>
