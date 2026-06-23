@@ -94,7 +94,6 @@
         </main>
     </div>
 
-    <!-- AUTH MODAL -->
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -129,7 +128,6 @@
         </div>
     </div>
 
-    <!-- CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -166,7 +164,6 @@
         </div>
     </div>
 
-    <!-- INSPECTION ZOOM MODAL -->
     <div id="zoom-modal" onclick="closeZoomModal()" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50 p-4 cursor-zoom-out select-none">
         <button class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
@@ -177,22 +174,58 @@
         </div>
     </div>
 
-    <!-- ADMIN LEDGER MONITOR MODAL -->
     <div id="admin-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center z-50 p-4">
-        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-5xl w-full p-6 shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-5xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
-                <h2 class="text-sm font-bold uppercase tracking-wider text-red-500 flex items-center gap-2"><i data-lucide="sliders"></i> Secure Checkout Order Ledger Console</h2>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-red-500 flex items-center gap-2"><i data-lucide="sliders"></i> System Master Administration Ledger</h2>
                 <button onclick="closeAdminPanel()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1 rounded text-gray-300">Close Panel</button>
             </div>
 
             <div id="admin-auth-gate" class="py-12 text-center space-y-3">
                 <p class="text-xs text-gray-400">Provide backend encryption authentication phrase to request tables logs.</p>
-                <input type="password" id="admin-pass-input" placeholder="Passphrase (Default: admin123)" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-center text-xs max-w-xs w-full focus:outline-none">
+                <input type="password" id="admin-pass-input" placeholder="Passphrase" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-center text-xs max-w-xs w-full focus:outline-none">
                 <br>
                 <button onclick="verifyAdminAuth()" class="bg-red-600 hover:bg-red-700 font-bold text-xs px-6 py-2 rounded shadow uppercase tracking-wider">Unlock Monitor</button>
             </div>
 
-            <div id="admin-workspace" class="hidden space-y-6">
+            <div id="admin-workspace" class="hidden space-y-8">
+                <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
+                    <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Card Name</label>
+                            <input type="text" id="inv-name" required placeholder="e.g. Monkey.D.Luffy" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Set Code</label>
+                            <input type="text" id="inv-set" required placeholder="e.g. OP05-119" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Rarity</label>
+                            <input type="text" id="inv-rarity" required placeholder="e.g. AA" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Price (PHP)</label>
+                            <input type="number" id="inv-price" required placeholder="14500" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Initial Stock Level</label>
+                            <input type="number" id="inv-stock" required placeholder="5" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Front Image URL</label>
+                            <input type="url" id="inv-front" required placeholder="https://..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Back Image URL</label>
+                            <input type="url" id="inv-back" required placeholder="https://..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 font-bold py-2 rounded text-white tracking-wide uppercase text-xs">Save Card to Cloud</button>
+                        </div>
+                    </form>
+                </div>
+
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
                     <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
@@ -214,7 +247,6 @@
         </div>
     </div>
 
-    <!-- FOOTER CONTAINING THE HIDDEN/DISCRETE ADMIN LINK -->
     <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
         <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
         <p>
@@ -225,9 +257,6 @@
     </footer>
 
     <script>
-        // =========================================================================
-        // IMPORTANT STEP: REPLACE WITH YOUR LIVE SUPABASE PROJECT CREDENTIALS
-        // =========================================================================
         const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
         
@@ -258,9 +287,18 @@
             try {
                 let { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false });
                 if (error) throw error;
+                
+                // Flexible mapping configuration architecture matching multiple schema variants safely
                 items = cards.map(c => ({
-                    id: c.id, name: c.name, set: c.set_code, rarity: c.rarity, price: c.price, stock: c.stock,
-                    frontImg: c.front_img, backImg: c.back_img, viewState: 'front'
+                    id: c.id, 
+                    name: c.name, 
+                    set: c.set_code || c.set || "OP-UNKNOWN", 
+                    rarity: c.rarity, 
+                    price: Number(c.price), 
+                    stock: Number(c.stock),
+                    frontImg: c.front_img || c.frontImg, 
+                    backImg: c.back_img || c.backImg, 
+                    viewState: 'front'
                 }));
             } catch (err) {
                 console.warn("Database sync failed, using fallback data:", err.message);
@@ -268,6 +306,31 @@
             }
             renderGrid();
         }
+
+        /* --- INVENTORY WRITE CONTROLLER ENGINE --- */
+        document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!supabaseClient) { alert("Production database client not loaded."); return; }
+            
+            const cardPayload = {
+                name: document.getElementById('inv-name').value,
+                set_code: document.getElementById('inv-set').value,
+                rarity: document.getElementById('inv-rarity').value,
+                price: Number(document.getElementById('inv-price').value),
+                stock: Number(document.getElementById('inv-stock').value),
+                front_img: document.getElementById('inv-front').value,
+                back_img: document.getElementById('inv-back').value
+            };
+
+            const { data, error } = await supabaseClient.from('cards').insert([cardPayload]);
+            if(error) {
+                alert(`Error saving card: ${error.message}`);
+            } else {
+                alert("Card uploaded to Supabase successfully!");
+                document.getElementById('admin-inventory-form').reset();
+                await fetchLiveInventory();
+            }
+        });
 
         /* --- AUTH --- */
         window.openAuthModal = function() {
@@ -331,6 +394,7 @@
             const itemSummaryCounts = [...new Set(cart)];
             itemSummaryCounts.forEach(id => {
                 const matchItem = items.find(i => i.id === id);
+                if (!matchItem) return;
                 const quant = cart.filter(cid => cid === id).length;
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center text-gray-300 py-1 border-b border-gray-800/40 last:border-0";
@@ -432,7 +496,7 @@
                 document.getElementById('admin-auth-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
                 renderAdminOrdersLedger();
-            } else { alert("Invalid access credentials code trace parameters."); }
+            } else { alert("Invalid credentials."); }
         }
 
         async function renderAdminOrdersLedger() {
@@ -454,7 +518,6 @@
             }
 
             dataset.forEach(ord => {
-                // INVENTORY COMPILING LOGIC: Maps quantities, titles, and item set codes cleanly
                 let itemsListHTML = '<div class="text-[10px] text-gray-400 mt-1 italic">No items tracked</div>';
                 if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
                     const counts = {};
@@ -509,7 +572,7 @@
         }
 
         window.purgeOrderLogRecord = async function(id) {
-            if(!confirm("Purge order ledger records permanently? This cannot be undone.")) return;
+            if(!confirm("Purge record permanently?")) return;
             if(supabaseClient) {
                 await supabaseClient.from('Orders').delete().eq('id', id);
             } else {
