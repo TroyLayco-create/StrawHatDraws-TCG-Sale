@@ -18,7 +18,6 @@
             transition: transform 0.1s ease-out;
             transform-origin: center center;
         }
-        /* Smooth, hardware-accelerated tracking via active element mapping */
         .zoom-container:hover .zoom-image {
             transform: scale(2.2);
             cursor: crosshair;
@@ -31,6 +30,7 @@
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
+    <!-- NAVIGATION DISPLAY -->
     <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -61,6 +61,7 @@
     </nav>
 
     <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- SIDEBAR FILTERS -->
         <aside class="lg:col-span-1 bg-[#1e1e1e] p-5 rounded-xl border border-gray-800 space-y-5 h-fit sticky top-20">
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
@@ -87,12 +88,14 @@
                 </select>
             </div>
 
+            <!-- BUYER REAL-TIME TRACKER SHIELD MODULE -->
             <div id="buyer-tracker-box" class="hidden border border-red-500/20 bg-red-950/10 p-3.5 rounded-lg space-y-2.5 text-xs">
                 <h4 class="font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5"><i class="w-3.5 h-3.5" data-lucide="package"></i> Your Active Orders</h4>
                 <div id="buyer-orders-queue" class="space-y-2 max-h-48 overflow-y-auto"></div>
             </div>
         </aside>
 
+        <!-- GRID PLATFORM -->
         <main class="lg:col-span-3">
             <div class="flex justify-between items-center mb-4 text-xs text-gray-400 font-medium">
                 <span id="results-count">Loading cards from inventory database...</span>
@@ -102,6 +105,7 @@
         </main>
     </div>
 
+    <!-- CUSTOMER PROFILE MANAGEMENT AUTH MODAL -->
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -136,6 +140,7 @@
         </div>
     </div>
 
+    <!-- SECURE TRAY SECURE CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -177,8 +182,9 @@
         </div>
     </div>
 
-    <div id="zoom-modal" onclick="closeZoomModal()" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50 p-4 cursor-zoom-out select-none">
-        <button class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800"><i data-lucide="x" class="w-6 h-6"></i></button>
+    <!-- MICROSCOPIC DETAIL INSPECTION CARD ZOOM MODAL -->
+    <div id="zoom-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50 p-4 select-none">
+        <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
             <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800 shadow-2xl">
                 <img id="zoom-target-img" src="" alt="" class="zoom-image w-full h-full object-cover">
@@ -187,6 +193,7 @@
         </div>
     </div>
 
+    <!-- SERVER AUTHENTICATED SERVER BACKEND COHESIVE ADMIN PANEL -->
     <div id="admin-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
@@ -194,6 +201,7 @@
                 <button onclick="closeAdminPanel()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1 rounded text-gray-300">Close Dashboard</button>
             </div>
 
+            <!-- SERVER SIDE GATEKEEPER SIGN IN PORTAL -->
             <div id="admin-auth-gate" class="py-12 text-center space-y-4 max-w-sm mx-auto">
                 <p class="text-xs text-gray-400">Sign in using your master Supabase administrator email credentials to unlock catalog write permissions.</p>
                 <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
@@ -202,6 +210,7 @@
             </div>
 
             <div id="admin-workspace" class="hidden space-y-8">
+                <!-- INVENTORY PORTAL MODULE -->
                 <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
                     <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -239,6 +248,7 @@
                     </form>
                 </div>
 
+                <!-- CLIENT ORDER LEDGER QUEUE MODULE -->
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
                     <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
@@ -261,6 +271,7 @@
         </div>
     </div>
 
+    <!-- REAR SYSTEM ROOT ACCESS LINK -->
     <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
         <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
         <p>
@@ -346,7 +357,6 @@
         window.verifyAdminAuth = async function() {
             const email = document.getElementById('admin-email-input').value;
             const password = document.getElementById('admin-pass-input').value;
-            
             if(!supabaseClient) { alert("Database framework missing."); return; }
             
             try {
@@ -538,8 +548,6 @@
         window.launchZoomModal = function(imgSrc) {
             const targetImg = document.getElementById('zoom-target-img');
             targetImg.src = imgSrc;
-            
-            // Clean baseline alignments clear old variable cache pipelines instantly
             targetImg.style.transformOrigin = 'center center';
             document.getElementById('zoom-modal').style.display = 'flex';
             lucide.createIcons();
@@ -549,7 +557,7 @@
             document.getElementById('zoom-modal').style.display = 'none';
         }
 
-        // Mapping direct local offsetting elements bypasses scroll layout containers entirely
+        // Mapping coordinates directly on the active target fixes zoom locks cleanly
         document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
