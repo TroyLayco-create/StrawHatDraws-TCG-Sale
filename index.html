@@ -630,8 +630,20 @@
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const rarity = document.getElementById('rarity-select').value;
             const sortBy = document.getElementById('sort-select').value;
-            
-            let filtered = items.filter(i => (i.name.toLowerCase().includes(search) || i.set.toLowerCase().includes(search)) && (rarity === 'ALL' || i.rarity === rarity));
+    
+            // UPDATED FILTER LOGIC:
+            let filtered = items.filter(i => {
+                const matchesSearch = i.name.toLowerCase().includes(search) || i.set.toLowerCase().includes(search);
+        
+                // Normalize both sides to uppercase and trim spaces
+                const itemRarity = (i.rarity || "").toUpperCase().trim();
+                const selectedRarity = rarity.toUpperCase().trim();
+        
+                const matchesRarity = (rarity === 'ALL' || itemRarity === selectedRarity);
+        
+                return matchesSearch && matchesRarity;
+            });
+
             if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
             else if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
 
