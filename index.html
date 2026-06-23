@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Precision Zoom Styles */
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -30,7 +31,7 @@
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
-    <!-- NAVIGATION BAR CONTROLLER -->
+    <!-- NAVIGATION HEADER -->
     <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -100,7 +101,7 @@
             </div>
         </aside>
 
-        <!-- GRID MAIN BOARD -->
+        <!-- MAIN GRIDBOARD -->
         <main class="lg:col-span-3">
             <div class="flex justify-between items-center mb-4 text-xs text-gray-400 font-medium">
                 <span id="results-count">Loading cards from inventory database...</span>
@@ -110,7 +111,7 @@
         </main>
     </div>
 
-    <!-- CUSTOMER PROFILE MANAGEMENT AUTH MODAL -->
+    <!-- AUTHENTICATION FORM MODAL -->
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -145,7 +146,7 @@
         </div>
     </div>
 
-    <!-- CART CHECKOUT TRAY -->
+    <!-- SECURE TRAY SECURE CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -187,7 +188,7 @@
         </div>
     </div>
 
-    <!-- INTENSITY TEXTURE ZOOM DETAILS OVERLAY MODAL -->
+    <!-- CARD ZOOM TEXTURE MODAL -->
     <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none">
         <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
@@ -198,7 +199,7 @@
         </div>
     </div>
 
-    <!-- SERVER AUTHENTICATED ENCRYPTED CONTROL PANEL SYSTEM -->
+    <!-- ENCRYPTED SYSTEM LEDGER MONITOR DASHBOARD -->
     <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
@@ -215,7 +216,7 @@
             </div>
 
             <div id="admin-workspace" class="hidden space-y-8">
-                <!-- INVENTORY STOCK MODULE -->
+                <!-- INVENTORY PORTAL MODULE -->
                 <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
                     <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -253,7 +254,7 @@
                     </form>
                 </div>
 
-                <!-- ORDERS CONTROL LEDGER -->
+                <!-- CLIENT ORDER LEDGER QUEUE MODULE -->
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
                     <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
@@ -276,7 +277,7 @@
         </div>
     </div>
 
-    <!-- FOOTER NODE LINK -->
+    <!-- REAR CONSOLE FOOTER LINK -->
     <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
         <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
         <p>
@@ -316,7 +317,6 @@
         async function fetchLiveInventory() {
             if (!supabaseClient) {
                 items = DEMO_FALLBACK_ITEMS;
-                document.getElementById('results-count').innerText = "Running on local mock fallback data.";
                 renderGrid();
                 return;
             }
@@ -329,14 +329,13 @@
                     frontImg: c.front_img || c.frontImg, backImg: c.back_img || c.backImg, viewState: 'front'
                 }));
             } catch (err) {
-                console.warn("Database sync failed, using fallback data:", err.message);
+                console.warn("Database sync dropped, pulling back cache models:", err.message);
                 items = DEMO_FALLBACK_ITEMS;
             }
             renderGrid();
-            await fetchBuyerRealtimeOrders();
         }
 
-        /* --- LOG CAPTURE VECTORS --- */
+        /* --- DECOUPLED INDEPENDENT ORDER PIPELINE EXTRACTOR --- */
         async function fetchBuyerRealtimeOrders() {
             if(!supabaseClient || !currentUserProfile || !currentUserProfile.id) return;
             try {
@@ -361,14 +360,14 @@
                         queueBox.innerHTML += div.outerHTML;
                     });
                 }
-            } catch(e) { console.warn("Failed tracking customer order vectors:", e); }
+            } catch(e) { console.warn("Tracker lookup skipped:", e); }
         }
 
-        /* --- ADMIN SECURITY CHECKS --- */
+        /* --- SECURE ADMIN CORE HANDLERS --- */
         window.verifyAdminAuth = async function() {
             const email = document.getElementById('admin-email-input').value;
             const password = document.getElementById('admin-pass-input').value;
-            if(!supabaseClient) { alert("Database framework missing."); return; }
+            if(!supabaseClient) return;
             
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -377,15 +376,13 @@
                 document.getElementById('admin-auth-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
                 await renderAdminOrdersLedger();
-            } catch (err) {
-                alert(`Security Access Core Denied: ${err.message}`);
-            }
+            } catch (err) { alert(`Denied: ${err.message}`); }
         }
 
-        /* --- UPLOADS CONTROLLER --- */
+        /* --- INVENTORY DISPATCH --- */
         document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if(!supabaseClient) { alert("Production database client not loaded."); return; }
+            if(!supabaseClient) return;
             
             const frontVal = document.getElementById('inv-front').value.trim();
             const backVal = document.getElementById('inv-back').value.trim();
@@ -401,44 +398,40 @@
             };
 
             const { data, error } = await supabaseClient.from('cards').insert([cardPayload]);
-            if(error) {
-                alert(`Error saving card (Verify DB writes account constraints): ${error.message}`);
-            } else {
-                alert("Card uploaded to Supabase successfully!");
+            if(error) { alert(`Error: ${error.message}`); } else {
+                alert("Uploaded successfully!");
                 document.getElementById('admin-inventory-form').reset();
                 await fetchLiveInventory();
             }
         });
 
-        /* --- AUTH CONTROLLER --- */
+        /* --- AUTH CONTROLLERS --- */
         window.openAuthModal = function() {
-            if(currentUserProfile) return; 
+            if(currentUserProfile) return;
             document.getElementById('auth-modal').style.display = 'flex';
         }
         window.closeAuthModal = function() { document.getElementById('auth-modal').style.display = 'none'; }
         
         window.executeSecureLogout = async function() {
-            if(confirm("Log out of your active account profile context?")) {
-                if(supabaseClient) {
-                    await supabaseClient.auth.signOut();
-                }
+            if(confirm("Log out of account?")) {
                 currentUserProfile = null;
+                if(supabaseClient) { await supabaseClient.auth.signOut(); }
                 document.getElementById('auth-btn-text').innerText = "Sign In / Register";
                 document.getElementById('nav-logout-btn').classList.add('hidden');
                 document.getElementById('buyer-tracker-box').classList.add('hidden');
-                alert("Account signed out successfully.");
                 window.location.reload();
             }
         }
 
         window.toggleAuthMode = function() {
             isRegisterMode = !isRegisterMode;
-            document.getElementById('auth-title').innerHTML = isRegisterMode ? `<i data-lucide="user-plus" class="text-red-500"></i> Create Buyer Account` : `<i data-lucide="log-in" class="text-red-500"></i> Sign In to Account`;
+            document.getElementById('auth-title').innerHTML = isRegisterMode ? `<i data-lucide="user-plus" class="text-red-500"></i> Create Account` : `<i data-lucide="log-in" class="text-red-500"></i> Sign In`;
             document.getElementById('auth-profile-fields').style.display = isRegisterMode ? 'block' : 'none';
             document.getElementById('auth-toggle-msg').innerText = isRegisterMode ? "Already have an account? Sign In here." : "Need an account? Register here.";
             lucide.createIcons();
         }
 
+        // FIXED REGISTRATION SUBMIT ENGINE: Clean form prevention ensures no background loop freezes
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
@@ -447,22 +440,30 @@
             const address = document.getElementById('auth-address').value || "Metro Manila";
             const phone = document.getElementById('auth-phone').value || "None";
 
-            if (supabaseClient) {
-                try {
-                    if (isRegisterMode) {
-                        let { data, error } = await supabaseClient.auth.signUp({ 
-                            email, password, options: { data: { name, address, phone } }
-                        });
-                        if (error) throw error;
-                        if(data.user) {
-                            await supabaseClient.from('profiles').insert([{ id: data.user.id, name, address, phone }]);
-                        }
-                    } else {
-                        let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                        if (error) throw error;
-                    }
-                } catch(err) { alert(`Auth Process Error: ${err.message}`); return; }
+            if (!supabaseClient) {
+                currentUserProfile = { id: "guest", name, address, phone };
+                document.getElementById('auth-btn-text').innerText = name;
+                document.getElementById('nav-logout-btn').classList.remove('hidden');
+                closeAuthModal();
+                return;
             }
+
+            try {
+                if (isRegisterMode) {
+                    let { data, error } = await supabaseClient.auth.signUp({ 
+                        email, password, options: { data: { name, address, phone } }
+                    });
+                    if (error) throw error;
+                    if(data.user) {
+                        await supabaseClient.from('profiles').insert([{ id: data.user.id, name, address, phone }]);
+                    }
+                    alert("Registration successful! Logging session parameters in.");
+                } else {
+                    let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    closeAuthModal();
+                }
+            } catch(err) { alert(`Auth Error: ${err.message}`); }
         });
 
         /* --- CHECKOUT --- */
@@ -497,13 +498,9 @@
             document.getElementById('checkout-grand-total').innerText = "₱" + runningSum.toLocaleString();
 
             if(currentUserProfile) {
-                document.getElementById('checkout-welcome-tip').innerText = `Autofilling details from account profile (${currentUserProfile.name}).`;
                 document.getElementById('cust-name').value = currentUserProfile.name;
                 document.getElementById('cust-address').value = currentUserProfile.address;
                 document.getElementById('cust-phone').value = currentUserProfile.phone;
-            } else {
-                document.getElementById('checkout-welcome-tip').innerText = "Checking out as Guest. Provide shipping records below.";
-                document.getElementById('checkout-form').reset();
             }
             document.getElementById('checkout-modal').style.display = 'flex';
             lucide.createIcons();
@@ -524,18 +521,13 @@
                 const targetObj = items.find(i => i.id === id);
                 if (targetObj && targetObj.stock > 0) {
                     targetObj.stock--;
-                    if(supabaseClient) {
-                        await supabaseClient.from('cards').update({ stock: targetObj.stock }).eq('id', id);
-                    }
+                    if(supabaseClient) { await supabaseClient.from('cards').update({ stock: targetObj.stock }).eq('id', id); }
                 }
             }
 
             if(supabaseClient) {
-                const { error } = await supabaseClient.from('Orders').insert([orderPayload]);
-                if (error) { alert(`Database Order Placement Error: ${error.message}`); return; }
-            } else {
-                localOrdersBackup.unshift(orderPayload);
-            }
+                await supabaseClient.from('Orders').insert([orderPayload]);
+            } else { localOrdersBackup.unshift(orderPayload); }
 
             cart = [];
             document.getElementById('cart-count').innerText = 0;
@@ -544,7 +536,7 @@
             renderGrid();
         });
 
-        /* --- OPTIMIZED ZOOM CONTROLLER --- */
+        /* --- MICROSCOPIC LENS ZOOM ENGINE --- */
         window.launchZoomModal = function(imgSrc) {
             const targetImg = document.getElementById('zoom-target-img');
             targetImg.src = imgSrc;
@@ -561,7 +553,7 @@
             e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
         });
 
-        /* --- ADMIN WORKSPACE --- */
+        /* --- SYSTEM MONITOR ADMINISTRATIVE LEDGER --- */
         window.openAdminPanel = function() { document.getElementById('admin-modal').style.display = 'flex'; }
         window.closeAdminPanel = function() {
             document.getElementById('admin-modal').style.display = 'none';
@@ -575,69 +567,38 @@
             const tbody = document.getElementById('admin-orders-tbody');
             tbody.innerHTML = '';
             let dataset = localOrdersBackup;
-            
             if(supabaseClient) {
                 let { data } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
                 if(data) dataset = data;
             }
 
-            if(dataset.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No active checkouts logged inside database logs.</td></tr>`;
-                return;
-            }
-
             dataset.forEach(ord => {
-                let itemsListHTML = '<div class="text-[10px] text-gray-400 mt-1 italic">No items tracked</div>';
+                let itemsListHTML = '';
                 let totalOrderPrice = 0;
-
                 if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
                     const counts = {};
                     ord.items_ordered.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
-                    
-                    itemsListHTML = '<div class="space-y-1 mt-1 bg-black/40 p-1.5 rounded border border-gray-800/80 max-w-xs">';
+                    itemsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">';
                     Object.keys(counts).forEach(id => {
                         const matchCard = items.find(i => i.id == id);
-                        const nameText = matchCard ? matchCard.name : `Card ID: ${id}`;
-                        const setCodeText = matchCard ? ` - <span class="text-gray-500 font-mono text-[10px]">${matchCard.set}</span>` : '';
                         if(matchCard) { totalOrderPrice += (matchCard.price * counts[id]); }
-                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium flex items-center justify-between"><span class="text-white bg-red-600/30 px-1.5 py-0.5 rounded text-[10px] mr-1.5 font-bold">${counts[id]}x</span> <span>${nameText}${setCodeText}</span></div>`;
+                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${matchCard ? matchCard.name : 'Unknown Card'}</div>`;
                     });
                     itemsListHTML += '</div>';
                 }
 
-                const currentStatus = ord.order_status || "Pending";
-
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-white/5 border-b border-gray-800/50 transition-all text-top";
+                tr.className = "hover:bg-white/5 border-b border-gray-800 text-top";
                 tr.innerHTML = `
-                    <td class="p-3"><input type="text" value="${ord.customer_name}" onchange="modifyOrderLogField('${ord.id}', 'customer_name', this.value)" class="bg-[#2a2a2a] p-1 border border-gray-700 rounded text-xs w-full text-white font-semibold"></td>
-                    <td class="p-3"><input type="text" value="${ord.shipping_address}" onchange="modifyOrderLogField('${ord.id}', 'shipping_address', this.value)" class="bg-[#2a2a2a] p-1 border border-gray-700 rounded text-xs w-full text-white"></td>
-                    <td class="p-3">
-                        <input type="text" value="${ord.phone_number}" onchange="modifyOrderLogField('${ord.id}', 'phone_number', this.value)" class="bg-[#2a2a2a] p-1 border border-gray-700 rounded text-xs w-full text-white mb-2">
-                        ${itemsListHTML}
-                    </td>
-                    <td class="p-3 font-mono text-green-400 font-bold text-xs">₱${totalOrderPrice.toLocaleString()}</td>
-                    <td class="p-3">
-                        <select onchange="modifyOrderLogField('${ord.id}', 'order_status', this.value)" class="bg-[#1a2e22] text-green-400 border border-green-800/40 font-bold p-1 rounded text-xs focus:outline-none">
-                            <option value="Pending" ${currentStatus === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
-                            <option value="Processed" ${currentStatus === 'Processed' ? 'selected' : ''}>✅ Processed</option>
-                            <option value="Shipped" ${currentStatus === 'Shipped' ? 'selected' : ''}>📦 Shipped</option>
-                        </select>
-                    </td>
-                    <td class="p-3 text-center">
-                        <button onclick="purgeOrderLogRecord('${ord.id}')" class="text-red-400 hover:text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-1 rounded transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5 inline"></i> Clear</button>
-                    </td>
+                    <td class="p-3 font-semibold text-white">${ord.customer_name}</td>
+                    <td class="p-3 text-gray-400">${ord.shipping_address}</td>
+                    <td class="p-3">${itemsListHTML}</td>
+                    <td class="p-3 font-mono text-green-400 font-bold">₱${totalOrderPrice.toLocaleString()}</td>
+                    <td class="p-3 font-bold text-yellow-500">⏳ ${ord.order_status || 'Pending'}</td>
+                    <td class="p-3 text-center"><button onclick="purgeOrderLogRecord('${ord.id}')" class="text-red-400 text-xs hover:underline">Clear Row</button></td>
                 `;
                 tbody.appendChild(tr);
             });
-            lucide.createIcons();
-        }
-
-        window.modifyOrderLogField = async function(id, column, value) {
-            if(supabaseClient) {
-                let payload = {}; payload[column] = value;
-                await supabaseClient.from('Orders').update(payload).eq('id', id);
-            }
         }
 
         window.purgeOrderLogRecord = async function(id) {
@@ -646,45 +607,35 @@
             await renderAdminOrdersLedger();
         }
 
-        /* --- INTERFACE DISPLAY GRID --- */
+        /* --- VISUAL DISPLAY INTERFACE --- */
         window.togglePhoto = function(id, view) {
             let rowObj = items.find(i => i.id === id);
             if(rowObj) { rowObj.viewState = view; renderGrid(); }
         }
-
         window.addToCart = function(id) {
             let rowObj = items.find(i => i.id === id);
             if(rowObj && rowObj.stock > cart.filter(cid => cid === id).length) {
-                cart.push(id);
-                updateCartUI();
-                renderGrid();
-            } else { alert("Insufficient stock values remaining."); }
+                cart.push(id); updateCartUI(); renderGrid();
+            }
         }
-
         window.removeFromCart = function(id) {
             const index = cart.indexOf(id);
             if (index > -1) { cart.splice(index, 1); updateCartUI(); renderGrid(); }
         }
-
         function updateCartUI() { document.getElementById('cart-count').innerText = cart.length; }
 
         function renderGrid() {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
-            
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const rarity = document.getElementById('rarity-select').value;
             const sortBy = document.getElementById('sort-select').value;
             
-            let filtered = items.filter(i => {
-                return (i.name.toLowerCase().includes(search) || i.set.toLowerCase().includes(search)) && (rarity === 'ALL' || i.rarity === rarity);
-            });
-
+            let filtered = items.filter(i => (i.name.toLowerCase().includes(search) || i.set.toLowerCase().includes(search)) && (rarity === 'ALL' || i.rarity === rarity));
             if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
             else if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
 
-            if(supabaseClient) { document.getElementById('results-count').innerText = `Showing ${filtered.length} active live inventory cards listings.`; }
-
+            document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory card records.`;
             grid.innerHTML = '';
             filtered.forEach(item => {
                 const soldOut = item.stock <= 0;
@@ -692,45 +643,30 @@
                 const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg;
                 
                 const div = document.createElement('div');
-                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut ? 'opacity-40 saturate-50 transition-all' : 'hover:border-gray-700 transition-all'}`;
+                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut ? 'opacity-40 select-none' : ''}`;
                 
-                let actionButtonMarkup = '';
-                if (soldOut) {
-                    actionButtonMarkup = `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded font-semibold cursor-not-allowed">Sold Out</button>`;
-                } else if (inCartCount > 0) {
-                    actionButtonMarkup = `
-                        <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden select-none">
-                            <button onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white hover:bg-red-600/20 transition-all font-bold text-xs">-</button>
-                            <span class="px-2 font-mono font-bold text-xs text-red-400 min-w-[20px] text-center">${inCartCount}</span>
-                            <button onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white hover:bg-green-600/20 transition-all font-bold text-xs">+</button>
-                        </div>
-                    `;
-                } else {
-                    actionButtonMarkup = `<button onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold active:scale-95 transition-all">Add</button>`;
-                }
+                let actionButtonMarkup = soldOut ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>` :
+                    (inCartCount > 0 ? `
+                        <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
+                            <button onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button>
+                            <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span>
+                            <button onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button>
+                        </div>` : `<button onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
 
                 div.innerHTML = `
                     <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
                         <img src="${dynamicImgSrc}" alt="" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';" onclick="launchZoomModal('${dynamicImgSrc}')" class="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200">
                         <div class="absolute top-2 left-2 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">Stock: ${item.stock}</div>
-                        ${soldOut ? '<div class="absolute inset-0 bg-black/70 flex items-center justify-center font-black text-xs text-red-500 tracking-widest pointer-events-none">SOLD OUT</div>' : ''}
-                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl backdrop-blur-md">
-                            <button onclick="togglePhoto(${item.id}, 'front')" ${soldOut ? 'disabled' : ''} class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase transition-colors">Front</button>
-                            <button onclick="togglePhoto(${item.id}, 'back')" ${soldOut ? 'disabled' : ''} class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase transition-colors">Back</button>
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
+                            <button onclick="togglePhoto(${item.id}, 'front')" ${soldOut ? 'disabled' : ''} class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
+                            <button onclick="togglePhoto(${item.id}, 'back')" ${soldOut ? 'disabled' : ''} class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button>
                         </div>
                         <span class="absolute top-2 right-2 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow">${item.rarity}</span>
                     </div>
                     <div class="flex flex-col justify-between flex-1">
-                        <div>
-                            <span class="text-[10px] font-mono text-gray-500">${item.set}</span>
-                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${item.name}</h3>
-                        </div>
-                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-800/50">
-                            <span class="text-sm font-bold text-gray-100">₱${item.price.toLocaleString()}</span>
-                            <div class="flex items-center">${actionButtonMarkup}</div>
-                        </div>
-                    </div>
-                `;
+                        <div><span class="text-[10px] font-mono text-gray-500">${item.set}</span><h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${item.name}</h3></div>
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-800/50"><span class="text-sm font-bold text-gray-100">₱${item.price.toLocaleString()}</span><div>${actionButtonMarkup}</div></div>
+                    </div>`;
                 grid.appendChild(div);
             });
             lucide.createIcons();
@@ -740,44 +676,35 @@
         document.getElementById('rarity-select').addEventListener('change', renderGrid);
         document.getElementById('sort-select').addEventListener('change', renderGrid);
 
-        /* --- ACTIVE STATE OBSERVER PIPELINE CONTROLS --- */
+        /* --- CRITICAL DECOUPLED AUTH STATE RADAR ENGINE --- */
         if (supabaseClient) {
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (session && session.user) {
-                    try {
-                        let { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
-                        if (prof) {
-                            currentUserProfile = prof;
-                        } else if (session.user.user_metadata) {
-                            currentUserProfile = {
-                                id: session.user.id,
-                                name: session.user.user_metadata.name || session.user.email.split('@')[0],
-                                address: session.user.user_metadata.address || "Metro Manila",
-                                phone: session.user.user_metadata.phone || "None"
-                            };
-                        }
-                        
-                        if (currentUserProfile) {
-                            document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
-                            document.getElementById('nav-logout-btn').classList.remove('hidden');
-                            await fetchBuyerRealtimeOrders();
-                        }
-                    } catch (err) {
-                        console.warn("Profile cache sync delay: ", err.message);
-                    }
+                    // Safe variable bundling inside the handler completely prevents API deadlocks
+                    currentUserProfile = {
+                        id: session.user.id,
+                        name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+                        address: session.user.user_metadata?.address || "Metro Manila",
+                        phone: session.user.user_metadata?.phone || "None"
+                    };
+                    document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
+                    document.getElementById('nav-logout-btn').classList.remove('hidden');
+                    
+                    // Dispatched cleanly out of the main block scope to keep form operations free
+                    setTimeout(() => { fetchBuyerRealtimeOrders(); }, 50);
                 } else {
                     currentUserProfile = null;
                     document.getElementById('auth-btn-text').innerText = "Sign In / Register";
                     document.getElementById('nav-logout-btn').classList.add('hidden');
                     document.getElementById('buyer-tracker-box').classList.add('hidden');
                 }
-                // FIXED LAYOUT DISPATCH: Keeps catalog grid rendering detached from background loading states
-                renderGrid();
             });
         }
 
-        // Run primary catalog assembly immediately on load
-        fetchLiveInventory();
+        // Run baseline setup immediately on layout paint cycles
+        (async () => {
+            await fetchLiveInventory();
+        })();
     </script>
 </body>
 </html>
