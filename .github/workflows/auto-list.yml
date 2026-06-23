@@ -1,0 +1,21 @@
+name: Auto-List TCG Card
+on:
+  push:
+    paths:
+      - 'listings/*.jpg'
+
+jobs:
+  update-database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with: {node-version: '18'}
+      - name: Install Supabase Client
+        run: npm install @supabase/supabase-js
+      - name: Run Lister Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/lister.js
