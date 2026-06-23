@@ -227,7 +227,6 @@
                 return;
             }
             try {
-                // Queries your 'cards' table
                 let { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false });
                 if (error) throw error;
                 items = cards.map(c => ({
@@ -242,6 +241,17 @@
         }
 
         /* --- AUTHENTICATION LOGIC ENGINE --- */
+        window.openAuthModal = function() {
+            if(currentUserProfile) {
+                if(confirm("Log out of account?")) {
+                    currentUserProfile = null;
+                    document.getElementById('auth-btn-text').innerText = "Sign In / Register";
+                    alert("Account signed out.");
+                }
+                return;
+            }
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
         window.openAuthModal = function() {
             if(currentUserProfile) {
                 if(confirm("Log out of account?")) {
@@ -348,13 +358,18 @@
                 if (targetObj && targetObj.stock > 0) {
                     targetObj.stock--;
                     if(supabaseClient) {
-                        await supabaseClient.from('cards').update({ stock: targetObj.stock }).eq('id', id);
+                        const { error: stockErr } = await supabaseClient.from('cards').update({ stock: targetObj.stock }).eq('id', id);
+                        if (stockErr) console.error("Stock sync error: ", stockErr.message);
                     }
                 }
             }
 
             if(supabaseClient) {
-                await supabaseClient.from('orders').insert([orderPayload]);
+                const { error } = await supabaseClient.from('orders').insert([orderPayload]);
+                if (error) {
+                    alert(`Database Order Placement Error: ${error.message}`);
+                    return;
+                }
             } else {
                 localOrdersBackup.unshift(orderPayload);
             }
@@ -389,7 +404,10 @@
             
             let dataset = localOrdersBackup;
             if(supabaseClient) {
-                let { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+                let { data, error } = await supabaseClient.from('orders').select('*').order('id', { ascending: false });
+                if(error) {
+                    alert(`Admin Ledger Read Error: ${error.message}`);
+                }
                 if(data) dataset = data;
             }
 
