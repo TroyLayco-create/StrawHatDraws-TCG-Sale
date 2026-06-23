@@ -31,7 +31,8 @@
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
-        <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
+    <!-- NAVIGATION HEADER -->
+    <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="bg-red-600 p-2 rounded-lg text-white font-black tracking-tighter">SHD</div>
@@ -67,7 +68,8 @@
     </nav>
 
     <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <aside class="lg:col-span-1 bg-[#1e1e1e] p-5 rounded-xl border border-gray-800 space-y-5 h-fit sticky top-20">
+        <!-- SIDEBAR FILTERS -->
+        <aside class="lg:col-span-1 bg-[#1e1e1e] p-5 rounded-xl border border-gray-800 space-y-5 h-fit sticky top-20">
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
                 <select id="sort-select" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-red-500">
@@ -76,6 +78,7 @@
                     <option value="price-desc">Price: High to Low</option>
                 </select>
             </div>
+
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Filter Rarity</h3>
                 <select id="rarity-select" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-red-500">
@@ -91,18 +94,15 @@
                     <option value="C">Common (C)</option>
                 </select>
             </div>
+
             <div id="buyer-tracker-box" class="hidden border border-red-500/20 bg-red-950/10 p-3.5 rounded-lg space-y-2.5 text-xs">
                 <h4 class="font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5"><i class="w-3.5 h-3.5" data-lucide="package"></i> Your Active Orders</h4>
                 <div id="buyer-orders-queue" class="space-y-2 max-h-48 overflow-y-auto"></div>
             </div>
         </aside>
 
+        <!-- MAIN GRIDBOARD -->
         <main class="lg:col-span-3">
-            <div class="flex gap-4 mb-6 border-b border-gray-800">
-                <button onclick="switchMode('SALE')" id="btn-sale" class="pb-3 text-sm font-bold uppercase border-b-2 border-red-600 text-white">For Sale</button>
-                <button onclick="switchMode('BID')" id="btn-bid" class="pb-3 text-sm font-bold uppercase border-b-2 border-transparent text-gray-500 hover:text-white">Bidding</button>
-            </div>
-
             <div class="flex justify-between items-center mb-4 text-xs text-gray-400 font-medium">
                 <span id="results-count">Loading cards from inventory database...</span>
                 <span>Currency: <strong class="text-red-400">PHP (₱)</strong></span>
@@ -111,17 +111,34 @@
         </main>
     </div>
 
+    <!-- AUTHENTICATION FORM MODAL -->
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
             <h2 id="auth-title" class="text-base font-bold mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="text-red-500"></i> Create Buyer Account</h2>
+            
             <form id="auth-form" class="space-y-3 text-xs">
-                <div><label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Email Address</label><input type="email" id="auth-email" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500"></div>
-                <div><label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Password</label><input type="password" id="auth-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500"></div>
+                <div>
+                    <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Email Address</label>
+                    <input type="email" id="auth-email" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Password</label>
+                    <input type="password" id="auth-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                </div>
                 <div id="auth-profile-fields" class="space-y-3">
-                    <div><label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Delivery Name</label><input type="text" id="auth-name" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500"></div>
-                    <div><label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Shipping Address</label><input type="text" id="auth-address" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500"></div>
-                    <div><label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Phone Contact Number</label><input type="tel" id="auth-phone" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500"></div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Delivery Name</label>
+                        <input type="text" id="auth-name" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Shipping Address</label>
+                        <input type="text" id="auth-address" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Phone Contact Number</label>
+                        <input type="tel" id="auth-phone" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                    </div>
                 </div>
                 <button type="submit" class="w-full bg-red-600 hover:bg-red-700 font-bold py-2 rounded text-white mt-2 tracking-wide uppercase">Confirm</button>
                 <p onclick="toggleAuthMode()" id="auth-toggle-msg" class="text-center text-[11px] text-gray-400 hover:text-red-400 cursor-pointer pt-2 transition-colors">Already have an account? Sign In here.</p>
@@ -129,54 +146,145 @@
         </div>
     </div>
 
+    <!-- SECURE TRAY SECURE CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            
             <div id="checkout-form-container">
                 <h2 class="text-xl font-bold mb-1 flex items-center gap-2"><i data-lucide="shopping-bag" class="text-red-500"></i> Secure Checkout</h2>
+                <p id="checkout-welcome-tip" class="text-xs text-gray-400 mb-4">Checking out as Guest.</p>
+                
                 <div id="checkout-items-list" class="max-h-36 overflow-y-auto bg-black/30 rounded-lg p-2.5 mb-4 text-xs space-y-2 border border-gray-800"></div>
+
                 <div class="flex justify-between items-center text-sm font-bold bg-white/5 border border-gray-800 p-2 rounded-lg mb-4 font-mono">
                     <span class="text-gray-400">GRAND TOTAL:</span>
                     <span id="checkout-grand-total" class="text-red-400 text-base">₱0</span>
                 </div>
+
                 <form id="checkout-form" class="space-y-3.5">
-                    <div><label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Name</label><input type="text" id="cust-name" required placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500"></div>
-                    <div><label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Shipping Address</label><textarea id="cust-address" required rows="2" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500 resize-none"></textarea></div>
-                    <div><label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label><input type="tel" id="cust-phone" required placeholder="09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500"></div>
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow-lg uppercase tracking-wider text-xs">Place Order</button>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
+                        <input type="text" id="cust-name" required placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Shipping Address</label>
+                        <textarea id="cust-address" required rows="2" placeholder="Quezon City, Metro Manila" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500 resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label>
+                        <input type="tel" id="cust-phone" required placeholder="09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    </div>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow-lg flex items-center justify-center gap-2 mt-2 uppercase tracking-wider text-xs">Place Order</button>
                 </form>
             </div>
+
             <div id="checkout-success-container" class="hidden text-center py-4">
+                <div class="bg-green-500/10 text-green-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-500/30"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
                 <h2 class="text-xl font-bold text-white mb-1">Order Confirmed!</h2>
+                <p class="text-xs text-gray-400 mb-4">Your data and inventory levels have been synchronized successfully.</p>
                 <button onclick="closeCheckoutModal()" class="w-full bg-[#2a2a2a] hover:bg-[#333] border border-gray-700 text-gray-200 py-2 rounded-lg text-sm font-semibold">Return to Catalog</button>
             </div>
         </div>
     </div>
 
+    <!-- CARD ZOOM TEXTURE MODAL -->
     <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none">
         <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
-        <div class="max-w-md w-full" onclick="event.stopPropagation()">
-            <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800"><img id="zoom-target-img" src="" class="zoom-image w-full h-full object-cover"></div>
+        <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
+            <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800 shadow-2xl">
+                <img id="zoom-target-img" src="" alt="" class="zoom-image w-full h-full object-cover">
+            </div>
+            <p class="text-center text-xs text-gray-400 font-medium tracking-wide flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-red-400"></i> Hover mouse over card textures to magnify parameters.</p>
         </div>
     </div>
 
+    <!-- ENCRYPTED SYSTEM LEDGER MONITOR DASHBOARD -->
     <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
-                <h2 class="text-sm font-bold uppercase tracking-wider text-red-500">Encrypted Server Admin Console</h2>
-                <button onclick="closeAdminPanel()" class="bg-gray-800 text-xs px-3 py-1 rounded text-gray-300">Close</button>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-red-500 flex items-center gap-2"><i data-lucide="shield-check"></i> Encrypted Server Admin Console</h2>
+                <button onclick="closeAdminPanel()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1 rounded text-gray-300">Close Dashboard</button>
             </div>
+
+            <!-- SERVER SIDE GATEKEEPER SIGN IN PORTAL -->
             <div id="admin-auth-gate" class="py-12 text-center space-y-4 max-w-sm mx-auto">
-                <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full text-white">
-                <input type="password" id="admin-pass-input" placeholder="Admin Account Password" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full text-white">
-                <button onclick="verifyAdminAuth()" class="w-full bg-red-600 font-bold text-xs py-2.5 rounded shadow uppercase">Establish Secure Sync</button>
+                <p class="text-xs text-gray-400">Sign in using your master Supabase administrator email credentials to unlock catalog write permissions.</p>
+                <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
+                <input type="password" id="admin-pass-input" placeholder="Admin Account Password" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
+                <button onclick="verifyAdminAuth()" class="w-full bg-red-600 hover:bg-red-700 font-bold text-xs py-2.5 rounded shadow uppercase tracking-wider flex items-center justify-center gap-2"><i class="w-4 h-4" data-lucide="unlock"></i> Establish Secure Sync</button>
             </div>
-            <div id="admin-workspace" class="hidden space-y-8">...</div>
+
+            <div id="admin-workspace" class="hidden space-y-8">
+                <!-- INVENTORY PORTAL MODULE -->
+                <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
+                    <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Card Name</label>
+                            <input type="text" id="inv-name" required placeholder="e.g. Monkey.D.Luffy" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Set Code</label>
+                            <input type="text" id="inv-set" required placeholder="e.g. OP05-119" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Rarity</label>
+                            <input type="text" id="inv-rarity" required placeholder="e.g. AA" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Price (PHP)</label>
+                            <input type="number" id="inv-price" required placeholder="14500" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Initial Stock Level</label>
+                            <input type="number" id="inv-stock" required placeholder="5" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Front Image URL (Optional)</label>
+                            <input type="url" id="inv-front" placeholder="Pasting empty fields defaults to placeholder texture" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Back Image URL (Optional)</label>
+                            <input type="url" id="inv-back" placeholder="Pasting empty fields defaults to placeholder texture" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 font-bold py-2 rounded text-white tracking-wide uppercase text-xs">Save Card to Cloud</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- CLIENT ORDER LEDGER QUEUE MODULE -->
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
+                    <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-gray-900 border-b border-gray-800 text-gray-400 font-semibold select-none">
+                                    <th class="p-3">Customer Details</th>
+                                    <th class="p-3">Shipping Target Address</th>
+                                    <th class="p-3">Ordered Items Inventory Trace</th>
+                                    <th class="p-3">Total Tally</th>
+                                    <th class="p-3">Process Status</th>
+                                    <th class="p-3 text-center">Clearance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-tbody" class="divide-y divide-gray-800/60 text-gray-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- REAR CONSOLE FOOTER LINK -->
     <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
-        <p>&copy; 2026 StrawHatDraws TCG Sales. <span onclick="openAdminPanel()" class="cursor-pointer hover:text-red-500">[🛡️ Admin]</span></p>
+        <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
+        <p>
+            <span onclick="openAdminPanel()" class="cursor-pointer text-gray-700 hover:text-red-500/40 transition-colors text-[10px] select-none font-mono">
+                [🛡️ Secure System Ledger Console]
+            </span>
+        </p>
     </footer>
 
     <script>
@@ -196,9 +304,8 @@
 
         let isRegisterMode = true;
         let currentUserProfile = null; 
-        let cart = JSON.parse(localStorage.getItem('shd_cart')) || [];
+        let cart = [];
         let items = []; 
-        let currentMode = 'SALE'; 
 
         const DEMO_FALLBACK_ITEMS = [
             { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' },
@@ -206,14 +313,6 @@
             { id: 3, name: "Nami (Special)", set: "OP01-016", rarity: "SP", price: 6200, stock: 0, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' }
         ];
         let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567", items_ordered: [1, 2], order_status: "Pending" }];
-
-        // --- NEW TAB LOGIC ---
-        window.switchMode = function(mode) {
-            currentMode = mode;
-            document.getElementById('btn-sale').className = mode === 'SALE' ? 'pb-3 text-sm font-bold uppercase border-b-2 border-red-600 text-white' : 'pb-3 text-sm font-bold uppercase border-b-2 border-transparent text-gray-500 hover:text-white';
-            document.getElementById('btn-bid').className = mode === 'BID' ? 'pb-3 text-sm font-bold uppercase border-b-2 border-red-600 text-white' : 'pb-3 text-sm font-bold uppercase border-b-2 border-transparent text-gray-500 hover:text-white';
-            renderGrid();
-        };
 
         async function fetchLiveInventory() {
             if (!supabaseClient) {
@@ -226,7 +325,7 @@
                 if (error) throw error;
                 
                 items = cards.map(c => ({
-                    id: c.id, name: c.name, set: c.set_code || c.set || "OP-UNKNOWN", rarity: c.rarity, price: Number(c.price), stock: Number(c.stock), type: c.type || 'SALE',
+                    id: c.id, name: c.name, set: c.set_code || c.set || "OP-UNKNOWN", rarity: c.rarity, price: Number(c.price), stock: Number(c.stock),
                     frontImg: c.front_img || c.frontImg, backImg: c.back_img || c.backImg, viewState: 'front'
                 }));
             } catch (err) {
@@ -431,7 +530,6 @@
             } else { localOrdersBackup.unshift(orderPayload); }
 
             cart = [];
-            localStorage.removeItem('shd_cart');
             document.getElementById('cart-count').innerText = 0;
             document.getElementById('checkout-form-container').classList.add('hidden');
             document.getElementById('checkout-success-container').classList.remove('hidden');
@@ -517,12 +615,12 @@
         window.addToCart = function(id) {
             let rowObj = items.find(i => i.id === id);
             if(rowObj && rowObj.stock > cart.filter(cid => cid === id).length) {
-                cart.push(id); localStorage.setItem('shd_cart', JSON.stringify(cart)); updateCartUI(); renderGrid();
+                cart.push(id); updateCartUI(); renderGrid();
             }
         }
         window.removeFromCart = function(id) {
             const index = cart.indexOf(id);
-            if (index > -1) { cart.splice(index, 1); localStorage.setItem('shd_cart', JSON.stringify(cart)); updateCartUI(); renderGrid(); }
+            if (index > -1) { cart.splice(index, 1); updateCartUI(); renderGrid(); }
         }
         function updateCartUI() { document.getElementById('cart-count').innerText = cart.length; }
 
@@ -535,8 +633,6 @@
     
             // UPDATED FILTER LOGIC:
             let filtered = items.filter(i => {
-                const itemType = (i.type || 'SALE').toUpperCase();
-                const matchesType = itemType === currentMode;
                 const matchesSearch = i.name.toLowerCase().includes(search) || i.set.toLowerCase().includes(search);
         
                 // Normalize both sides to uppercase and trim spaces
@@ -545,7 +641,7 @@
         
                 const matchesRarity = (rarity === 'ALL' || itemRarity === selectedRarity);
         
-                return matchesType && matchesSearch && matchesRarity;
+                return matchesSearch && matchesRarity;
             });
 
             if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
@@ -558,15 +654,16 @@
                 const inCartCount = cart.filter(cid => cid === item.id).length;
                 const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg;
                 
-                let actionButtonMarkup = currentMode === 'BID' 
-                    ? `<button class="w-full bg-blue-600 hover:bg-blue-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Place Bid</button>`
-                    : (soldOut ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>` :
+                const div = document.createElement('div');
+                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut ? 'opacity-40 select-none' : ''}`;
+                
+                let actionButtonMarkup = soldOut ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>` :
                     (inCartCount > 0 ? `
                         <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
                             <button onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button>
                             <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span>
                             <button onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button>
-                        </div>` : `<button onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`));
+                        </div>` : `<button onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
 
                 div.innerHTML = `
                     <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
@@ -618,7 +715,6 @@
 
         // Run baseline setup immediately on layout paint cycles
         (async () => {
-            document.getElementById('cart-count').innerText = cart.length;
             await fetchLiveInventory();
         })();
     </script>
