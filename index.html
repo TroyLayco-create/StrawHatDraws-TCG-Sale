@@ -183,7 +183,7 @@
     </div>
 
     <!-- MICROSCOPIC DETAIL INSPECTION CARD ZOOM MODAL -->
-    <div id="zoom-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50 p-4 select-none">
+    <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none">
         <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
             <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800 shadow-2xl">
@@ -194,7 +194,7 @@
     </div>
 
     <!-- SERVER AUTHENTICATED SERVER BACKEND COHESIVE ADMIN PANEL -->
-    <div id="admin-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
                 <h2 class="text-sm font-bold uppercase tracking-wider text-red-500 flex items-center gap-2"><i data-lucide="shield-check"></i> Encrypted Server Admin Console</h2>
@@ -287,7 +287,14 @@
         
         let supabaseClient = null;
         if(SUPABASE_URL.indexOf("your-project-id") === -1) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            // PROACTIVE UPGRADE: Explicit configuration variables force automatic persistence memory tracking
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true
+                }
+            });
         }
 
         let isRegisterMode = true;
@@ -301,6 +308,32 @@
             { id: 3, name: "Nami (Special)", set: "OP01-016", rarity: "SP", price: 6200, stock: 0, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' }
         ];
         let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567", items_ordered: [1, 2], order_status: "Pending" }];
+
+        // PROACTIVE RECOVERY HOOK: Inspects local storage data on initial browser initialization cycles
+        async function initializeSessionRecovery() {
+            if (!supabaseClient) return;
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    let { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
+                    if(prof) { 
+                        currentUserProfile = prof; 
+                    } else if(session.user.user_metadata) {
+                        currentUserProfile = {
+                            id: session.user.id,
+                            name: session.user.user_metadata.name || session.user.email.split('@')[0],
+                            address: session.user.user_metadata.address || "Metro Manila",
+                            phone: session.user.user_metadata.phone || "None"
+                        };
+                    }
+                    if (currentUserProfile) {
+                        document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
+                    }
+                }
+            } catch (err) {
+                console.warn("Session restoration pipeline skipped: ", err.message);
+            }
+        }
 
         async function fetchLiveInventory() {
             if (!supabaseClient) {
@@ -462,7 +495,6 @@
             document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
             closeAuthModal();
             await fetchBuyerRealtimeOrders();
-            alert(`Authenticated successfully as: ${currentUserProfile.name}`);
         });
 
         /* --- CHECKOUT COMPILATION SYSTEM --- */
@@ -557,13 +589,25 @@
             document.getElementById('zoom-modal').style.display = 'none';
         }
 
-        // Mapping coordinates directly on the active target fixes zoom locks cleanly
+        // Direct target mapping boundaries tracking
         document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
             const y = ((e.clientY - rect.top) / rect.height) * 100;
             e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
         });
+
+        /* --- SYSTEM MONITOR CHANNELS --- */
+        window.openAdminPanel = function() { 
+            document.getElementById('admin-modal').style.display = 'flex'; 
+        }
+        window.closeAdminPanel = function() {
+            document.getElementById('admin-modal').style.display = 'none';
+            document.getElementById('admin-auth-gate').classList.remove('hidden');
+            document.getElementById('admin-workspace').classList.add('hidden');
+            document.getElementById('admin-pass-input').value = '';
+            document.getElementById('admin-email-input').value = '';
+        }
 
         async function renderAdminOrdersLedger() {
             const tbody = document.getElementById('admin-orders-tbody');
@@ -640,7 +684,7 @@
             await renderAdminOrdersLedger();
         }
 
-        /* --- VISUAL INTERFACE LAYER --- */
+        /* --- VISUAL INTERFACE LAYERS --- */
         window.togglePhoto = function(id, view) {
             let rowObj = items.find(i => i.id === id);
             if(rowObj) { rowObj.viewState = view; renderGrid(); }
@@ -732,7 +776,11 @@
         document.getElementById('rarity-select').addEventListener('change', renderGrid);
         document.getElementById('sort-select').addEventListener('change', renderGrid);
 
-        fetchLiveInventory();
+        // SEQUENTIAL FLOW SYSTEM RESOLUTION TRIGGER CORES
+        (async () => {
+            await initializeSessionRecovery();
+            await fetchLiveInventory();
+        })();
     </script>
 </body>
 </html>
