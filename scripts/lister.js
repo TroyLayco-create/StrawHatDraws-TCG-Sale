@@ -20,6 +20,8 @@ async function run() {
                 name: cardName,
                 price: 100, 
                 stock: 1,
+                set_code: 'TBD', // <--- ADD THIS
+                rarity: 'C',     // <--- ADD THIS
                 front_img: `https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_REPO/main/listings/${file}`
             }]);
             
