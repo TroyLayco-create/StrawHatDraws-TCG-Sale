@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Proactive Magnifier Matrix Styles */
+        /* Micro-Precision Zoom Engine Rules */
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -17,6 +17,7 @@
         .zoom-image {
             transition: transform 0.1s ease-out;
             transform-origin: center center;
+            will-change: transform, transform-origin;
         }
         .zoom-container:hover .zoom-image {
             transform: scale(2.2);
@@ -30,7 +31,6 @@
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
-    <!-- NAVIGATION DISPLAY -->
     <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -61,7 +61,6 @@
     </nav>
 
     <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- SIDEBAR FILTERS -->
         <aside class="lg:col-span-1 bg-[#1e1e1e] p-5 rounded-xl border border-gray-800 space-y-5 h-fit sticky top-20">
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
@@ -88,14 +87,12 @@
                 </select>
             </div>
 
-            <!-- BUYER REAL-TIME TRACKER SHIELD MODULE -->
             <div id="buyer-tracker-box" class="hidden border border-red-500/20 bg-red-950/10 p-3.5 rounded-lg space-y-2.5 text-xs">
                 <h4 class="font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5"><i class="w-3.5 h-3.5" data-lucide="package"></i> Your Active Orders</h4>
                 <div id="buyer-orders-queue" class="space-y-2 max-h-48 overflow-y-auto"></div>
             </div>
         </aside>
 
-        <!-- GRID PLATFORM -->
         <main class="lg:col-span-3">
             <div class="flex justify-between items-center mb-4 text-xs text-gray-400 font-medium">
                 <span id="results-count">Loading cards from inventory database...</span>
@@ -105,7 +102,6 @@
         </main>
     </div>
 
-    <!-- CUSTOMER PROFILE MANAGEMENT AUTH MODAL -->
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -140,7 +136,6 @@
         </div>
     </div>
 
-    <!-- SECURE TRAY SECURE CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -182,18 +177,16 @@
         </div>
     </div>
 
-    <!-- MICROSCOPIC DETAIL INSPECTION CARD ZOOM MODAL -->
     <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none">
         <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
             <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800 shadow-2xl">
                 <img id="zoom-target-img" src="" alt="" class="zoom-image w-full h-full object-cover">
             </div>
-            <p class="text-center text-xs text-gray-400 font-medium tracking-wide flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-red-400"></i> Hover mouse over card textures to magnify parameters.</p>
+            <p class="text-center text-xs text-gray-400 font-medium tracking-wide flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-red-400"></i> Hover cursor over target details to inspect grading textures.</p>
         </div>
     </div>
 
-    <!-- SERVER AUTHENTICATED SERVER BACKEND COHESIVE ADMIN PANEL -->
     <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
@@ -201,7 +194,6 @@
                 <button onclick="closeAdminPanel()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1 rounded text-gray-300">Close Dashboard</button>
             </div>
 
-            <!-- SERVER SIDE GATEKEEPER SIGN IN PORTAL -->
             <div id="admin-auth-gate" class="py-12 text-center space-y-4 max-w-sm mx-auto">
                 <p class="text-xs text-gray-400">Sign in using your master Supabase administrator email credentials to unlock catalog write permissions.</p>
                 <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
@@ -210,7 +202,6 @@
             </div>
 
             <div id="admin-workspace" class="hidden space-y-8">
-                <!-- INVENTORY PORTAL MODULE -->
                 <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
                     <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -235,12 +226,12 @@
                             <input type="number" id="inv-stock" required placeholder="5" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                         </div>
                         <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Front Image URL</label>
-                            <input type="url" id="inv-front" required placeholder="https://..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Front Image URL (Optional)</label>
+                            <input type="url" id="inv-front" placeholder="Pasting empty fields defaults to placeholder texture" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Back Image URL</label>
-                            <input type="url" id="inv-back" required placeholder="https://..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Back Image URL (Optional)</label>
+                            <input type="url" id="inv-back" placeholder="Pasting empty fields defaults to placeholder texture" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                         </div>
                         <div class="flex items-end">
                             <button type="submit" class="w-full bg-green-600 hover:bg-green-700 font-bold py-2 rounded text-white tracking-wide uppercase text-xs">Save Card to Cloud</button>
@@ -248,7 +239,6 @@
                     </form>
                 </div>
 
-                <!-- CLIENT ORDER LEDGER QUEUE MODULE -->
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
                     <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
@@ -271,7 +261,6 @@
         </div>
     </div>
 
-    <!-- REAR SYSTEM ROOT ACCESS LINK -->
     <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
         <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
         <p>
@@ -287,7 +276,7 @@
         
         let supabaseClient = null;
         if(SUPABASE_URL.indexOf("your-project-id") === -1) {
-            // PROACTIVE UPGRADE: Explicit configuration variables force automatic persistence memory tracking
+            // Master config properties actively lock down memory leakage across reloads
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
                     persistSession: true,
@@ -309,7 +298,7 @@
         ];
         let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567", items_ordered: [1, 2], order_status: "Pending" }];
 
-        // PROACTIVE RECOVERY HOOK: Inspects local storage data on initial browser initialization cycles
+        // SESSION RECOVERY HANDLER: Auto-hooks on setup to pull saved token logs cleanly
         async function initializeSessionRecovery() {
             if (!supabaseClient) return;
             try {
@@ -331,7 +320,7 @@
                     }
                 }
             } catch (err) {
-                console.warn("Session restoration pipeline skipped: ", err.message);
+                console.warn("Session vault processing skipped: ", err.message);
             }
         }
 
@@ -409,14 +398,17 @@
             e.preventDefault();
             if(!supabaseClient) { alert("Production database client not loaded."); return; }
             
+            const frontVal = document.getElementById('inv-front').value.trim();
+            const backVal = document.getElementById('inv-back').value.trim();
+
             const cardPayload = {
                 name: document.getElementById('inv-name').value,
                 set_code: document.getElementById('inv-set').value,
                 rarity: document.getElementById('inv-rarity').value,
                 price: Number(document.getElementById('inv-price').value),
                 stock: Number(document.getElementById('inv-stock').value),
-                front_img: document.getElementById('inv-front').value,
-                back_img: document.getElementById('inv-back').value
+                front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400"
             };
 
             const { data, error } = await supabaseClient.from('cards').insert([cardPayload]);
@@ -576,7 +568,7 @@
             renderGrid();
         });
 
-        /* --- HIGHER FIDELITY OPTIMIZED ZOOM CONTROLLER --- */
+        /* --- RELATIVE TARGET ELEMENT BOUNDARY ZOOM TRACKER --- */
         window.launchZoomModal = function(imgSrc) {
             const targetImg = document.getElementById('zoom-target-img');
             targetImg.src = imgSrc;
@@ -589,7 +581,7 @@
             document.getElementById('zoom-modal').style.display = 'none';
         }
 
-        // Direct target mapping boundaries tracking
+        // Direct item boundary listener completely prevents frame freezing anomalies
         document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -597,7 +589,7 @@
             e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
         });
 
-        /* --- SYSTEM MONITOR CHANNELS --- */
+        /* --- SYSTEM MONITOR ADMINISTRATIVE WORKSPACES --- */
         window.openAdminPanel = function() { 
             document.getElementById('admin-modal').style.display = 'flex'; 
         }
@@ -679,12 +671,15 @@
         }
 
         window.purgeOrderLogRecord = async function(id) {
-            if(!confirm("Purge record permanently?")) return;
-            if(supabaseClient) { await supabaseClient.from('Orders').delete().eq('id', id); }
+            if(!confirm("Purge record permanently from cloud storage?")) return;
+            if(supabaseClient) {
+                const { error } = await supabaseClient.from('Orders').delete().eq('id', id);
+                if(error) { alert(`Delete Action Blocked: ${error.message}`); return; }
+            }
             await renderAdminOrdersLedger();
         }
 
-        /* --- VISUAL INTERFACE LAYERS --- */
+        /* --- DISPLAY MAPPING RENDERERS --- */
         window.togglePhoto = function(id, view) {
             let rowObj = items.find(i => i.id === id);
             if(rowObj) { rowObj.viewState = view; renderGrid(); }
@@ -776,7 +771,7 @@
         document.getElementById('rarity-select').addEventListener('change', renderGrid);
         document.getElementById('sort-select').addEventListener('change', renderGrid);
 
-        // SEQUENTIAL FLOW SYSTEM RESOLUTION TRIGGER CORES
+        // SEQUENTIAL ASYNCHRONOUS ENGINE LIFECYCLE
         (async () => {
             await initializeSessionRecovery();
             await fetchLiveInventory();
