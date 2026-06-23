@@ -437,6 +437,7 @@
         window.executeSecureLogout = async function() {
             if(confirm("Log out of your active account profile context?")) {
                 currentUserProfile = null;
+                // ADDED AWAIT: Forces browser to wait until session is completely deleted from the database
                 if(supabaseClient) {
                     await supabaseClient.auth.signOut();
                 }
