@@ -178,7 +178,7 @@
                                 <tr class="bg-gray-900 border-b border-gray-800 text-gray-400 font-semibold select-none">
                                     <th class="p-3">Customer Name</th>
                                     <th class="p-3">Shipping Delivery Target Address</th>
-                                    <th class="p-3">Phone Line</th>
+                                    <th class="p-3">Phone Line / Items Bought</th>
                                     <th class="p-3 text-center">Actions / Clearances</th>
                                 </tr>
                             </thead>
@@ -217,7 +217,7 @@
             { id: 2, name: "Roronoa Zoro", set: "OP01-025", rarity: "SR", price: 950, stock: 5, frontImg: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' },
             { id: 3, name: "Nami (Special)", set: "OP01-016", rarity: "SP", price: 6200, stock: 0, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' }
         ];
-        let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567" }];
+        let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567", items_ordered: [1, 2] }];
 
         async function fetchLiveInventory() {
             if (!supabaseClient) {
@@ -241,17 +241,6 @@
         }
 
         /* --- AUTHENTICATION LOGIC ENGINE --- */
-        window.openAuthModal = function() {
-            if(currentUserProfile) {
-                if(confirm("Log out of account?")) {
-                    currentUserProfile = null;
-                    document.getElementById('auth-btn-text').innerText = "Sign In / Register";
-                    alert("Account signed out.");
-                }
-                return;
-            }
-            document.getElementById('auth-modal').style.display = 'flex';
-        }
         window.openAuthModal = function() {
             if(currentUserProfile) {
                 if(confirm("Log out of account?")) {
@@ -417,12 +406,31 @@
             }
 
             dataset.forEach(ord => {
+                // --- INLINE BASKET BREAKDOWN LOGIC ---
+                let itemsListHTML = '<div class="text-[10px] text-gray-400 mt-1 italic">No items tracked</div>';
+                if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
+                    const counts = {};
+                    ord.items_ordered.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+                    
+                    itemsListHTML = '<div class="space-y-0.5 mt-1 bg-black/40 p-1.5 rounded border border-gray-800/80 max-w-xs">';
+                    Object.keys(counts).forEach(id => {
+                        const matchCard = items.find(i => i.id == id);
+                        const nameText = matchCard ? matchCard.name : `Card ID: ${id}`;
+                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium"><span class="text-white bg-red-600/30 px-1 py-0.2 rounded text-[10px] mr-1">${counts[id]}x</span> ${nameText}</div>`;
+                    });
+                    itemsListHTML += '</div>';
+                }
+
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-white/5 border-b border-gray-800/50 transition-all";
+                tr.className = "hover:bg-white/5 border-b border-gray-800/50 transition-all text-top";
                 tr.innerHTML = `
                     <td class="p-3 font-semibold"><input type="text" value="${ord.customer_name}" onchange="modifyOrderLogField('${ord.id}', 'customer_name', this.value)" class="bg-[#2a2a2a] p-1 border border-gray-700 rounded text-xs w-full text-white"></td>
                     <td class="p-3"><input type="text" value="${ord.shipping_address}" onchange="modifyOrderLogField('${ord.id}', 'shipping_address', this.value)" class="bg-[#2a2a2a] p-1 border border-gray-700 rounded text-xs w-full text-white"></td>
-                    <td class="p-3"><input type="text" value="${ord.phone_number}" onchange="modifyOrderLogField('${ord.id}', 'phone_number', this.value)" class="bg-[#2a2a2a] p-1 border border-gray-700 rounded text-xs w-full text-white"></td>
+                    <td class="p-3">
+                        <input type="text" value="${ord.phone_number}" onchange="modifyOrderLogField('${ord.id}', 'phone_number', this.value)" class="bg-[#2a2a2a] p-1 border border-gray-700 rounded text-xs w-full text-white">
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-gray-500 mt-2 select-none">Cart Items:</div>
+                        ${itemsListHTML}
+                    </td>
                     <td class="p-3 text-center">
                         <button onclick="purgeOrderLogRecord('${ord.id}')" class="text-red-400 hover:text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-1 rounded transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5 inline"></i> Delete</button>
                     </td>
@@ -435,7 +443,7 @@
         window.modifyOrderLogField = async function(id, column, value) {
             if(supabaseClient) {
                 let payload = {}; payload[column] = value;
-                await supabaseClient.from('orders').update(payload).eq('id', id);
+                await supabaseClient.from('Orders').update(payload).eq('id', id);
             } else {
                 let match = localOrdersBackup.find(o => o.id === id);
                 if(match) match[column] = value;
@@ -445,7 +453,7 @@
         window.purgeOrderLogRecord = async function(id) {
             if(!confirm("Purge order ledger records permanently? This cannot be undone.")) return;
             if(supabaseClient) {
-                await supabaseClient.from('orders').delete().eq('id', id);
+                await supabaseClient.from('Orders').delete().eq('id', id);
             } else {
                 localOrdersBackup = localOrdersBackup.filter(o => o.id !== id);
             }
