@@ -19,7 +19,7 @@
             transform-origin: center center;
         }
         .zoom-container:hover .zoom-image {
-            transform: scale(2.5);
+            transform: scale(2.0); /* Optimized scale multiplier level for pristine image clarity */
             cursor: crosshair;
         }
     </style>
@@ -257,6 +257,9 @@
     </footer>
 
     <script>
+        // =========================================================================
+        // IMPORTANT STEP: REPLACE WITH YOUR LIVE SUPABASE PROJECT CREDENTIALS
+        // =========================================================================
         const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
         
@@ -288,7 +291,6 @@
                 let { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false });
                 if (error) throw error;
                 
-                // Flexible mapping configuration architecture matching multiple schema variants safely
                 items = cards.map(c => ({
                     id: c.id, 
                     name: c.name, 
@@ -463,7 +465,7 @@
             renderGrid();
         });
 
-        /* --- CARD ZOOM MODAL --- */
+        /* --- MICROSCOPIC TEXTURE ZOOM MODAL LOGIC ENGINE --- */
         window.launchZoomModal = function(imgSrc) {
             document.getElementById('zoom-target-img').src = imgSrc;
             document.getElementById('zoom-modal').style.display = 'flex';
@@ -474,11 +476,11 @@
             document.getElementById('zoom-target-img').style.transform = 'scale(1)';
         }
 
+        // Relative frame viewport offset boundary processing prevents coordinate sync delays
         document.getElementById('zoom-frame').addEventListener('mousemove', function(e) {
             const img = document.getElementById('zoom-target-img');
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            const x = (e.offsetX / e.currentTarget.offsetWidth) * 100;
+            const y = (e.offsetY / e.currentTarget.offsetHeight) * 100;
             img.style.transformOrigin = `${x}% ${y}%`;
         });
 
