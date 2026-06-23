@@ -19,7 +19,7 @@
             transform-origin: center center;
         }
         .zoom-container:hover .zoom-image {
-            transform: scale(2.0); /* Optimized scale multiplier level for pristine image clarity */
+            transform: scale(2.0);
             cursor: crosshair;
         }
     </style>
@@ -257,9 +257,6 @@
     </footer>
 
     <script>
-        // =========================================================================
-        // IMPORTANT STEP: REPLACE WITH YOUR LIVE SUPABASE PROJECT CREDENTIALS
-        // =========================================================================
         const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
         
@@ -367,7 +364,13 @@
             if (supabaseClient) {
                 try {
                     if (isRegisterMode) {
-                        let { data, error } = await supabaseClient.auth.signUp({ email, password });
+                        let { data, error } = await supabaseClient.auth.signUp({ 
+                            email, 
+                            password,
+                            options: {
+                                data: { name, address, phone }
+                            }
+                        });
                         if (error) throw error;
                         if(data.user) {
                             await supabaseClient.from('profiles').insert([{ id: data.user.id, name, address, phone }]);
@@ -375,8 +378,17 @@
                     } else {
                         let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                         if (error) throw error;
+                        
                         let { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', data.user.id).single();
-                        if(prof) { currentUserProfile = prof; }
+                        if(prof) { 
+                            currentUserProfile = prof; 
+                        } else if(data.user.user_metadata) {
+                            currentUserProfile = {
+                                name: data.user.user_metadata.name || name,
+                                address: data.user.user_metadata.address || address,
+                                phone: data.user.user_metadata.phone || phone
+                            };
+                        }
                     }
                 } catch(err) { alert(`Auth Process Error: ${err.message}`); return; }
             }
@@ -465,7 +477,7 @@
             renderGrid();
         });
 
-        /* --- MICROSCOPIC TEXTURE ZOOM MODAL LOGIC ENGINE --- */
+        /* --- CARD ZOOM MODAL --- */
         window.launchZoomModal = function(imgSrc) {
             document.getElementById('zoom-target-img').src = imgSrc;
             document.getElementById('zoom-modal').style.display = 'flex';
@@ -476,7 +488,7 @@
             document.getElementById('zoom-target-img').style.transform = 'scale(1)';
         }
 
-        // Relative frame viewport offset boundary processing prevents coordinate sync delays
+        // Mouse offsets logic tracks internal boundaries flawlessly
         document.getElementById('zoom-frame').addEventListener('mousemove', function(e) {
             const img = document.getElementById('zoom-target-img');
             const x = (e.offsetX / e.currentTarget.offsetWidth) * 100;
@@ -632,7 +644,9 @@
             filtered.forEach(item => {
                 const soldOut = item.stock <= 0;
                 const inCartCount = cart.filter(cid => cid === item.id).length;
-                const img = item.viewState === 'back' ? item.backImg : item.frontImg;
+                
+                // CRITICAL FIX DETECTOR: Dynamically targets whichever face link is actively mounted
+                const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg;
                 
                 const div = document.createElement('div');
                 div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut ? 'opacity-40 saturate-50 transition-all' : 'hover:border-gray-700 transition-all'}`;
@@ -654,7 +668,7 @@
 
                 div.innerHTML = `
                     <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
-                        <img src="${img}" alt="" onclick="launchZoomModal('${img}')" class="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200">
+                        <img src="${dynamicImgSrc}" alt="" onclick="launchZoomModal('${dynamicImgSrc}')" class="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200">
                         <div class="absolute top-2 left-2 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">Stock: ${item.stock}</div>
                         ${soldOut ? '<div class="absolute inset-0 bg-black/70 flex items-center justify-center font-black text-xs text-red-500 tracking-widest pointer-events-none">SOLD OUT</div>' : ''}
                         <div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl backdrop-blur-md">
