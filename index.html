@@ -365,7 +365,7 @@
             }
 
             if(supabaseClient) {
-                const { error } = await supabaseClient.from('orders').insert([orderPayload]);
+                const { error } = await supabaseClient.from('Orders').insert([orderPayload]);
                 if (error) {
                     alert(`Database Order Placement Error: ${error.message}`);
                     return;
@@ -404,7 +404,7 @@
             
             let dataset = localOrdersBackup;
             if(supabaseClient) {
-                let { data, error } = await supabaseClient.from('orders').select('*').order('id', { ascending: false });
+                let { data, error } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
                 if(error) {
                     alert(`Admin Ledger Read Error: ${error.message}`);
                 }
