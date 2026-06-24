@@ -3,124 +3,707 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StrawHatDraws TCG Sales</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Alvin Troy Dela Paz Layco | Executive Portfolio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
-        .zoom-container { position: relative; overflow: hidden; cursor: zoom-in; }
-        .zoom-image { transition: transform 0.1s ease-out; transform-origin: center center; will-change: transform, transform-origin; }
-        .zoom-container:hover .zoom-image { transform: scale(2.2); cursor: crosshair; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #121212; }
-        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
-    </style>
-</head>
-<body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
-
-    <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-red-600 p-2 rounded-lg text-white font-black tracking-tighter">SHD</div>
-                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                    StrawHatDraws <span class="text-red-500 font-light text-sm tracking-wider uppercase border border-red-500/30 px-1.5 py-0.5 rounded ml-1">TCG Sales</span>
-                </h1>
-            </div>
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                <div class="relative flex-1 sm:w-64">
-                    <input type="text" id="search-input" placeholder="Search by name or set code..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg pl-9 pr-4 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-red-500 transition-colors">
-                    <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-gray-400"></i>
-                </div>
-                <button onclick="openCheckoutModal()" class="relative bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow">
-                    <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-                    <span>Checkout</span>
-                    <span id="cart-count" class="bg-black/30 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="max-w-7xl w-full mx-auto p-4 flex-1">
-        <main>
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
-        </main>
-    </div>
-
-    <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
-        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-sm font-bold text-red-500">Encrypted Server Admin Console</h2>
-                <button onclick="closeAdminPanel()" class="bg-gray-800 p-2 rounded text-xs">Close</button>
-            </div>
-            <div id="admin-auth-gate" class="text-center py-12">
-                <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] p-2 mb-2 w-full max-w-xs text-xs block mx-auto">
-                <input type="password" id="admin-pass-input" placeholder="Password" class="bg-[#2a2a2a] p-2 mb-4 w-full max-w-xs text-xs block mx-auto">
-                <button onclick="verifyAdminAuth()" class="bg-red-600 px-6 py-2 rounded text-xs">Establish Sync</button>
-            </div>
-            <div id="admin-workspace" class="hidden">
-                <table class="w-full text-xs text-left">
-                    <thead><tr class="text-gray-400 border-b border-gray-800"><th class="p-3">Customer</th><th class="p-3">Address</th><th class="p-3">Status</th><th class="p-3">Action</th></tr></thead>
-                    <tbody id="admin-orders-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <footer class="text-center text-[10px] py-6 text-gray-600"><span onclick="openAdminPanel()" class="cursor-pointer">[🛡️ Admin Access]</span></footer>
-
-    <script>
-        const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        window.openAdminPanel = () => document.getElementById('admin-modal').style.display = 'flex';
-        window.closeAdminPanel = () => document.getElementById('admin-modal').style.display = 'none';
-
-        window.verifyAdminAuth = async () => {
-            const email = document.getElementById('admin-email-input').value;
-            const password = document.getElementById('admin-pass-input').value;
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if(error) return alert(error.message);
-            document.getElementById('admin-auth-gate').classList.add('hidden');
-            document.getElementById('admin-workspace').classList.remove('hidden');
-            renderAdminOrdersLedger();
-        };
-
-        async function renderAdminOrdersLedger() {
-            const tbody = document.getElementById('admin-orders-tbody');
-            tbody.innerHTML = '';
-            let { data } = await supabaseClient.from('Orders').select('*');
-            if(data) {
-                data.forEach(ord => {
-                    const tr = document.createElement('tr');
-                    tr.className = "border-b border-gray-800";
-                    tr.innerHTML = `
-                        <td class="p-3">${ord.customer_name}</td>
-                        <td class="p-3">${ord.shipping_address}</td>
-                        <td class="p-3">
-                            <select onchange="updateOrderStatus('${ord.id}', this.value)" class="bg-[#2a2a2a] p-1 rounded">
-                                <option value="Pending" ${ord.order_status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                <option value="Processed" ${ord.order_status === 'Processed' ? 'selected' : ''}>Processed</option>
-                                <option value="Shipped" ${ord.order_status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                            </select>
-                        </td>
-                        <td class="p-3"><button onclick="purgeOrder('${ord.id}')" class="text-red-500">Delete</button></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: rgba(30, 41, 59, 0.4);
+            --border-glow: rgba(59, 130, 246, 0.2);
+            --accent: #3b82f6;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
         }
 
-        window.updateOrderStatus = async (id, status) => {
-            await supabaseClient.from('Orders').update({ order_status: status }).eq('id', id);
-            alert("Updated to " + status);
-        };
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            scroll-behavior: smooth;
+        }
 
-        window.purgeOrder = async (id) => {
-            await supabaseClient.from('Orders').delete().eq('id', id);
-            renderAdminOrdersLedger();
-        };
-    </script>
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(59, 130, 246, 0.15);
+            filter: blur(150px);
+            top: 10%;
+            left: -100px;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        header {
+            background: rgba(11, 15, 25, 0.8);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .logo span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--text-primary);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        section {
+            padding: 8rem 2rem 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 85vh;
+            gap: 4rem;
+        }
+
+        .hero-text {
+            flex: 1.2;
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-text p {
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            font-size: 1.15rem;
+            max-width: 650px;
+        }
+
+        .hero-img-container {
+            flex: 0.8;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hero-img {
+            width: 320px;
+            height: 350px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 24px;
+            padding: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transform: rotate(-3deg);
+            transition: transform 0.5s ease;
+        }
+
+        .hero-img:hover {
+            transform: rotate(0deg) scale(1.02);
+        }
+
+        .hero-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent-gradient);
+            color: white;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+        }
+
+        .section-header {
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-glow);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.1);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon i {
+            font-size: 1.4rem;
+            color: #60a5fa;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .card ul {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card li {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .card li i {
+            color: var(--accent);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+
+        .timeline-modern {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .timeline-modern::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent) 0%, rgba(255,255,255,0.05) 100%);
+        }
+
+        .timeline-block {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 3.5rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 11px;
+            top: 6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            border: 4px solid var(--accent);
+            z-index: 2;
+        }
+
+        .timeline-body {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2.5rem;
+            border-radius: 16px;
+        }
+
+        .time-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .role-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .comp-name {
+            color: #60a5fa;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .date-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .timeline-body ul {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .timeline-body li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .timeline-body li::before {
+            content: "•";
+            color: var(--accent);
+            position: absolute;
+            left: 0.2rem;
+            font-size: 1.2rem;
+            top: -0.1rem;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .tech-tag {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 3rem;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .contact-box {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .contact-box i {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            background: #060911;
+        }
+
+        @media (max-width: 968px) {
+            .hero {
+                flex-direction: column-reverse;
+                text-align: center;
+                padding-top: 10rem;
+            }
+            .btn-group {
+                justify-content: center;
+            }
+            .contact-layout {
+                grid-template-columns: 1fr;
+            }
+            .time-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Alvin Troy <span>Layco</span></div>
+            <nav>
+                <a href="#about">About</a>
+                <a href="#expertise">Expertise</a>
+                <a href="#experience">Journey</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <section id="about" class="hero">
+        <div class="hero-text">
+            <span class="tag">Banking Operations & Senior Management Executive</span>
+            <h1>Balancing Complex Data.<br>Leading Elite Teams.</h1>
+            <p>I am a results-driven banking operations leader with over 10 years of robust financial services and BPO industry experience, highlighting 5+ years in strategic senior management roles at JP Morgan Chase & Co. Expertly combining risk architecture, global process automation, and high-impact people leadership.</p>
+            <div class="btn-group">
+                <a href="#contact" class="btn"><i class="fa-solid fa-envelope"></i> Contact Me</a>
+                <a href="#experience" class="btn btn-secondary">Explore Experience</a>
+            </div>
+        </div>
+        <div class="hero-img-container">
+            <div class="hero-img">
+                <img src="https://6a395e9d67012f040a077ed0.imgix.net/Resume%20pic.jpg" alt="Alvin Troy Dela Paz Layco">
+            </div>
+        </div>
+    </section>
+
+    <section id="expertise">
+        <div class="section-header">
+            <h2>Core Competencies</h2>
+        </div>
+        <div class="grid-4">
+            <div class="card">
+                <div class="card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                <h3>Banking Operations</h3>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> In-house & TLM IU Reconciliations</li>
+                    <li><i class="fa-solid fa-check"></i> Fund Accounting & NAV Validation</li>
+                    <li><i class="fa-solid fa-check"></i> High-Volume Control Architecture</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>Risk & Compliance</h3>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> Regulatory Compliance (AML, KYC)</li>
+                    <li><i class="fa-solid fa-check"></i> Risk Management & Governance</li>
+                    <li><i class="fa-solid fa-check"></i> Policy Enforcement & Mitigation</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                <h3>People Leadership</h3>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> Cross-Geographical Team Management</li>
+                    <li><i class="fa-solid fa-check"></i> Strategic Performance Coaching</li>
+                    <li><i class="fa-solid fa-check"></i> Ownership & Core Values Culture</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                <h3>Strategic Engineering</h3>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i> Process Optimization Automation</li>
+                    <li><i class="fa-solid fa-check"></i> Workload & Capacity Forecasting</li>
+                    <li><i class="fa-solid fa-check"></i> Agile Framework Tracking (JIRA)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience">
+        <div class="section-header">
+            <h2>Professional Journey</h2>
+        </div>
+        <div class="timeline-modern">
+
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="time-meta">
+                        <div>
+                            <span class="role-title">Assistant Vice President, AWM</span> <br>
+                            <span class="comp-name">JP Morgan Chase & Co.</span>
+                        </div>
+                        <span class="date-badge">Apr 2023 - Present</span>
+                    </div>
+                    <ul>
+                        <li>Lead a high-performing operations team supporting reconciliation and risk control functions.</li>
+                        <li>Conduct process reviews to identify improvement opportunities, enhance efficiency, and reduce costs.</li>
+                        <li>Ensure strict compliance with corporate accounting policies and regulatory requirements.</li>
+                        <li>Drive client-centric strategies while managing ultra-high net worth relationships.</li>
+                        <li>Implement controls to mitigate operational risks and promote ownership culture.</li>
+                    </ul>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Reconciliation Control</span>
+                        <span class="tech-tag">Risk Governance</span>
+                        <span class="tech-tag">AWM Client Strategy</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="time-meta">
+                        <div>
+                            <span class="role-title">Reconciliation Manager</span> <br>
+                            <span class="comp-name">JP Morgan Chase & Co.</span>
+                        </div>
+                        <span class="date-badge">Sep 2019 - Apr 2023</span>
+                    </div>
+                    <ul>
+                        <li>Directed reconciliation operations ensuring accurate and timely reporting.</li>
+                        <li>Identified risks and implemented proactive control measures.</li>
+                        <li>Championed continuous improvement projects to streamline operations.</li>
+                        <li>Managed client servicing for sensitive trust accounts.</li>
+                        <li>Built strong stakeholder relationships and promoted collaboration.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="time-meta">
+                        <div>
+                            <span class="role-title">Fund Accounting Supervisor</span> <br>
+                            <span class="comp-name">JP Morgan Chase & Co.</span>
+                        </div>
+                        <span class="date-badge">Aug 2016 - Aug 2019</span>
+                    </div>
+                    <ul>
+                        <li>Oversaw NAV validation, corporate actions, and fund activity analysis.</li>
+                        <li>Led QA controls ensuring integrity of financial reporting.</li>
+                        <li>Drove automation via Xceptor and VBA, reducing manual workload.</li>
+                        <li>Redesigned shift structure and balanced workload across teams.</li>
+                    </ul>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Xceptor</span>
+                        <span class="tech-tag">VBA Automation</span>
+                        <span class="tech-tag">NAV Validation</span>
+                        <span class="tech-tag">QA Controls</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="time-meta">
+                        <div>
+                            <span class="role-title">Junior Assistant Manager II</span> <br>
+                            <span class="comp-name">BDO (Banco de Oro)</span>
+                        </div>
+                        <span class="date-badge">Feb 2013 - Jul 2016</span>
+                    </div>
+                    <ul>
+                        <li>Led workforce management and volume forecasting.</li>
+                        <li>Created detailed performance reports and dashboards.</li>
+                        <li>Trained and coached staff on updated procedures.</li>
+                        <li>Advised clients on investments, loans, and account solutions.</li>
+                    </ul>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Workforce Planning</span>
+                        <span class="tech-tag">Volume Forecasting</span>
+                        <span class="tech-tag">Client Financial Advisory</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-block">
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                    <div class="time-meta">
+                        <div>
+                            <span class="role-title">Operations Manager / Team Leader</span> <br>
+                            <span class="comp-name">HGS (Hinduja Global Solutions)</span>
+                        </div>
+                        <span class="date-badge">2008 - 2013</span>
+                    </div>
+                    <ul>
+                        <li>Managed scale BPO processing units for enterprise global clients like AT&T, running up to 144 FTEs.</li>
+                        <li>Oversaw intensive performance monitoring, skills training frameworks, and overall service quality metrics.</li>
+                        <li>Engineered and implemented targeted productivity improvements across matrixed configurations.</li>
+                        <li>Handled critical operational escalations and pioneered high-yield team coaching initiatives.</li>
+                    </ul>
+                    <div class="tech-tags">
+                        <span class="tech-tag">BPO Enterprise Management</span>
+                        <span class="tech-tag">144 FTE Scale</span>
+                        <span class="tech-tag">Escalation Controls</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="section-header">
+            <h2>Let's Coordinate</h2>
+        </div>
+        <div class="contact-layout">
+            <div>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Reach out directly to discuss high-scale financial infrastructure optimization, operational risk management models, or automated framework architectures.</p>
+                <div class="contact-details">
+                    <div class="contact-box">
+                        <i class="fa-solid fa-envelope"></i>
+                        <div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Direct Email</p>
+                            <a href="mailto:atdlayco@gmail.com" style="color: inherit; text-decoration: none; font-weight: 600;">atdlayco@gmail.com</a>
+                        </div>
+                    </div>
+                    <div class="contact-box">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                        <div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Mobile Contact</p>
+                            <p style="font-weight: 600;">+63 998 554 2836</p>
+                        </div>
+                    </div>
+                    <div class="contact-box">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Location Base</p>
+                            <p style="font-weight: 600;">National Capital Region, Philippines</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); padding: 2.5rem; border-radius: 16px;">
+                <h3 style="margin-bottom: 1.2rem;">Automation Ecosystem & Architecture</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom: 2rem;">
+                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">Alteryx</span>
+                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">Xceptor</span>
+                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">UIPath</span>
+                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">JIRA (Agile)</span>
+                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">VBA Scripting</span>
+                </div>
+
+                <h3 style="margin-bottom: 1rem;">Academic Base & Frameworks</h3>
+                <p style="font-weight: 600; color: #60a5fa; margin-bottom: 0.25rem;">B.S. Electrical Engineering</p>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">University of Santo Tomas (UST), Philippines (2008)</p>
+                
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Core Management & Operational Credentials:</p>
+                <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                    <span class="tech-tag">Coaching and Counselling</span>
+                    <span class="tech-tag">Supervisory Skills</span>
+                    <span class="tech-tag">Six Sigma Fundamentals</span>
+                    <span class="tech-tag">Lean Principles</span>
+                    <span class="tech-tag">Project Management</span>
+                    <span class="tech-tag">Emotional Economics</span>
+                    <span class="tech-tag">Time Management</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Alvin Troy Dela Paz Layco. Built for elite execution performance.</p>
+    </footer>
+
 </body>
 </html>
