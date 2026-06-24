@@ -489,11 +489,11 @@
 
         function escapeHtml(str) {
             return String(str ?? '')
-                .replace(/&/g, '&')
-                .replace(/</g, '<')
-                .replace(/>/g, '>')
-                .replace(/"/g, '"')
-                .replace(/'/g, ''');
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;'); // <--  Fixed with safe HTML string entities
         }
 
         function formatPHP(num) {
@@ -1148,33 +1148,31 @@
                 lucide.createIcons();
             }
         });
-
         window.placeListingBid = async function(cardId, isCustom = false) {
             if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) {
                 showCustomToast("Only registered accounts can bid! Please sign in or create an account.", "error");
                 openAuthModal();
                 return;
             }
-
+        
             const card = items.find(i => i.id === cardId);
             if (!card) return;
-
-            // Global Lock: Protect client from submitting bids if listing timer has elapsed
+        
+            // GLOBAL SAFETY GATE: Blocks execution for both Supabase cloud transactions and fallback instances
             if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
                 showCustomToast("This auction bidding window has already closed!", "error");
                 return;
             }
-
+        
             let bidAmount = 0;
-
+        
             if (isCustom) {
-                // Modified: Reads the exact absolute value the customer typed as their target offer
                 const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value);
                 if (!customVal || isNaN(customVal) || customVal <= 0) {
-                    showCustomToast("Enter a valid custom bid amount.", "error");
+                    showCustomToast("Enter a valid custom bid add-on amount.", "error");
                     return;
                 }
-                bidAmount = customVal; 
+                bidAmount = Number(card.price) + customVal;
             } else {
                 const selectVal = Number(document.getElementById(`bid-select-${cardId}`).value);
                 if (!selectVal || isNaN(selectVal) || selectVal <= 0) {
@@ -1183,13 +1181,7 @@
                 }
                 bidAmount = Number(card.price) + selectVal;
             }
-
-            // Universal validation layer to reject low offers immediately
-            if (bidAmount <= Number(card.price)) {
-                showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
-                return;
-            }
-
+        
             const bidderName = currentUserProfile.name || "Collector";
             if (supabaseClient) {
                 try {
@@ -1199,13 +1191,13 @@
                         p_bidder_name: bidderName
                     });
                     if (error) throw error;
-
+        
                     if (data) {
                         card.price = Number(data.price);
                         card.top_bidder = data.top_bidder;
                         card.bidding_ends_at = data.bidding_ends_at;
                     }
-
+        
                     pendingCustomBidInputs[cardId] = "";
                     showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success");
                     await fetchLiveInventory(true);
@@ -1213,6 +1205,11 @@
                     showCustomToast(err.message || "Bid failed.", "error");
                 }
             } else {
+                if (bidAmount <= Number(card.price)) {
+                    showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
+                    return;
+                }
+        
                 card.price = bidAmount;
                 card.top_bidder = bidderName;
                 pendingCustomBidInputs[cardId] = "";
@@ -1731,7 +1728,6 @@
                 renderGrid();
             }
         };
-
         function renderGrid() {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
@@ -1790,16 +1786,18 @@
                 } else {
                     biddingHeaderMarkup = `
                         <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
-                            <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder: <span class="text-white">${topBidderName}</span>
+                            <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder: 
+                            <span class="text-white">${topBidderName}</span>
                         </div>
                         <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString()}">
                         </div>
                     `;
-
-                    // Safety Lockout: Determines if timeline parameters indicate a closed listing
+                
+                    // Calculate if the current item's bidding timeline has expired
                     const isAuctionEnded = item.bidding_ends_at && new Date(item.bidding_ends_at).getTime() < Date.now();
-
+                
                     if (isAuctionEnded) {
+                        // Swap inputs out for a disabled visual lockout layout
                         actionMarkup = `
                             <div class="w-full text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg text-xs mt-2 uppercase tracking-wider select-none">
                                 Bidding Closed
@@ -1819,7 +1817,7 @@
                                     <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
                                 </div>
                                 <div class="flex gap-1.5">
-                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Enter Total Bid (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
+                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Custom Bid Add-On (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
                                     <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
                                 </div>
                             </div>
