@@ -944,14 +944,30 @@
 
             try {
                 const currentUrl = new URL(window.location.href);
-                const hash = currentUrl.hash || '';
+                const hash = currentUrl.hash ? currentUrl.hash.replace(/^#/, '') : '';
+                const hashParams = new URLSearchParams(hash);
                 const queryMode = currentUrl.searchParams.get('mode');
+                const queryType = currentUrl.searchParams.get('type');
 
-                if (
+                const hasAccessToken = !!hashParams.get('access_token');
+                const hasRefreshToken = !!hashParams.get('refresh_token');
+                const hashType = hashParams.get('type');
+                const hasErrorCode = !!hashParams.get('error_code');
+                const errorDescription = hashParams.get('error_description');
+
+                if (hasErrorCode) {
+                    showCustomToast(`Recovery link error: ${errorDescription || 'Invalid or expired link.'}`, "error");
+                    return;
+                }
+
+                const isRecoveryFlow =
                     queryMode === 'reset' ||
-                    hash.includes('type=recovery') ||
-                    hash.includes('access_token=')
-                ) {
+                    queryType === 'recovery' ||
+                    hashType === 'recovery' ||
+                    hasAccessToken ||
+                    hasRefreshToken;
+
+                if (isRecoveryFlow) {
                     recoveryMode = true;
                     openResetPasswordModal();
                 }
@@ -2019,6 +2035,11 @@
 
         (async () => {
             await handlePasswordRecoveryFromUrl();
+
+            setTimeout(() => {
+                handlePasswordRecoveryFromUrl();
+            }, 1200);
+
             await hydrateCurrentUserFromSession();
             await fetchLiveInventory(true);
             if (currentUserProfile) {
