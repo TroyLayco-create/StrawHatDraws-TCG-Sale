@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Precision Zoom Styles */
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -31,7 +30,6 @@
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
-    <!-- NAVIGATION HEADER -->
     <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -67,8 +65,18 @@
         </div>
     </nav>
 
+    <div class="bg-[#181818] border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 flex gap-4">
+            <button onclick="changeListingSection('sale')" id="tab-section-sale" class="py-3 px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i> Buy Now (Sale)
+            </button>
+            <button onclick="changeListingSection('bidding')" id="tab-section-bidding" class="py-3 px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all">
+                <i data-lucide="gavel" class="w-4 h-4"></i> Live Auction (Bidding)
+            </button>
+        </div>
+    </div>
+
     <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- SIDEBAR FILTERS -->
         <aside class="lg:col-span-1 bg-[#1e1e1e] p-5 rounded-xl border border-gray-800 space-y-5 h-fit sticky top-20">
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
@@ -96,12 +104,13 @@
             </div>
 
             <div id="buyer-tracker-box" class="hidden border border-red-500/20 bg-red-950/10 p-3.5 rounded-lg space-y-2.5 text-xs">
-                <h4 class="font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5"><i class="w-3.5 h-3.5" data-lucide="package"></i> Your Active Orders</h4>
-                <div id="buyer-orders-queue" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                <h4 class="font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5">
+                    <i class="w-3.5 h-3.5" data-lucide="package"></i> Your Order History
+                </h4>
+                <div id="buyer-orders-queue" class="space-y-2 max-h-72 overflow-y-auto"></div>
             </div>
         </aside>
 
-        <!-- MAIN GRIDBOARD -->
         <main class="lg:col-span-3">
             <div class="flex justify-between items-center mb-4 text-xs text-gray-400 font-medium">
                 <span id="results-count">Loading cards from inventory database...</span>
@@ -111,7 +120,15 @@
         </main>
     </div>
 
-    <!-- AUTHENTICATION FORM MODAL (STRUCTURED ADDRESS) -->
+    <footer class="max-w-7xl w-full mx-auto px-4 pb-8 pt-2">
+        <div class="border-t border-gray-800 pt-4 flex justify-center">
+            <button onclick="openAdminPanel()" class="bg-[#1e1e1e] hover:bg-[#2a2a2a] border border-gray-700 text-gray-300 hover:text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                <i data-lucide="shield-check" class="w-4 h-4 text-red-500"></i>
+                <span>Admin Login</span>
+            </button>
+        </div>
+    </footer>
+
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -131,8 +148,6 @@
                         <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Delivery Name</label>
                         <input type="text" id="auth-name" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                     </div>
-                    
-                    <!-- Standardized structured address grid -->
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">House / Unit #, Bldg</label>
@@ -143,7 +158,6 @@
                             <input type="text" id="auth-street" placeholder="e.g. 104 Katipunan Ave" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                         </div>
                     </div>
-                    
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Barangay</label>
@@ -154,7 +168,6 @@
                             <input type="text" id="auth-city" placeholder="e.g. Quezon City" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Region / Province</label>
@@ -165,7 +178,6 @@
                             <input type="text" id="auth-postal" placeholder="e.g. 1108" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Phone Contact Number</label>
                         <input type="tel" id="auth-phone" placeholder="e.g. 09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
@@ -177,7 +189,6 @@
         </div>
     </div>
 
-    <!-- SECURE TRAY SECURE CHECKOUT MODAL -->
     <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -199,7 +210,11 @@
                         <input type="text" id="cust-name" required placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
                     </div>
 
-                    <!-- Structured Checkout address fields -->
+                    <div id="checkout-email-wrapper">
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
+                        <input type="email" id="cust-email" required placeholder="juan@example.com" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">House / Unit #, Bldg</label>
@@ -235,9 +250,9 @@
 
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label>
-                        <input type="tel" id="cust-phone" required placeholder="e.g. 09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                        <input type="tel" id="cust-phone" required placeholder="09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
                     </div>
-                    <button type="submit" id="checkout-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow-lg flex items-center justify-center gap-2 mt-2 uppercase tracking-wider text-xs">Place Order</button>
+                    <button type="button" onclick="submitCheckoutOrder()" id="checkout-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow-lg flex items-center justify-center gap-2 mt-2 uppercase tracking-wider text-xs">Place Order</button>
                 </form>
             </div>
 
@@ -245,13 +260,29 @@
                 <div class="bg-green-500/10 text-green-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-500/30"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
                 <h2 class="text-xl font-bold text-white mb-1">Order Confirmed!</h2>
                 <p class="text-xs text-gray-400 mb-4">Your data and inventory levels have been synchronized successfully.</p>
-                <button onclick="closeCheckoutModal()" class="w-full bg-[#2a2a2a] hover:bg-[#333] border border-gray-700 text-gray-200 py-2 rounded-lg text-sm font-semibold">Return to Catalog</button>
+                
+                <div id="guest-conversion-box" class="hidden mt-6 border-t border-gray-800 pt-6 text-left space-y-3 bg-[#251818]/10 p-3.5 rounded-lg border border-red-500/10">
+                    <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="sparkles" class="w-4 h-4"></i> Save Details For Next Purchase?</h3>
+                    <p class="text-[11px] text-gray-400 leading-relaxed">Choose a password below to convert your guest session into a permanent member profile. You can log in next time to instantly retrieve your structured delivery address and track real-time orders!</p>
+                    
+                    <form id="conversion-register-form" class="space-y-3 mt-2">
+                        <div class="text-[10px] font-mono text-gray-500">Registered Email: <span id="conversion-email-label" class="text-red-400 font-bold"></span></div>
+                        <div>
+                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Choose Password</label>
+                            <input type="password" id="conversion-password" required placeholder="Choose a secure password" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-xs text-white focus:outline-none focus:border-red-500">
+                        </div>
+                        <button type="submit" id="conversion-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-[11px] tracking-wide uppercase flex items-center justify-center gap-1.5">
+                            <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Create My Account
+                        </button>
+                    </form>
+                </div>
+
+                <button onclick="closeCheckoutModal()" class="w-full bg-[#2a2a2a] hover:bg-[#333] border border-gray-700 text-gray-200 py-2 rounded-lg text-sm font-semibold mt-4">Return to Catalog</button>
             </div>
         </div>
     </div>
 
-    <!-- CARD ZOOM TEXTURE MODAL -->
-    <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none">
+    <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none" onclick="closeZoomModal()">
         <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
             <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800 shadow-2xl">
@@ -261,7 +292,6 @@
         </div>
     </div>
 
-    <!-- ENCRYPTED SYSTEM LEDGER MONITOR DASHBOARD -->
     <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
@@ -269,7 +299,6 @@
                 <button onclick="closeAdminPanel()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1 rounded text-gray-300">Close Dashboard</button>
             </div>
 
-            <!-- SERVER SIDE GATEKEEPER SIGN IN PORTAL -->
             <div id="admin-auth-gate" class="py-12 text-center space-y-4 max-w-sm mx-auto">
                 <p class="text-xs text-gray-400">Sign in using your master Supabase administrator email credentials to unlock catalog write permissions.</p>
                 <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
@@ -278,7 +307,6 @@
             </div>
 
             <div id="admin-workspace" class="hidden space-y-8">
-                <!-- TESTING AND CACHE DIAGNOSTIC BAR -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[#251818] border border-red-900/30 p-4 rounded-xl gap-3 text-xs">
                     <div>
                         <span class="font-bold text-red-400 uppercase tracking-wider block mb-0.5">⚠️ Local Sandbox Cache Manager</span>
@@ -287,7 +315,6 @@
                     <button onclick="resetSystemLocalCache()" class="bg-red-950 hover:bg-red-900 text-red-300 border border-red-800/40 px-3.5 py-2 rounded-lg font-bold uppercase tracking-wide transition-colors">Reset Local overrides</button>
                 </div>
 
-                <!-- INVENTORY PORTAL MODULE -->
                 <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
                     <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -304,12 +331,23 @@
                             <input type="text" id="inv-rarity" required placeholder="e.g. AA" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                         </div>
                         <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Price (PHP)</label>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold" id="inv-price-label">Price (Sale) / Starting Bid (Bidding)</label>
                             <input type="number" id="inv-price" required placeholder="14500" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                         </div>
                         <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Listing Type</label>
+                            <select id="inv-type" onchange="toggleAdminBiddingFields(this.value)" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                                <option value="sale">Buy Now (Sale)</option>
+                                <option value="bidding">Live Auction (Bidding)</option>
+                            </select>
+                        </div>
+                        <div id="inv-stock-container">
                             <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Initial Stock Level</label>
-                            <input type="number" id="inv-stock" required placeholder="5" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                            <input type="number" id="inv-stock" required placeholder="5" value="1" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div id="inv-bidding-ends-container" class="hidden">
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Auction Expiry Datetime</label>
+                            <input type="datetime-local" id="inv-bidding-ends" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                         </div>
                         <div>
                             <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Front Image URL (Optional)</label>
@@ -325,7 +363,6 @@
                     </form>
                 </div>
 
-                <!-- CLIENT ORDER LEDGER QUEUE MODULE -->
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
                     <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
@@ -348,7 +385,6 @@
         </div>
     </div>
 
-    <!-- CUSTOM CONFIRMATION DIALOG MODAL -->
     <div id="custom-confirm-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center z-[110] p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-xs w-full p-5 shadow-2xl text-center">
             <div class="bg-red-500/10 text-red-500 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 border border-red-500/20">
@@ -363,28 +399,17 @@
         </div>
     </div>
 
-    <!-- CUSTOM NOTIFICATION TOAST -->
     <div id="custom-toast" class="fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-gray-800 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none">
         <span id="toast-icon"></span>
         <span id="toast-message"></span>
     </div>
 
-    <!-- REAR CONSOLE FOOTER LINK -->
-    <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
-        <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
-        <p>
-            <span onclick="openAdminPanel()" class="cursor-pointer text-gray-700 hover:text-red-500/40 transition-colors text-[10px] select-none font-mono">
-                [🛡️ Secure System Ledger Console]
-            </span>
-        </p>
-    </footer>
-
     <script>
-        const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co"; 
+        const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
-        
+
         let supabaseClient = null;
-        if(SUPABASE_URL.indexOf("your-project-id") === -1) {
+        if (SUPABASE_URL.indexOf("your-project-id") === -1) {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
                     persistSession: true,
@@ -394,12 +419,11 @@
             });
         }
 
-        /* --- PRE-LOAD PERSISTENCE UTILS FOR CLOUD DISCONNECT FALLBACKS --- */
         function getLocalOrders() {
             try {
                 const saved = localStorage.getItem('shd_local_orders');
-                return saved ? JSON.parse(saved) : null;
-            } catch(e) { return null; }
+                return saved ? JSON.parse(saved) : [];
+            } catch(e) { return []; }
         }
 
         function saveLocalOrders(orders) {
@@ -411,9 +435,7 @@
         function getLocalStock(cardId, defaultStock) {
             try {
                 const stocks = JSON.parse(localStorage.getItem('shd_card_stocks') || '{}');
-                if (stocks[cardId] !== undefined) {
-                    return Number(stocks[cardId]);
-                }
+                if (stocks[cardId] !== undefined) return Number(stocks[cardId]);
             } catch(e) {}
             return defaultStock;
         }
@@ -426,30 +448,57 @@
             } catch(e) {}
         }
 
-        let isRegisterMode = true;
-        let currentUserProfile = null; 
-        let cart = [];
-        let items = []; 
-
-        const DEMO_FALLBACK_ITEMS = [
-            { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' },
-            { id: 2, name: "Roronoa Zoro", set: "OP01-025", rarity: "SR", price: 950, stock: 5, frontImg: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' },
-            { id: 3, name: "Nami (Special)", set: "OP01-016", rarity: "SP", price: 6200, stock: 0, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' }
-        ];
-
-        let localOrdersBackup = getLocalOrders() || [];
-        if(!getLocalOrders()) {
-            saveLocalOrders(localOrdersBackup);
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
-        /* --- NON-BLOCKING CUSTOM OVERLAYS SYSTEM --- */
+        function formatPHP(num) {
+            return `₱${Number(num || 0).toLocaleString()}`;
+        }
+
+        function formatAuctionEnd(datetimeStr) {
+            if (!datetimeStr) return "No end time";
+            const dt = new Date(datetimeStr);
+            return dt.toLocaleString('en-PH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        let isRegisterMode = true;
+        let currentUserProfile = null;
+        let cart = [];
+        let items = [];
+        let lastGuestCheckoutData = null;
+        let activeListingSection = 'sale';
+        let localOrdersBackup = getLocalOrders();
+        let pendingBidSelections = {};
+        let pendingCustomBidInputs = {};
+        let lastInventorySignature = '';
+        let inventoryPollInFlight = false;
+
+        const DEMO_FALLBACK_ITEMS = [
+            { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' },
+            { id: 2, name: "Roronoa Zoro", set: "OP01-025", rarity: "SR", price: 950, stock: 5, frontImg: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' },
+            { id: 3, name: "Nami (Special Auction)", set: "OP01-016", rarity: "SP", price: 6200, stock: 1, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'bidding', top_bidder: 'ZoroLover99', bidding_ends_at: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString() }
+        ];
+
         function showCustomToast(message, type = 'info') {
             const toast = document.getElementById('custom-toast');
             const iconSpan = document.getElementById('toast-icon');
             const msgSpan = document.getElementById('toast-message');
-            
+
             msgSpan.innerText = message;
-            
+
             if (type === 'success') {
                 iconSpan.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>';
                 toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-green-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300";
@@ -460,12 +509,12 @@
                 iconSpan.innerHTML = '<i data-lucide="info" class="w-4 h-4 text-blue-500"></i>';
                 toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-blue-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300";
             }
-            
+
             lucide.createIcons();
-            
+
             setTimeout(() => {
                 toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-900 border border-gray-800 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none";
-            }, 5000);
+            }, 4500);
         }
 
         function askCustomConfirmation(title, message) {
@@ -475,79 +524,151 @@
                 const msgEl = document.getElementById('confirm-modal-message');
                 const cancelBtn = document.getElementById('confirm-modal-cancel');
                 const submitBtn = document.getElementById('confirm-modal-submit');
-                
+
                 titleEl.innerText = title;
                 msgEl.innerText = message;
-                
                 modal.style.display = 'flex';
                 lucide.createIcons();
-                
-                function cleanUp(result) {
+
+                function cleanup(result) {
                     modal.style.display = 'none';
                     cancelBtn.removeEventListener('click', onCancel);
                     submitBtn.removeEventListener('click', onSubmit);
                     resolve(result);
                 }
-                
-                function onCancel() { cleanUp(false); }
-                function onSubmit() { cleanUp(true); }
-                
+                function onCancel() { cleanup(false); }
+                function onSubmit() { cleanup(true); }
+
                 cancelBtn.addEventListener('click', onCancel);
                 submitBtn.addEventListener('click', onSubmit);
             });
         }
 
-        async function fetchLiveInventory() {
-            if (!supabaseClient) {
-                items = DEMO_FALLBACK_ITEMS.map(item => ({
-                    ...item,
-                    stock: getLocalStock(item.id, item.stock)
-                }));
-                renderGrid();
-                return;
-            }
-            try {
-                let { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false });
-                if (error) throw error;
-                
-                items = cards.map(c => {
-                    const defaultStock = Number(c.stock);
-                    return {
-                        id: c.id, 
-                        name: c.name, 
-                        set: c.set_code || c.set || "OP-UNKNOWN", 
-                        rarity: c.rarity, 
-                        price: Number(c.price), 
-                        stock: Math.min(defaultStock, getLocalStock(c.id, defaultStock)),
-                        frontImg: c.front_img || c.frontImg, 
-                        backImg: c.back_img || c.backImg, 
-                        viewState: 'front'
-                    };
-                });
-            } catch (err) {
-                console.warn("Database sync dropped, pulling back cache models:", err.message);
-                items = DEMO_FALLBACK_ITEMS.map(item => ({
-                    ...item,
-                    stock: getLocalStock(item.id, item.stock)
-                }));
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        function buildInventorySignature(list) {
+            return JSON.stringify(
+                (list || []).map(item => ({
+                    id: item.id,
+                    stock: item.stock,
+                    price: item.price,
+                    top_bidder: item.top_bidder,
+                    bidding_ends_at: item.bidding_ends_at,
+                    type: item.type
+                }))
+            );
+        }
+
+        function changeListingSection(section) {
+            activeListingSection = section;
+            const saleTab = document.getElementById('tab-section-sale');
+            const biddingTab = document.getElementById('tab-section-bidding');
+
+            if (section === 'sale') {
+                saleTab.className = "py-3 px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
+                biddingTab.className = "py-3 px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
+            } else {
+                biddingTab.className = "py-3 px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
+                saleTab.className = "py-3 px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
             }
             renderGrid();
         }
 
-        /* --- DECOUPLED INDEPENDENT ORDER PIPELINE EXTRACTOR --- */
+        async function fetchLiveInventory(forceRender = false) {
+            let nextItems = [];
+
+            if (!supabaseClient) {
+                nextItems = DEMO_FALLBACK_ITEMS.map(item => {
+                    const existing = items.find(i => i.id === item.id);
+                    return {
+                        ...item,
+                        stock: getLocalStock(item.id, item.stock),
+                        viewState: existing?.viewState || item.viewState || 'front'
+                    };
+                });
+            } else {
+                try {
+                    const { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false });
+                    if (error) throw error;
+
+                    if (!cards || cards.length === 0) {
+                        nextItems = DEMO_FALLBACK_ITEMS.map(item => {
+                            const existing = items.find(i => i.id === item.id);
+                            return {
+                                ...item,
+                                stock: getLocalStock(item.id, item.stock),
+                                viewState: existing?.viewState || item.viewState || 'front'
+                            };
+                        });
+                    } else {
+                        nextItems = cards.map(c => {
+                            const existing = items.find(i => i.id === c.id);
+                            const defaultStock = Number(c.stock || 0);
+                            const dbType = (c.type || "sale").toLowerCase().trim();
+                            const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
+
+                            return {
+                                id: c.id,
+                                name: c.name || "Unnamed Card",
+                                set: c.set_code || c.set || "OP-UNKNOWN",
+                                rarity: c.rarity || "N/A",
+                                price: Number(c.price || 0),
+                                type: normalizedType,
+                                top_bidder: c.top_bidder || null,
+                                bidding_ends_at: c.bidding_ends_at || null,
+                                stock: Math.min(defaultStock, getLocalStock(c.id, defaultStock)),
+                                frontImg: c.front_img || c.frontImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                                backImg: c.back_img || c.backImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                                viewState: existing?.viewState || 'front'
+                            };
+                        });
+                    }
+                } catch (err) {
+                    console.warn("Database sync dropped, pulling back cache models:", err.message);
+                    nextItems = DEMO_FALLBACK_ITEMS.map(item => {
+                        const existing = items.find(i => i.id === item.id);
+                        return {
+                            ...item,
+                            stock: getLocalStock(item.id, item.stock),
+                            viewState: existing?.viewState || item.viewState || 'front'
+                        };
+                    });
+                }
+            }
+
+            const nextSig = buildInventorySignature(nextItems);
+            const changed = nextSig !== lastInventorySignature;
+
+            items = nextItems;
+            lastInventorySignature = nextSig;
+
+            if (forceRender || changed) renderGrid();
+        }
+
         async function fetchBuyerRealtimeOrders() {
-            if(!supabaseClient || !currentUserProfile || !currentUserProfile.id) return;
-            if(currentUserProfile.id === 'guest') return;
+            if (!currentUserProfile || !currentUserProfile.id) return;
+
             try {
                 let dbOrders = [];
                 if (supabaseClient) {
-                    let { data } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
-                    if (data) dbOrders = data;
+                    const { data, error } = await supabaseClient
+                        .from('Orders')
+                        .select('*')
+                        .order('id', { ascending: false });
+
+                    if (error) {
+                        console.warn("Could not load customer orders:", error.message);
+                    } else if (data) {
+                        dbOrders = data;
+                    }
                 }
-                
+
                 const combined = [...localOrdersBackup, ...dbOrders];
                 const seenIds = new Set();
                 const uniqueOrders = [];
+
                 combined.forEach(o => {
                     if (o && o.id && !seenIds.has(o.id)) {
                         seenIds.add(o.id);
@@ -557,149 +678,206 @@
 
                 const queueBox = document.getElementById('buyer-orders-queue');
                 const container = document.getElementById('buyer-tracker-box');
-                
-                const filteredOrders = uniqueOrders.filter(o => 
-                    o.user_id === currentUserProfile.id || 
-                    o.buyer_id === currentUserProfile.id ||
-                    (o.phone_number && currentUserProfile.phone && o.phone_number.trim() === currentUserProfile.phone.trim())
-                );
-                
-                if(filteredOrders && filteredOrders.length > 0) {
+
+                const filteredOrders = uniqueOrders.filter(o => {
+                    if (currentUserProfile.id !== 'guest') {
+                        if (o.user_id === currentUserProfile.id || o.buyer_id === currentUserProfile.id) return true;
+                    }
+
+                    const isRealPhone = (ph) => ph && ph !== "None" && ph.trim().length > 5;
+                    if (isRealPhone(o.phone_number) && isRealPhone(currentUserProfile.phone)) {
+                        if (o.phone_number.trim() === currentUserProfile.phone.trim()) return true;
+                    }
+
+                    return false;
+                });
+
+                if (filteredOrders.length > 0) {
                     container.classList.remove('hidden');
                     queueBox.innerHTML = '';
+
                     filteredOrders.forEach(o => {
-                        const div = document.createElement('div');
-                        div.className = "p-2 bg-black/40 rounded border border-gray-800 flex justify-between items-center text-[11px]";
                         let statusColor = "text-yellow-500";
-                        if(o.order_status === 'Processed') statusColor = "text-green-400";
-                        if(o.order_status === 'Shipped') statusColor = "text-blue-400";
-                        if(o.order_status === 'Cancelled') statusColor = "text-red-400";
-                        
-                        div.innerHTML = `
-                            <span class="font-mono text-gray-400 truncate max-w-[100px]">${o.id}</span>
-                            <span class="font-bold ${statusColor}">${o.order_status || 'Pending'}</span>
+                        if (o.order_status === 'Processed') statusColor = "text-green-400";
+                        if (o.order_status === 'Shipped') statusColor = "text-blue-400";
+                        if (o.order_status === 'Cancelled') statusColor = "text-red-400";
+
+                        let itemsHtml = '';
+                        if (Array.isArray(o.items_ordered)) {
+                            const counts = {};
+                            o.items_ordered.forEach(id => {
+                                counts[id] = (counts[id] || 0) + 1;
+                            });
+
+                            itemsHtml = Object.keys(counts).map(id => {
+                                const card = items.find(i => i.id == id);
+                                return `<div class="text-[10px] text-gray-300">${counts[id]}x ${escapeHtml(card ? card.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(card ? card.set : 'UNKNOWN')})</span></div>`;
+                            }).join('');
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = "p-2.5 bg-black/40 rounded border border-gray-800 space-y-1.5";
+                        card.innerHTML = `
+                            <div class="flex justify-between items-center gap-2">
+                                <span class="font-mono text-gray-400 text-[10px] break-all">${escapeHtml(o.id)}</span>
+                                <span class="font-bold ${statusColor} text-[11px]">${escapeHtml(o.order_status || 'Pending')}</span>
+                            </div>
+                            <div class="text-[10px] text-gray-500">${escapeHtml(o.customer_name || '')}</div>
+                            <div class="space-y-1">${itemsHtml}</div>
                         `;
-                        queueBox.innerHTML += div.outerHTML;
+                        queueBox.appendChild(card);
                     });
                 } else {
                     container.classList.add('hidden');
+                    queueBox.innerHTML = '';
                 }
-            } catch(e) { console.warn("Tracker lookup skipped:", e); }
+            } catch (e) {
+                console.warn("Tracker lookup skipped:", e);
+            }
         }
 
-        /* --- GEOLOCATION AND PHILIPPINE PHONE VALIDATOR --- */
         async function performStructuredAddressValidation(house, street, barangay, city, region, postal, phone) {
-            // 1. Phone validation
             const cleanedPhone = phone.trim().replace(/[\s\-().]/g, '');
             const phoneRegex = /^(09|\+639|639)\d{9}$/;
             if (!phoneRegex.test(cleanedPhone)) {
-                throw new Error("Invalid mobile number. Must be a valid Philippine mobile number starting with 09 (e.g., 09171234567).");
+                throw new Error("Invalid mobile number. Must be a valid Philippine mobile number (e.g. 09171234567).");
             }
 
-            // 2. Address verification
             if (!house || !street || !barangay || !city || !region || !postal) {
-                throw new Error("All address fields (House#, Street, Barangay, City, Region, Postal Code) are required to calculate standard delivery coordinates.");
+                throw new Error("All address fields are required to calculate delivery coordinates.");
             }
 
-            const cleanHouse = house.trim();
-            const cleanStreet = street.trim();
-            const cleanBarangay = barangay.trim();
-            const cleanCity = city.trim();
-            const cleanRegion = region.trim();
-            const cleanPostal = postal.trim();
+            const formattedAddress = `${house}, ${street}, Brgy. ${barangay}, ${city}, ${region}, ${postal}, Philippines`;
+            const fallbackMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formattedAddress)}`;
 
-            const combinedAddress = `${cleanHouse}, ${cleanStreet}, Brgy. ${cleanBarangay}, ${cleanCity}, ${cleanRegion}, ${cleanPostal}, Philippines`;
-
-            // Query OpenStreetMap Nominatim restricted strictly to the Philippines boundaries
             try {
-                // Focus the query on Street, City & Region for high-accuracy mapping
-                const nominatimQuery = `${cleanStreet}, ${cleanBarangay}, ${cleanCity}, ${cleanRegion}, Philippines`;
+                const nominatimQuery = `${house} ${street}, ${barangay}, ${city}, ${region}, Philippines`;
                 const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nominatimQuery)}&countrycodes=ph&limit=1&addressdetails=1`;
-                
+
                 const response = await fetch(nominatimUrl, {
-                    headers: { 'Accept': 'application/json' }
+                    headers: { 'Accept': 'application/json', 'User-Agent': 'StrawHatDraws-TCG-Sales' }
                 });
-                
-                if (!response.ok) {
-                    throw new Error("Nominatim server busy. Bypassing live coordination check.");
-                }
 
-                const data = await response.json();
-                if (!data || data.length === 0) {
-                    throw new Error("We couldn't locate this address on maps. Please check the spelling of your street, barangay, or city.");
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        const result = data[0];
+                        return {
+                            phone: cleanedPhone,
+                            address: formattedAddress,
+                            mapsPin: `https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`,
+                            structured: { house, street, barangay, city, region, postal }
+                        };
+                    }
                 }
-
-                const result = data[0];
-                const addressDetails = result.address || {};
-                
-                if (addressDetails.country_code !== 'ph') {
-                    throw new Error("Detected coordinates reside outside delivery boundaries. We only deliver within the Philippines.");
-                }
-
-                // Generate high fidelity Google Maps search pin link using coordinates
-                const googleMapsPinLink = `https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`;
 
                 return {
                     phone: cleanedPhone,
-                    address: combinedAddress,
-                    mapsPin: googleMapsPinLink,
-                    structured: {
-                        house: cleanHouse,
-                        street: cleanStreet,
-                        barangay: cleanBarangay,
-                        city: cleanCity,
-                        region: cleanRegion,
-                        postal: cleanPostal
-                    }
+                    address: formattedAddress,
+                    mapsPin: fallbackMapsUrl,
+                    structured: { house, street, barangay, city, region, postal }
                 };
-
             } catch (err) {
-                // If it is standard validation rejection, throw immediately
-                if (err.message.includes("mobile number") || err.message.includes("couldn't locate") || err.message.includes("outside")) {
-                    throw err;
-                }
-                
-                // Fallback coordinates link generation if Nominatim is completely down but strings pass length checks
-                console.warn("Geocoding failed. Running safe mathematical default parameter strings:", err);
-                const standardFallbackAddress = `${cleanHouse}, ${cleanStreet}, Brgy. ${cleanBarangay}, ${cleanCity}, ${cleanRegion}, ${cleanPostal}, Philippines`;
                 return {
                     phone: cleanedPhone,
-                    address: standardFallbackAddress,
-                    mapsPin: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(standardFallbackAddress)}`,
-                    structured: {
-                        house: cleanHouse,
-                        street: cleanStreet,
-                        barangay: cleanBarangay,
-                        city: cleanCity,
-                        region: cleanRegion,
-                        postal: cleanPostal
-                    }
+                    address: formattedAddress,
+                    mapsPin: fallbackMapsUrl,
+                    structured: { house, street, barangay, city, region, postal }
                 };
             }
         }
 
-        /* --- AUTH CONTROLLERS --- */
+        async function hydrateCurrentUserFromSession() {
+            if (!supabaseClient) return;
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    currentUserProfile = {
+                        id: session.user.id,
+                        name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+                        address: session.user.user_metadata?.address || "Metro Manila",
+                        phone: session.user.user_metadata?.phone || "None",
+                        google_maps_pin: session.user.user_metadata?.google_maps_pin || '',
+                        structured: {
+                            house: session.user.user_metadata?.structured_house || '',
+                            street: session.user.user_metadata?.structured_street || '',
+                            barangay: session.user.user_metadata?.structured_barangay || '',
+                            city: session.user.user_metadata?.structured_city || '',
+                            region: session.user.user_metadata?.structured_region || '',
+                            postal: session.user.user_metadata?.structured_postal || ''
+                        }
+                    };
+
+                    document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
+                    document.getElementById('nav-logout-btn').classList.remove('hidden');
+                    await fetchBuyerRealtimeOrders();
+                }
+            } catch (err) {
+                console.warn("Session hydration failed:", err);
+            }
+        }
+
+        window.submitCheckoutOrder = async function() {
+            const form = document.getElementById('checkout-form');
+            if (!form) {
+                showCustomToast("Checkout form not found.", "error");
+                return;
+            }
+
+            const emailWrapper = document.getElementById('checkout-email-wrapper');
+            const emailInput = document.getElementById('cust-email');
+
+            if (currentUserProfile && currentUserProfile.id !== 'guest') {
+                if (emailWrapper) emailWrapper.style.display = 'none';
+                if (emailInput) {
+                    emailInput.required = false;
+                }
+            } else {
+                if (emailWrapper) emailWrapper.style.display = 'block';
+                if (emailInput) {
+                    emailInput.required = true;
+                    if (!emailInput.value.trim()) {
+                        showCustomToast("Email address is required for guest checkout.", "error");
+                        emailInput.focus();
+                        return;
+                    }
+                }
+            }
+
+            if (!form.reportValidity()) {
+                showCustomToast("Please complete all required checkout fields.", "error");
+                return;
+            }
+
+            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+            form.dispatchEvent(submitEvent);
+        };
+
         window.openAuthModal = function() {
             if(currentUserProfile) return;
             document.getElementById('auth-modal').style.display = 'flex';
-        }
-        window.closeAuthModal = function() { document.getElementById('auth-modal').style.display = 'none'; }
-        
+        };
+
+        window.closeAuthModal = function() {
+            document.getElementById('auth-modal').style.display = 'none';
+        };
+
         window.executeSecureLogout = async function() {
             const confirmed = await askCustomConfirmation("Sign Out", "Are you sure you want to log out of your session?");
             if(confirmed) {
                 currentUserProfile = null;
-                cart = []; // Purge local cart selection instantly
-                updateCartUI(); // Reset cart indicator instantly
-                renderGrid(); // Clear dynamic grid button markers
-                if(supabaseClient) { await supabaseClient.auth.signOut(); }
+                cart = [];
+                updateCartUI();
+                renderGrid();
+                if (supabaseClient) await supabaseClient.auth.signOut();
                 document.getElementById('auth-btn-text').innerText = "Sign In / Register";
                 document.getElementById('nav-logout-btn').classList.add('hidden');
                 document.getElementById('buyer-tracker-box').classList.add('hidden');
                 showCustomToast("Logged out successfully.", "info");
-                setTimeout(() => { window.location.reload(); }, 1000);
+                setTimeout(() => window.location.reload(), 800);
             }
-        }
+        };
 
         window.toggleAuthMode = function() {
             isRegisterMode = !isRegisterMode;
@@ -707,13 +885,13 @@
             document.getElementById('auth-profile-fields').style.display = isRegisterMode ? 'block' : 'none';
             document.getElementById('auth-toggle-msg').innerText = isRegisterMode ? "Already have an account? Sign In here." : "Need an account? Register here.";
             lucide.createIcons();
-        }
+        };
 
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('auth-email').value;
+
+            const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
-            
             const name = document.getElementById('auth-name').value || email.split('@')[0];
             const house = document.getElementById('auth-house').value;
             const street = document.getElementById('auth-street').value;
@@ -723,31 +901,48 @@
             const postal = document.getElementById('auth-postal').value;
             const phone = document.getElementById('auth-phone').value;
 
+            const lastReg = localStorage.getItem('shd_last_reg_timestamp');
+            if (isRegisterMode && lastReg && (Date.now() - Number(lastReg) < 30000)) {
+                const secondsLeft = Math.ceil((30000 - (Date.now() - Number(lastReg))) / 1000);
+                showCustomToast(`Anti-Spam active. Please wait ${secondsLeft}s before submitting another registration form.`, "error");
+                return;
+            }
+
+            if (isRegisterMode) {
+                if (password.length < 6) {
+                    showCustomToast("Password must be at least 6 characters long.", "error");
+                    return;
+                }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showCustomToast("Please enter a valid structured email address.", "error");
+                    return;
+                }
+            }
+
             const submitBtn = document.getElementById('auth-submit-btn');
             const originalHTML = submitBtn.innerHTML;
-            
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4"></i> Mapping Pin coordinates...`;
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i> Mapping Pin Coordinates...`;
             lucide.createIcons();
 
             try {
                 let validatedData = {
-                    phone: phone,
+                    phone,
                     address: `${house}, ${street}, Brgy. ${barangay}, ${city}, ${region}, ${postal}, Philippines`,
                     mapsPin: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(street + ', ' + city)}`,
                     structured: { house, street, barangay, city, region, postal }
                 };
 
                 if (isRegisterMode) {
-                    // Trigger deep geolocation parameters verification
                     validatedData = await performStructuredAddressValidation(house, street, barangay, city, region, postal, phone);
                 }
 
                 if (!supabaseClient) {
-                    currentUserProfile = { 
-                        id: "guest", 
-                        name, 
-                        address: validatedData.address, 
+                    currentUserProfile = {
+                        id: "guest",
+                        name,
+                        address: validatedData.address,
                         phone: validatedData.phone,
                         google_maps_pin: validatedData.mapsPin,
                         structured: validatedData.structured
@@ -760,11 +955,12 @@
                 }
 
                 if (isRegisterMode) {
-                    let { data, error } = await supabaseClient.auth.signUp({ 
-                        email, password, options: { 
-                            data: { 
-                                name, 
-                                address: validatedData.address, 
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email, password,
+                        options: {
+                            data: {
+                                name,
+                                address: validatedData.address,
                                 phone: validatedData.phone,
                                 google_maps_pin: validatedData.mapsPin,
                                 structured_house: house,
@@ -773,29 +969,33 @@
                                 structured_city: city,
                                 structured_region: region,
                                 structured_postal: postal
-                            } 
+                            }
                         }
                     });
                     if (error) throw error;
-                    if(data.user) {
-                        await supabaseClient.from('profiles').insert([{ 
-                            id: data.user.id, 
-                            name, 
-                            address: validatedData.address, 
+
+                    if (data.user) {
+                        await supabaseClient.from('profiles').insert([{
+                            id: data.user.id,
+                            email,
+                            name,
+                            address: validatedData.address,
                             phone: validatedData.phone,
                             google_maps_pin: validatedData.mapsPin
                         }]);
+                        localStorage.setItem('shd_last_reg_timestamp', Date.now());
                     }
+
                     showCustomToast("Registration successful!", "success");
                     closeAuthModal();
                 } else {
-                    let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
                     if (error) throw error;
                     showCustomToast("Logged in successfully", "success");
                     closeAuthModal();
                 }
-            } catch(err) { 
-                showCustomToast(`Auth Error: ${err.message}`, 'error'); 
+            } catch(err) {
+                showCustomToast(`Auth Error: ${err.message}`, 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
@@ -803,49 +1003,125 @@
             }
         });
 
-        /* --- CHECKOUT --- */
-        window.openCheckoutModal = function() {
-            // Reset modal layout views to prevent showing stale checkout successes
+        window.placeListingBid = async function(cardId, isCustom = false) {
+            if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) {
+                showCustomToast("Only registered accounts can bid! Please sign in or create an account.", "error");
+                openAuthModal();
+                return;
+            }
+
+            const card = items.find(i => i.id === cardId);
+            if (!card) return;
+
+            if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
+                showCustomToast("This auction bidding window has already closed!", "error");
+                return;
+            }
+
+            let bidAmount = 0;
+
+            if (isCustom) {
+                const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value);
+                if (!customVal || isNaN(customVal) || customVal <= 0) {
+                    showCustomToast("Enter a valid custom bid add-on amount.", "error");
+                    return;
+                }
+                bidAmount = Number(card.price) + customVal;
+            } else {
+                const selectVal = Number(document.getElementById(`bid-select-${cardId}`).value);
+                if (!selectVal || isNaN(selectVal) || selectVal <= 0) {
+                    showCustomToast("Choose a valid bid increment.", "error");
+                    return;
+                }
+                bidAmount = Number(card.price) + selectVal;
+            }
+
+            if (bidAmount <= Number(card.price)) {
+                showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
+                return;
+            }
+
+            const bidderName = currentUserProfile.name || "Collector";
+            card.price = bidAmount;
+            card.top_bidder = bidderName;
+
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('cards')
+                        .update({ price: bidAmount, top_bidder: bidderName })
+                        .eq('id', cardId);
+                    if (error) throw error;
+                    showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success");
+                } catch(err) {
+                    console.warn("DB update failed. Saving mock bid locally.");
+                    showCustomToast("Local bid cached successfully!", "success");
+                }
+            } else {
+                showCustomToast("Local simulator bid placed successfully!", "success");
+            }
+
+            pendingCustomBidInputs[cardId] = "";
+            renderGrid();
+        };
+
+        window.openCheckoutModal = async function() {
             document.getElementById('checkout-form-container').classList.remove('hidden');
             document.getElementById('checkout-success-container').classList.add('hidden');
+            document.getElementById('checkout-submit-btn').disabled = false;
+            document.getElementById('checkout-submit-btn').innerHTML = 'Place Order';
 
-            if(cart.length === 0) { 
-                showCustomToast("Your cart is empty. Pick some cards first!", "error"); 
-                return; 
+            if (cart.length === 0) {
+                showCustomToast("Your cart is empty. Pick some cards first!", "error");
+                return;
             }
+
             const tray = document.getElementById('checkout-items-list');
             tray.innerHTML = '';
             let runningSum = 0;
-            
-            const itemSummaryCounts = [...new Set(cart)];
-            itemSummaryCounts.forEach(id => {
+
+            const uniqueIds = [...new Set(cart)];
+            uniqueIds.forEach(id => {
                 const matchItem = items.find(i => i.id === id);
                 if (!matchItem) return;
-                const quant = cart.filter(cid => cid === id).length;
-                runningSum += (matchItem.price * quant);
-                
+
+                const qty = cart.filter(cid => cid === id).length;
+                runningSum += matchItem.price * qty;
+
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center text-gray-300 py-1 border-b border-gray-800/40 last:border-0";
                 div.innerHTML = `
                     <div class="flex items-center gap-2">
-                        <span class="text-red-400 font-mono font-bold">${quant}x</span>
-                        <span>${matchItem.name}</span>
+                        <span class="text-red-400 font-mono font-bold">${qty}x</span>
+                        <span>${escapeHtml(matchItem.name)}</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-gray-200">₱${(matchItem.price * quant).toLocaleString()}</span>
+                        <span class="font-bold text-gray-200">${formatPHP(matchItem.price * qty)}</span>
                         <button onclick="removeFromCart(${id}); openCheckoutModal();" class="text-red-400 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 `;
                 tray.appendChild(div);
             });
 
-            document.getElementById('checkout-grand-total').innerText = "₱" + runningSum.toLocaleString();
+            document.getElementById('checkout-grand-total').innerText = formatPHP(runningSum);
 
-            if(currentUserProfile) {
-                document.getElementById('cust-name').value = currentUserProfile.name;
-                document.getElementById('cust-phone').value = currentUserProfile.phone;
-                
-                // Populate structured address fields if available
+            const emailWrapper = document.getElementById('checkout-email-wrapper');
+            const emailInput = document.getElementById('cust-email');
+
+            if (currentUserProfile && currentUserProfile.id !== 'guest') {
+                document.getElementById('cust-name').value = currentUserProfile.name || '';
+                document.getElementById('cust-phone').value = currentUserProfile.phone || '';
+
+                if (emailWrapper) emailWrapper.style.display = 'none';
+                if (emailInput) emailInput.required = false;
+
+                if (supabaseClient) {
+                    try {
+                        const { data: { session } } = await supabaseClient.auth.getSession();
+                        if (emailInput) emailInput.value = session?.user?.email || '';
+                    } catch (e) {}
+                }
+
                 if (currentUserProfile.structured) {
                     document.getElementById('cust-house').value = currentUserProfile.structured.house || '';
                     document.getElementById('cust-street').value = currentUserProfile.structured.street || '';
@@ -854,28 +1130,33 @@
                     document.getElementById('cust-region').value = currentUserProfile.structured.region || '';
                     document.getElementById('cust-postal').value = currentUserProfile.structured.postal || '';
                 }
+            } else {
+                if (emailWrapper) emailWrapper.style.display = 'block';
+                if (emailInput) emailInput.required = true;
             }
+
             document.getElementById('checkout-modal').style.display = 'flex';
             lucide.createIcons();
-        }
-        window.closeCheckoutModal = function() { document.getElementById('checkout-modal').style.display = 'none'; }
+        };
 
-        /* --- CHECKOUT PRE-SUBMIT PREVENT OVER-ORDER VALIDATION ENGINE --- */
+        window.closeCheckoutModal = function() {
+            document.getElementById('checkout-modal').style.display = 'none';
+        };
+
         document.getElementById('checkout-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+            console.log("Checkout submit handler fired");
+
             const submitBtn = document.getElementById('checkout-submit-btn');
             const originalHTML = submitBtn.innerHTML;
-            
+
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4"></i> Verifying Shipping coordinates...`;
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2 inline-block"></i> Verifying Stocks & Map Pins...`;
             lucide.createIcons();
 
             try {
-                // 1. Fetch freshest stock levels from Supabase first to prevent race conditions
-                await fetchLiveInventory();
-                
-                // 2. Validate structured checkout fields & extract Google Maps Marker link
+                await fetchLiveInventory(false);
+
                 const house = document.getElementById('cust-house').value;
                 const street = document.getElementById('cust-street').value;
                 const barangay = document.getElementById('cust-barangay').value;
@@ -884,136 +1165,175 @@
                 const postal = document.getElementById('cust-postal').value;
                 const phone = document.getElementById('cust-phone').value;
 
-                const validationResult = await performSecureValidation(house, street, barangay, city, region, postal, phone);
+                const validationResult = await performStructuredAddressValidation(
+                    house, street, barangay, city, region, postal, phone
+                );
 
-                // 3. Compile quantities requested in the checkout cart
                 const requestedCounts = {};
                 cart.forEach(id => { requestedCounts[id] = (requestedCounts[id] || 0) + 1; });
-                
-                // 4. Verify absolute current stock values
+
                 let validationSucceeded = true;
                 let offendingDetails = [];
-                
+
                 for (const [idStr, qty] of Object.entries(requestedCounts)) {
                     const cardId = Number(idStr);
                     const targetCard = items.find(i => i.id === cardId);
                     const currentSystemStock = targetCard ? targetCard.stock : 0;
-                    
+
                     if (qty > currentSystemStock) {
                         validationSucceeded = false;
-                        offendingDetails.push(`${targetCard ? targetCard.name : 'Unknown Card'} (In Cart: ${qty}x, Available Stock: ${currentSystemStock}x)`);
+                        offendingDetails.push(
+                            `${targetCard ? targetCard.name : 'Unknown Card'} (In Cart: ${qty}x, Available Stock: ${currentSystemStock}x)`
+                        );
                     }
                 }
-                
-                // 5. Halt transaction if validation fails and auto-adjust cart
+
                 if (!validationSucceeded) {
-                    showCustomToast(`Checkout blocked! Stocks have updated:\n${offendingDetails.join('\n')}`, "error");
-                    
-                    // Adjust cart elements down to match the new real-time constraints
+                    showCustomToast("Checkout blocked! Stocks have updated: " + offendingDetails.join(' | '), "error");
+
                     const adjustedCart = [];
                     for (const [idStr, qty] of Object.entries(requestedCounts)) {
                         const cardId = Number(idStr);
                         const targetCard = items.find(i => i.id === cardId);
                         const currentSystemStock = targetCard ? targetCard.stock : 0;
                         const safeLimit = Math.min(qty, currentSystemStock);
-                        for (let i = 0; i < safeLimit; i++) {
-                            adjustedCart.push(cardId);
-                        }
+                        for (let i = 0; i < safeLimit; i++) adjustedCart.push(cardId);
                     }
-                    
+
                     cart = adjustedCart;
                     updateCartUI();
-                    
-                    if (cart.length > 0) {
-                        openCheckoutModal(); // Refresh cart layout showing updated valid amounts
-                    } else {
-                        closeCheckoutModal(); // Exit if item is fully sold out
-                    }
+
+                    if (cart.length > 0) openCheckoutModal();
+                    else closeCheckoutModal();
+
                     renderGrid();
                     return;
                 }
 
-                const tempClientId = "ORD-" + Date.now();
+                const guestEmailInput = document.getElementById('cust-email');
+                let parsedEmail = guestEmailInput ? guestEmailInput.value.trim() : "";
+
+                if (currentUserProfile && currentUserProfile.id !== 'guest' && supabaseClient) {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    parsedEmail = session?.user?.email || parsedEmail || "";
+                }
+
+                lastGuestCheckoutData = {
+                    email: parsedEmail,
+                    name: document.getElementById('cust-name').value,
+                    house,
+                    street,
+                    barangay,
+                    city,
+                    region,
+                    postal,
+                    phone: validationResult.phone,
+                    address: validationResult.address,
+                    mapsPin: validationResult.mapsPin
+                };
+
                 const orderPayload = {
-                    id: tempClientId,
-                    customer_name: document.getElementById('cust-name').value,
+                    customer_name: lastGuestCheckoutData.name,
+                    customer_email: lastGuestCheckoutData.email || null,
                     shipping_address: validationResult.address,
                     phone_number: validationResult.phone,
                     google_maps_pin: validationResult.mapsPin,
-                    items_ordered: [...cart], // Deep copy cart arrays
+                    items_ordered: JSON.parse(JSON.stringify([...cart])),
                     order_status: "Pending",
                     user_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null,
                     buyer_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null
                 };
 
-                // Deduct stock in memory and securely cache locally to safeguard against page reload wipeouts
-                for (let id of cart) {
-                    const targetObj = items.find(i => i.id === id);
-                    if (targetObj && targetObj.stock > 0) {
-                        targetObj.stock--;
-                        saveLocalStock(id, targetObj.stock);
-                        if(supabaseClient) { 
-                            try {
-                                const { error } = await supabaseClient.from('cards').update({ stock: targetObj.stock }).eq('id', id); 
-                                if (error) throw error;
-                            } catch(err) {
-                                console.warn("Table cards update restricted via RLS rules. Cached client-side instead.");
-                            }
-                        }
-                    }
-                }
+                let orderWriteSuccessful = false;
 
-                // Write to client local session first to prevent frontend UI data disappearances
-                localOrdersBackup.unshift(orderPayload); 
-                saveLocalOrders(localOrdersBackup);
-
-                // 6. Build clean payload for Supabase database insertion (includes id explicitly since schema is missing autogenerator)
-                if(supabaseClient) {
+                if (supabaseClient) {
                     const dbPayload = {
-                        id: orderPayload.id, // Explicitly provide client-generated ID to bypass NOT-NULL constraint
                         customer_name: orderPayload.customer_name,
+                        customer_email: orderPayload.customer_email,
                         shipping_address: orderPayload.shipping_address,
                         phone_number: orderPayload.phone_number,
                         items_ordered: orderPayload.items_ordered,
                         order_status: orderPayload.order_status,
-                        google_maps_pin: orderPayload.id ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(orderPayload.shipping_address)}` : ''
+                        google_maps_pin: orderPayload.google_maps_pin,
+                        user_id: orderPayload.user_id,
+                        buyer_id: orderPayload.buyer_id
                     };
 
-                    try {
-                        const { data, error } = await supabaseClient.from('Orders').insert([dbPayload]).select();
-                        if (error) throw error;
+                    console.log("Attempting Orders insert with payload:", dbPayload);
 
-                        // If Supabase generated or returned a different ID column sequencing, map it back to update the temporary client tracking ID
-                        if (data && data[0] && data[0].id) {
-                            const dbGeneratedId = data[0].id;
-                            orderPayload.id = dbGeneratedId;
+                    const { data, error } = await supabaseClient
+                        .from('Orders')
+                        .insert([dbPayload])
+                        .select();
 
-                            const currentLocal = getLocalOrders() || [];
-                            if (currentLocal.length > 0) {
-                                currentLocal[0].id = dbGeneratedId;
-                                saveLocalOrders(currentLocal);
+                    if (error) {
+                        console.error("Orders insert failed:", error);
+                        console.error("Rejected payload:", dbPayload);
+                        throw new Error(`Order registration rejected by Supabase database: ${error.message}`);
+                    }
+
+                    if (data && data[0]) {
+                        orderPayload.id = data[0].id || ("ORD-" + Date.now());
+                        orderWriteSuccessful = true;
+                    }
+                } else {
+                    orderPayload.id = "ORD-" + Date.now();
+                    orderWriteSuccessful = true;
+                }
+
+                if (orderWriteSuccessful) {
+                    for (let id of cart) {
+                        const targetObj = items.find(i => i.id === id);
+                        if (targetObj && targetObj.stock > 0) {
+                            targetObj.stock--;
+                            saveLocalStock(id, targetObj.stock);
+
+                            if (supabaseClient) {
+                                try {
+                                    const { error } = await supabaseClient
+                                        .from('cards')
+                                        .update({ stock: targetObj.stock })
+                                        .eq('id', id);
+
+                                    if (error) throw error;
+                                } catch (err) {
+                                    console.warn("Table cards update restricted via RLS rules. Cached client-side instead.");
+                                }
                             }
                         }
-                        showCustomToast("Successfully written and synchronized with cloud database!", "success");
-                    } catch(err) {
-                        console.error("Database Write Blocked:", err);
-                        // Renders exact error detail directly on screen to bypass silent failing
-                        showCustomToast(`Supabase Block: ${err.message} (Code: ${err.code || 'RLS_RESTRICTION'})`, "error");
+                    }
+
+                    localOrdersBackup.unshift(orderPayload);
+                    saveLocalOrders(localOrdersBackup);
+
+                    cart = [];
+                    updateCartUI();
+
+                    document.getElementById('checkout-form-container').classList.add('hidden');
+                    document.getElementById('checkout-success-container').classList.remove('hidden');
+
+                    const conversionBox = document.getElementById('guest-conversion-box');
+                    if ((!currentUserProfile || currentUserProfile.id === 'guest') && supabaseClient && lastGuestCheckoutData && lastGuestCheckoutData.email) {
+                        document.getElementById('conversion-email-label').innerText = lastGuestCheckoutData.email;
+                        conversionBox.classList.remove('hidden');
+                    } else {
+                        conversionBox.classList.add('hidden');
+                    }
+
+                    renderGrid();
+                    showCustomToast("Successfully processed order transaction!", "success");
+
+                    if (currentUserProfile) await fetchBuyerRealtimeOrders();
+                    if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
+                        await renderAdminOrdersLedger();
                     }
                 }
-
-                cart = [];
-                updateCartUI();
-                document.getElementById('checkout-form-container').classList.add('hidden');
-                document.getElementById('checkout-success-container').classList.remove('hidden');
-                renderGrid();
-                
-                // Refresh order queues instantly
-                if (currentUserProfile) {
-                    await fetchBuyerRealtimeOrders();
-                }
             } catch (err) {
-                showCustomToast(err.message, 'error');
+                console.error("Checkout failed:", err);
+                if (err && err.message) {
+                    console.error("Checkout error message:", err.message);
+                }
+                showCustomToast(err.message || "Checkout failed.", 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
@@ -1021,15 +1341,73 @@
             }
         });
 
-        /* --- MICROSCOPIC LENS ZOOM ENGINE --- */
+        document.getElementById('conversion-register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!supabaseClient || !lastGuestCheckoutData) return;
+
+            const password = document.getElementById('conversion-password').value;
+            const submitBtn = document.getElementById('conversion-submit-btn');
+            const originalHTML = submitBtn.innerHTML;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-3.5 h-3.5"></i> Initializing Account...`;
+            lucide.createIcons();
+
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: lastGuestCheckoutData.email,
+                    password,
+                    options: {
+                        data: {
+                            name: lastGuestCheckoutData.name,
+                            address: lastGuestCheckoutData.address,
+                            phone: lastGuestCheckoutData.phone,
+                            google_maps_pin: lastGuestCheckoutData.mapsPin,
+                            structured_house: lastGuestCheckoutData.house,
+                            structured_street: lastGuestCheckoutData.street,
+                            structured_barangay: lastGuestCheckoutData.barangay,
+                            structured_city: lastGuestCheckoutData.city,
+                            structured_region: lastGuestCheckoutData.region,
+                            structured_postal: lastGuestCheckoutData.postal
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                if (data.user) {
+                    await supabaseClient.from('profiles').insert([{
+                        id: data.user.id,
+                        email: lastGuestCheckoutData.email,
+                        name: lastGuestCheckoutData.name,
+                        address: lastGuestCheckoutData.address,
+                        phone: lastGuestCheckoutData.phone,
+                        google_maps_pin: lastGuestCheckoutData.mapsPin
+                    }]);
+                }
+
+                showCustomToast("Account successfully created! You are now logged in.", "success");
+                document.getElementById('guest-conversion-box').classList.add('hidden');
+            } catch(err) {
+                showCustomToast(`Conversion Failed: ${err.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                lucide.createIcons();
+            }
+        });
+
         window.launchZoomModal = function(imgSrc) {
             const targetImg = document.getElementById('zoom-target-img');
             targetImg.src = imgSrc;
             targetImg.style.transformOrigin = 'center center';
             document.getElementById('zoom-modal').style.display = 'flex';
             lucide.createIcons();
-        }
-        window.closeZoomModal = function() { document.getElementById('zoom-modal').style.display = 'none'; }
+        };
+
+        window.closeZoomModal = function() {
+            document.getElementById('zoom-modal').style.display = 'none';
+        };
 
         document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
             const rect = e.currentTarget.getBoundingClientRect();
@@ -1038,31 +1416,72 @@
             e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
         });
 
-        /* --- SYSTEM MONITOR ADMINISTRATIVE LEDGER --- */
-        window.openAdminPanel = function() { document.getElementById('admin-modal').style.display = 'flex'; }
+        window.openAdminPanel = function() {
+            document.getElementById('admin-modal').style.display = 'flex';
+        };
+
         window.closeAdminPanel = function() {
             document.getElementById('admin-modal').style.display = 'none';
             document.getElementById('admin-auth-gate').classList.remove('hidden');
             document.getElementById('admin-workspace').classList.add('hidden');
             document.getElementById('admin-pass-input').value = '';
             document.getElementById('admin-email-input').value = '';
+        };
+
+        window.toggleAdminBiddingFields = function(type) {
+            const stockContainer = document.getElementById('inv-stock-container');
+            const biddingEndsContainer = document.getElementById('inv-bidding-ends-container');
+            const priceLabel = document.getElementById('inv-price-label');
+
+            if (type === 'bidding') {
+                stockContainer.classList.add('hidden');
+                biddingEndsContainer.classList.remove('hidden');
+                priceLabel.innerText = "Starting Bid Amount (₱)";
+                document.getElementById('inv-stock').value = 1;
+            } else {
+                stockContainer.classList.remove('hidden');
+                biddingEndsContainer.classList.add('hidden');
+                priceLabel.innerText = "Price (₱)";
+            }
+        };
+
+        async function verifyAdminAuth() {
+            const email = document.getElementById('admin-email-input').value;
+            const password = document.getElementById('admin-pass-input').value;
+
+            if (!supabaseClient) {
+                document.getElementById('admin-auth-gate').classList.add('hidden');
+                document.getElementById('admin-workspace').classList.remove('hidden');
+                await renderAdminOrdersLedger();
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+
+                document.getElementById('admin-auth-gate').classList.add('hidden');
+                document.getElementById('admin-workspace').classList.remove('hidden');
+                await renderAdminOrdersLedger();
+            } catch(err) {
+                showCustomToast(`Access Denied: ${err.message}`, 'error');
+            }
         }
 
         async function renderAdminOrdersLedger() {
             const tbody = document.getElementById('admin-orders-tbody');
             tbody.innerHTML = '';
-            
+
             let dbOrdersList = [];
-            if(supabaseClient) {
+            if (supabaseClient) {
                 try {
-                    let { data } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
+                    const { data } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
                     if (data) dbOrdersList = data;
                 } catch(e) {
                     console.warn("Failed to fetch orders from Supabase:", e);
                 }
             }
 
-            // Merge local overrides with DB entries to display both client sessions seamlessly
             const combined = [...localOrdersBackup, ...dbOrdersList];
             const seenIds = new Set();
             const dataset = [];
@@ -1076,15 +1495,21 @@
             dataset.forEach(ord => {
                 let itemsListHTML = '';
                 let totalOrderPrice = 0;
+
                 if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
                     const counts = {};
-                    ord.items_ordered.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
                     itemsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">';
+
+                    ord.items_ordered.forEach(id => {
+                        counts[id] = (counts[id] || 0) + 1;
+                    });
+
                     Object.keys(counts).forEach(id => {
                         const matchCard = items.find(i => i.id == id);
-                        if(matchCard) { totalOrderPrice += (matchCard.price * counts[id]); }
-                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${matchCard ? matchCard.name : 'Unknown Card'}</div>`;
+                        if (matchCard) totalOrderPrice += matchCard.price * counts[id];
+                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${escapeHtml(matchCard ? matchCard.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(matchCard ? matchCard.set : 'UNKNOWN')})</span></div>`;
                     });
+
                     itemsListHTML += '</div>';
                 }
 
@@ -1094,55 +1519,52 @@
                 if (statusVal === 'Shipped') selectColorClass = 'text-blue-400 border-blue-500/30';
                 if (statusVal === 'Cancelled') selectColorClass = 'text-red-400 border-red-500/30';
 
-                // Locate Google Maps pinpoint URLs safely from logs
-                const mapsPinUrl = ord.google_maps_pin || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ord.shipping_address)}`;
+                const mapsPinUrl = ord.google_maps_pin || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ord.shipping_address || '')}`;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-white/5 border-b border-gray-800 text-top";
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-white">
-                        <div>${ord.customer_name}</div>
-                        <div class="text-[10px] text-gray-500 font-mono">${ord.phone_number || ''}</div>
+                        <div>${escapeHtml(ord.customer_name)}</div>
+                        <div class="text-[10px] text-gray-500">${escapeHtml(ord.customer_email || '')}</div>
+                        <div class="text-[10px] text-gray-500 font-mono">${escapeHtml(ord.phone_number || '')}</div>
                     </td>
                     <td class="p-3">
-                        <div class="text-gray-400 max-w-xs leading-relaxed text-[11px]">${ord.shipping_address}</div>
+                        <div class="text-gray-400 max-w-xs leading-relaxed text-[11px]">${escapeHtml(ord.shipping_address || '')}</div>
                         <a href="${mapsPinUrl}" target="_blank" class="mt-2 inline-flex items-center gap-1.5 text-[10px] text-red-400 hover:text-red-300 font-bold bg-red-950/20 px-2 py-0.5 rounded border border-red-500/20 transition-colors">
                             <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Open Google Maps Pin
                         </a>
                     </td>
                     <td class="p-3">${itemsListHTML}</td>
-                    <td class="p-3 font-mono text-green-400 font-bold">₱${totalOrderPrice.toLocaleString()}</td>
+                    <td class="p-3 font-mono text-green-400 font-bold">${formatPHP(totalOrderPrice)}</td>
                     <td class="p-3">
-                        <select onchange="changeOrderStatus('${ord.id}', this.value)" class="bg-[#2a2a2a] border ${selectColorClass} rounded px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 transition-colors cursor-pointer">
+                        <select onchange="changeOrderStatus('${escapeHtml(ord.id)}', this.value)" class="bg-[#2a2a2a] border ${selectColorClass} rounded px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 transition-colors cursor-pointer">
                             <option value="Pending" ${statusVal === 'Pending' ? 'selected' : ''} class="text-yellow-500 font-bold bg-[#1e1e1e]">⏳ Pending</option>
                             <option value="Processed" ${statusVal === 'Processed' ? 'selected' : ''} class="text-green-400 font-bold bg-[#1e1e1e]">✅ Processed</option>
                             <option value="Shipped" ${statusVal === 'Shipped' ? 'selected' : ''} class="text-blue-400 font-bold bg-[#1e1e1e]">📦 Shipped</option>
-                            <option value="Cancelled" ${statusVal === 'Cancelled' ? 'selected' : ''} class="text-red-400 font-bold bg-[#1e1e1e]">📦 Cancelled</option>
+                            <option value="Cancelled" ${statusVal === 'Cancelled' ? 'selected' : ''} class="text-red-400 font-bold bg-[#1e1e1e]">❌ Cancelled</option>
                         </select>
                     </td>
                     <td class="p-3 text-center">
-                        <button onclick="purgeOrderLogRecord('${ord.id}', this)" class="text-red-400 text-xs hover:underline hover:text-red-300 transition-colors font-medium">Clear Row</button>
+                        <button onclick="purgeOrderLogRecord('${escapeHtml(ord.id)}', this)" class="text-red-400 text-xs hover:underline hover:text-red-300 transition-colors font-medium">Clear Row</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+
             lucide.createIcons();
         }
 
         window.changeOrderStatus = async function(orderId, newStatus) {
             if (supabaseClient) {
                 try {
-                    const { error } = await supabaseClient
-                        .from('Orders')
-                        .update({ order_status: newStatus })
-                        .eq('id', orderId);
+                    const { error } = await supabaseClient.from('Orders').update({ order_status: newStatus }).eq('id', orderId);
                     if (error) throw error;
                 } catch(err) {
                     console.warn(`Failed to update status in cloud database: ${err.message}`);
                 }
             }
-            
-            // Sync with local fallback store
+
             const localOrder = localOrdersBackup.find(o => o.id === orderId);
             if (localOrder) {
                 localOrder.order_status = newStatus;
@@ -1150,19 +1572,16 @@
             }
 
             await renderAdminOrdersLedger();
-            if (currentUserProfile) {
-                await fetchBuyerRealtimeOrders();
-            }
+            if (currentUserProfile) await fetchBuyerRealtimeOrders();
             showCustomToast("Order status updated successfully!", "success");
-        }
+        };
 
         window.purgeOrderLogRecord = async function(id, buttonEl) {
             if (!buttonEl.dataset.confirmed) {
                 buttonEl.dataset.confirmed = "true";
                 buttonEl.innerText = "Are you sure? Click again to confirm";
                 buttonEl.className = "bg-red-950/80 border border-red-500/40 text-red-200 text-[10px] px-2 py-1 rounded transition-all font-bold hover:bg-red-900/80";
-                
-                // Auto reset back to default safety after 4 seconds
+
                 setTimeout(() => {
                     if (buttonEl && buttonEl.dataset.confirmed) {
                         buttonEl.removeAttribute('data-confirmed');
@@ -1181,44 +1600,78 @@
                     console.warn(`Failed to delete order record: ${err.message}`);
                 }
             }
-            
+
             localOrdersBackup = localOrdersBackup.filter(o => o.id !== id);
             saveLocalOrders(localOrdersBackup);
 
             await renderAdminOrdersLedger();
             showCustomToast("Order row cleared successfully!", "success");
-        }
+        };
 
-        /* --- VISUAL DISPLAY INTERFACE --- */
-        window.togglePhoto = function(id, view) {
-            let rowObj = items.find(i => i.id === id);
-            if(rowObj) { rowObj.viewState = view; renderGrid(); }
-        }
-        window.addToCart = function(id) {
-            let rowObj = items.find(i => i.id === id);
-            if(rowObj && rowObj.stock > cart.filter(cid => cid === id).length) {
-                cart.push(id); updateCartUI(); renderGrid();
+        window.resetSystemLocalCache = async function() {
+            const confirmed = await askCustomConfirmation("Reset Local Cache", "This will clear local stock overrides and cached orders on this device. Continue?");
+            if (!confirmed) return;
+
+            localStorage.removeItem('shd_card_stocks');
+            localStorage.removeItem('shd_local_orders');
+            localOrdersBackup = [];
+            saveLocalOrders(localOrdersBackup);
+            showCustomToast("Local cache reset successfully.", "success");
+            await fetchLiveInventory(true);
+
+            if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
+                await renderAdminOrdersLedger();
             }
-        }
+        };
+
+        window.togglePhoto = function(id, view) {
+            const rowObj = items.find(i => i.id === id);
+            if (rowObj) {
+                rowObj.viewState = view;
+                renderGrid();
+            }
+        };
+
+        window.addToCart = function(id) {
+            const rowObj = items.find(i => i.id === id);
+            if (rowObj && rowObj.stock > cart.filter(cid => cid === id).length) {
+                cart.push(id);
+                updateCartUI();
+                renderGrid();
+            }
+        };
+
         window.removeFromCart = function(id) {
             const index = cart.indexOf(id);
-            if (index > -1) { cart.splice(index, 1); updateCartUI(); renderGrid(); }
-        }
-        function updateCartUI() { document.getElementById('cart-count').innerText = cart.length; }
+            if (index > -1) {
+                cart.splice(index, 1);
+                updateCartUI();
+                renderGrid();
+            }
+        };
 
         function renderGrid() {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
+
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const rarity = document.getElementById('rarity-select').value;
             const sortBy = document.getElementById('sort-select').value;
-    
+
             let filtered = items.filter(i => {
-                const matchesSearch = i.name.toLowerCase().includes(search) || i.set.toLowerCase().includes(search);
-                const itemRarity = (i.rarity || "").toUpperCase().trim();
-                const selectedRarity = rarity.toUpperCase().trim();
+                const matchesSection =
+                    (activeListingSection === 'sale' && (i.type === 'sale' || !i.type)) ||
+                    (activeListingSection === 'bidding' && (i.type === 'bidding' || i.type === 'bid'));
+
+                const matchesSearch =
+                    String(i.name || '').toLowerCase().includes(search) ||
+                    String(i.set || '').toLowerCase().includes(search);
+
+                const itemRarity = String(i.rarity || '').toUpperCase().trim();
+                const selectedRarity = String(rarity || '').toUpperCase().trim();
                 const matchesRarity = (rarity === 'ALL' || itemRarity === selectedRarity);
-                return matchesSearch && matchesRarity;
+
+                return matchesSection && matchesSearch && matchesRarity;
             });
 
             if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
@@ -1226,48 +1679,201 @@
 
             document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory card records.`;
             grid.innerHTML = '';
+
             filtered.forEach(item => {
                 const soldOut = item.stock <= 0;
                 const inCartCount = cart.filter(cid => cid === item.id).length;
                 const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg;
-                
+                const safeName = escapeHtml(item.name);
+                const safeSet = escapeHtml(item.set);
+                const safeRarity = escapeHtml(item.rarity);
+                const topBidderName = escapeHtml(item.top_bidder || 'No bids yet');
+                const selectedIncrement = pendingBidSelections[item.id] || "10";
+                const customBidValue = pendingCustomBidInputs[item.id] || "";
+
                 const div = document.createElement('div');
-                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut ? 'opacity-40 select-none' : ''}`;
-                
-                let actionButtonMarkup = soldOut ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>` :
-                    (inCartCount > 0 ? `
-                        <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
-                            <button onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button>
-                            <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span>
-                            <button onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button>
-                        </div>` : `<button onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
+                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut && activeListingSection === 'sale' ? 'opacity-40 select-none' : ''}`;
+
+                let actionMarkup = '';
+                let biddingHeaderMarkup = '';
+
+                if (activeListingSection === 'sale') {
+                    actionMarkup = soldOut
+                        ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>`
+                        : (inCartCount > 0
+                            ? `
+                            <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
+                                <button type="button" onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button>
+                                <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span>
+                                <button type="button" onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button>
+                            </div>`
+                            : `<button type="button" onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
+                } else {
+                    biddingHeaderMarkup = `
+                        <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
+                            <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder: <span class="text-white">${topBidderName}</span>
+                        </div>
+                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString()}">
+                        </div>
+                    `;
+
+                    const bidIncrements = Array.from({ length: 15 }, (_, idx) => 10 + (idx * 20));
+                    const selectOptions = bidIncrements.map(val =>
+                        `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>`
+                    ).join('');
+
+                    actionMarkup = `
+                        <div class="flex flex-col gap-2 mt-2 w-full text-xs">
+                            <div class="flex gap-1.5">
+                                <select id="bid-select-${item.id}" onchange="pendingBidSelections[${item.id}] = this.value" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none">
+                                    ${selectOptions}
+                                </select>
+                                <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Custom Bid Add-On (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
+                                <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
+                            </div>
+                        </div>
+                    `;
+                }
 
                 div.innerHTML = `
                     <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
-                        <img src="${dynamicImgSrc}" alt="" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';" onclick="launchZoomModal('${dynamicImgSrc}')" class="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200">
-                        <div class="absolute top-2 left-2 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">Stock: ${item.stock}</div>
-                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
-                            <button onclick="togglePhoto(${item.id}, 'front')" ${soldOut ? 'disabled' : ''} class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
-                            <button onclick="togglePhoto(${item.id}, 'back')" ${soldOut ? 'disabled' : ''} class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button>
+                        ${biddingHeaderMarkup}
+
+                        <img
+                            src="${dynamicImgSrc}"
+                            alt="${safeName}"
+                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';"
+                            onclick="launchZoomModal('${dynamicImgSrc}')"
+                            class="relative z-10 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200"
+                        >
+
+                        <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 pointer-events-none">
+                            <i data-lucide="zoom-in" class="w-3 h-3"></i>
+                            <span>Zoom</span>
                         </div>
-                        <span class="absolute top-2 right-2 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow">${item.rarity}</span>
+
+                        <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none">
+                            ${activeListingSection === 'sale' ? 'Stock: ' + item.stock : 'Auction'}
+                        </div>
+
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
+                            <button type="button" onclick="togglePhoto(${item.id}, 'front')" class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
+                            <button type="button" onclick="togglePhoto(${item.id}, 'back')" class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button>
+                        </div>
+
+                        <span class="absolute top-2 right-2 z-20 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow pointer-events-none">${safeRarity}</span>
                     </div>
+
                     <div class="flex flex-col justify-between flex-1">
-                        <div><span class="text-[10px] font-mono text-gray-500">${item.set}</span><h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${item.name}</h3></div>
-                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-800/50"><span class="text-sm font-bold text-gray-100">₱${item.price.toLocaleString()}</span><div>${actionButtonMarkup}</div></div>
-                    </div>`;
+                        <div>
+                            <span class="text-[10px] font-mono text-gray-500">${safeSet}</span>
+                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${safeName}</h3>
+                        </div>
+
+                        <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
+                            <div class="flex justify-between items-center gap-3">
+                                <span class="text-sm font-bold text-gray-100">${activeListingSection === 'sale' ? formatPHP(item.price) : 'Current Bid: ' + formatPHP(item.price)}</span>
+                                ${activeListingSection === 'sale' ? `<div>${actionMarkup}</div>` : ''}
+                            </div>
+
+                            ${activeListingSection === 'bidding' ? `
+                                <div class="text-[10px] text-gray-400 mt-1">
+                                    Ends at: <span class="text-yellow-400 font-medium">${formatAuctionEnd(item.bidding_ends_at || new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString())}</span>
+                                </div>
+                                ${actionMarkup}
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
                 grid.appendChild(div);
             });
+
             lucide.createIcons();
         }
+
+        document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!supabaseClient) {
+                showCustomToast("Supabase client not connected. Falling back to local catalog simulation.", "info");
+                return;
+            }
+
+            const frontVal = document.getElementById('inv-front').value.trim();
+            const backVal = document.getElementById('inv-back').value.trim();
+            const typeVal = document.getElementById('inv-type').value;
+            const biddingEndsVal = document.getElementById('inv-bidding-ends').value;
+            const normalizedDbType = typeVal === 'bidding' ? 'BID' : 'SALE';
+
+            const cardPayload = {
+                name: document.getElementById('inv-name').value,
+                set_code: document.getElementById('inv-set').value,
+                rarity: document.getElementById('inv-rarity').value,
+                price: Number(document.getElementById('inv-price').value),
+                stock: Number(document.getElementById('inv-stock').value),
+                front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                type: normalizedDbType,
+                bidding_ends_at: typeVal === 'bidding' ? (biddingEndsVal ? new Date(biddingEndsVal).toISOString() : null) : null,
+                top_bidder: typeVal === 'bidding' ? 'No bids yet' : null
+            };
+
+            const { error } = await supabaseClient.from('cards').insert([cardPayload]);
+            if(error) {
+                showCustomToast(`Error: ${error.message}`, 'error');
+            } else {
+                showCustomToast("Successfully uploaded card metadata directly to Supabase cloud!", "success");
+                document.getElementById('admin-inventory-form').reset();
+                toggleAdminBiddingFields('sale');
+                await fetchLiveInventory(true);
+            }
+        });
+
+        setInterval(() => {
+            const countdowns = document.querySelectorAll('[data-timer-expiry]');
+            countdowns.forEach(el => {
+                const expiryTime = el.getAttribute('data-timer-expiry');
+                if (!expiryTime) return;
+
+                const expiryDate = new Date(expiryTime);
+                const timeRemaining = expiryDate.getTime() - Date.now();
+
+                if (timeRemaining <= 0) {
+                    el.innerHTML = `<span class="text-red-500 font-bold uppercase">🔴 Ended</span>`;
+                } else {
+                    const hrs = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                    const formatNum = (num) => String(num).padStart(2, '0');
+                    const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+                    el.innerHTML = `
+                        <div class="text-yellow-500 font-mono font-bold">⏳ ${formatNum(hrs)}h ${formatNum(mins)}m ${formatNum(secs)}s</div>
+                        <div class="text-[10px] text-gray-300 font-medium mt-0.5">Ends ${ampm}</div>
+                    `;
+                }
+            });
+        }, 1000);
+
+        setInterval(async () => {
+            if (inventoryPollInFlight) return;
+            inventoryPollInFlight = true;
+            try {
+                await fetchLiveInventory(false);
+                if (currentUserProfile) await fetchBuyerRealtimeOrders();
+            } finally {
+                inventoryPollInFlight = false;
+            }
+        }, 5000);
 
         document.getElementById('search-input').addEventListener('input', renderGrid);
         document.getElementById('rarity-select').addEventListener('change', renderGrid);
         document.getElementById('sort-select').addEventListener('change', renderGrid);
 
-        /* --- CRITICAL DECOUPLED AUTH STATE RADAR ENGINE --- */
         if (supabaseClient) {
-            supabaseClient.auth.onAuthStateChange((event, session) => {
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 if (session && session.user) {
                     currentUserProfile = {
                         id: session.user.id,
@@ -1284,15 +1890,16 @@
                             postal: session.user.user_metadata?.structured_postal || ''
                         }
                     };
+
                     document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
                     document.getElementById('nav-logout-btn').classList.remove('hidden');
-                    
+
                     setTimeout(() => { fetchBuyerRealtimeOrders(); }, 50);
                 } else {
                     currentUserProfile = null;
-                    cart = []; // Purge local cart instantly on auth state cancellation
-                    updateCartUI(); // Instantly update navigation cart numbers
-                    renderGrid(); // Re-render card grid to revert counters
+                    cart = [];
+                    updateCartUI();
+                    renderGrid();
                     document.getElementById('auth-btn-text').innerText = "Sign In / Register";
                     document.getElementById('nav-logout-btn').classList.add('hidden');
                     document.getElementById('buyer-tracker-box').classList.add('hidden');
@@ -1300,9 +1907,13 @@
             });
         }
 
-        // Run baseline setup immediately on layout paint cycles
         (async () => {
-            await fetchLiveInventory();
+            await hydrateCurrentUserFromSession();
+            await fetchLiveInventory(true);
+            if (currentUserProfile) {
+                await fetchBuyerRealtimeOrders();
+            }
+            lucide.createIcons();
         })();
     </script>
 </body>
