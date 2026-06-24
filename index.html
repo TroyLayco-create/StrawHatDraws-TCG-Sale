@@ -3,707 +3,720 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alvin Troy Dela Paz Layco | Executive Portfolio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <title>StrawHatDraws TCG Sales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --bg-dark: #0b0f19;
-            --bg-card: rgba(30, 41, 59, 0.4);
-            --border-glow: rgba(59, 130, 246, 0.2);
-            --accent: #3b82f6;
-            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: rgba(59, 130, 246, 0.15);
-            filter: blur(150px);
-            top: 10%;
-            left: -100px;
-            border-radius: 50%;
-            z-index: -1;
-        }
-
-        header {
-            background: rgba(11, 15, 25, 0.8);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.2rem 2rem;
-        }
-
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .logo span {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        nav a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            margin-left: 2rem;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
-        nav a:hover {
-            color: var(--text-primary);
-            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-        }
-
-        section {
-            padding: 8rem 2rem 4rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .hero {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 85vh;
-            gap: 4rem;
-        }
-
-        .hero-text {
-            flex: 1.2;
-        }
-
-        .tag {
-            display: inline-block;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #60a5fa;
-            padding: 0.4rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .hero-text h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 1.5rem;
-            letter-spacing: -1px;
-        }
-
-        .hero-text p {
-            color: var(--text-secondary);
-            margin-bottom: 2.5rem;
-            font-size: 1.15rem;
-            max-width: 650px;
-        }
-
-        .hero-img-container {
-            flex: 0.8;
-            display: flex;
-            justify-content: center;
-        }
-
-        .hero-img {
-            width: 320px;
-            height: 350px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-glow);
-            border-radius: 24px;
-            padding: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            transform: rotate(-3deg);
-            transition: transform 0.5s ease;
-        }
-
-        .hero-img:hover {
-            transform: rotate(0deg) scale(1.02);
-        }
-
-        .hero-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 16px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--accent-gradient);
-            color: white;
-            padding: 0.9rem 2rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-            box-shadow: none;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: none;
-        }
-
-        .section-header {
-            margin-bottom: 4rem;
-            text-align: center;
-        }
-
-        .section-header h2 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card {
-            background: var(--bg-card);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 2.5rem 2rem;
-            border-radius: 16px;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--border-glow);
-            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.1);
-        }
-
-        .card-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-icon i {
-            font-size: 1.4rem;
-            color: #60a5fa;
-        }
-
-        .card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .card ul {
-            list-style: none;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .card li {
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .card li i {
-            color: var(--accent);
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
-        }
-
-        .timeline-modern {
-            max-width: 900px;
-            margin: 0 auto;
+        /* Precision Zoom Styles */
+        .zoom-container {
             position: relative;
+            overflow: hidden;
+            cursor: zoom-in;
         }
-
-        .timeline-modern::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(180deg, var(--accent) 0%, rgba(255,255,255,0.05) 100%);
+        .zoom-image {
+            transition: transform 0.1s ease-out;
+            transform-origin: center center;
+            will-change: transform, transform-origin;
         }
-
-        .timeline-block {
-            position: relative;
-            padding-left: 60px;
-            margin-bottom: 3.5rem;
+        .zoom-container:hover .zoom-image {
+            transform: scale(2.2);
+            cursor: crosshair;
         }
-
-        .timeline-dot {
-            position: absolute;
-            left: 11px;
-            top: 6px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--bg-dark);
-            border: 4px solid var(--accent);
-            z-index: 2;
-        }
-
-        .timeline-body {
-            background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 2.5rem;
-            border-radius: 16px;
-        }
-
-        .time-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .role-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .comp-name {
-            color: #60a5fa;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .date-badge {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.3rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .timeline-body ul {
-            list-style: none;
-            margin-top: 1rem;
-        }
-
-        .timeline-body li {
-            position: relative;
-            padding-left: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .timeline-body li::before {
-            content: "•";
-            color: var(--accent);
-            position: absolute;
-            left: 0.2rem;
-            font-size: 1.2rem;
-            top: -0.1rem;
-        }
-
-        .tech-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .tech-tag {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 0.25rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .contact-layout {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 3rem;
-        }
-
-        .contact-details {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .contact-box {
-            display: flex;
-            align-items: center;
-            gap: 1.2rem;
-            background: var(--bg-card);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .contact-box i {
-            font-size: 1.5rem;
-            color: var(--accent);
-        }
-
-        footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 3rem 2rem;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            background: #060911;
-        }
-
-        @media (max-width: 968px) {
-            .hero {
-                flex-direction: column-reverse;
-                text-align: center;
-                padding-top: 10rem;
-            }
-            .btn-group {
-                justify-content: center;
-            }
-            .contact-layout {
-                grid-template-columns: 1fr;
-            }
-            .time-meta {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #121212; }
+        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
     </style>
 </head>
-<body>
+<body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
-    <header>
-        <div class="nav-container">
-            <div class="logo">Alvin Troy <span>Layco</span></div>
-            <nav>
-                <a href="#about">About</a>
-                <a href="#expertise">Expertise</a>
-                <a href="#experience">Journey</a>
-                <a href="#contact">Contact</a>
-            </nav>
-        </div>
-    </header>
-
-    <section id="about" class="hero">
-        <div class="hero-text">
-            <span class="tag">Banking Operations & Senior Management Executive</span>
-            <h1>Balancing Complex Data.<br>Leading Elite Teams.</h1>
-            <p>I am a results-driven banking operations leader with over 10 years of robust financial services and BPO industry experience, highlighting 5+ years in strategic senior management roles at JP Morgan Chase & Co. Expertly combining risk architecture, global process automation, and high-impact people leadership.</p>
-            <div class="btn-group">
-                <a href="#contact" class="btn"><i class="fa-solid fa-envelope"></i> Contact Me</a>
-                <a href="#experience" class="btn btn-secondary">Explore Experience</a>
+    <!-- NAVIGATION HEADER -->
+    <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-red-600 p-2 rounded-lg text-white font-black tracking-tighter">SHD</div>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                    StrawHatDraws <span class="text-red-500 font-light text-sm tracking-wider uppercase border border-red-500/30 px-1.5 py-0.5 rounded ml-1">TCG Sales</span>
+                </h1>
             </div>
-        </div>
-        <div class="hero-img-container">
-            <div class="hero-img">
-                <img src="https://6a395e9d67012f040a077ed0.imgix.net/Resume%20pic.jpg" alt="Alvin Troy Dela Paz Layco">
-            </div>
-        </div>
-    </section>
-
-    <section id="expertise">
-        <div class="section-header">
-            <h2>Core Competencies</h2>
-        </div>
-        <div class="grid-4">
-            <div class="card">
-                <div class="card-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                <h3>Banking Operations</h3>
-                <ul>
-                    <li><i class="fa-solid fa-check"></i> In-house & TLM IU Reconciliations</li>
-                    <li><i class="fa-solid fa-check"></i> Fund Accounting & NAV Validation</li>
-                    <li><i class="fa-solid fa-check"></i> High-Volume Control Architecture</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                <h3>Risk & Compliance</h3>
-                <ul>
-                    <li><i class="fa-solid fa-check"></i> Regulatory Compliance (AML, KYC)</li>
-                    <li><i class="fa-solid fa-check"></i> Risk Management & Governance</li>
-                    <li><i class="fa-solid fa-check"></i> Policy Enforcement & Mitigation</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-icon"><i class="fa-solid fa-users"></i></div>
-                <h3>People Leadership</h3>
-                <ul>
-                    <li><i class="fa-solid fa-check"></i> Cross-Geographical Team Management</li>
-                    <li><i class="fa-solid fa-check"></i> Strategic Performance Coaching</li>
-                    <li><i class="fa-solid fa-check"></i> Ownership & Core Values Culture</li>
-                </ul>
-            </div>
-            <div class="card">
-                <div class="card-icon"><i class="fa-solid fa-laptop-code"></i></div>
-                <h3>Strategic Engineering</h3>
-                <ul>
-                    <li><i class="fa-solid fa-check"></i> Process Optimization Automation</li>
-                    <li><i class="fa-solid fa-check"></i> Workload & Capacity Forecasting</li>
-                    <li><i class="fa-solid fa-check"></i> Agile Framework Tracking (JIRA)</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <section id="experience">
-        <div class="section-header">
-            <h2>Professional Journey</h2>
-        </div>
-        <div class="timeline-modern">
-
-            <div class="timeline-block">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="time-meta">
-                        <div>
-                            <span class="role-title">Assistant Vice President, AWM</span> <br>
-                            <span class="comp-name">JP Morgan Chase & Co.</span>
-                        </div>
-                        <span class="date-badge">Apr 2023 - Present</span>
-                    </div>
-                    <ul>
-                        <li>Lead a high-performing operations team supporting reconciliation and risk control functions.</li>
-                        <li>Conduct process reviews to identify improvement opportunities, enhance efficiency, and reduce costs.</li>
-                        <li>Ensure strict compliance with corporate accounting policies and regulatory requirements.</li>
-                        <li>Drive client-centric strategies while managing ultra-high net worth relationships.</li>
-                        <li>Implement controls to mitigate operational risks and promote ownership culture.</li>
-                    </ul>
-                    <div class="tech-tags">
-                        <span class="tech-tag">Reconciliation Control</span>
-                        <span class="tech-tag">Risk Governance</span>
-                        <span class="tech-tag">AWM Client Strategy</span>
-                    </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <div class="relative flex-1 sm:w-64">
+                    <input type="text" id="search-input" placeholder="Search by name or set code..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg pl-9 pr-4 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-red-500 transition-colors">
+                    <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-gray-400"></i>
                 </div>
-            </div>
-
-            <div class="timeline-block">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="time-meta">
-                        <div>
-                            <span class="role-title">Reconciliation Manager</span> <br>
-                            <span class="comp-name">JP Morgan Chase & Co.</span>
-                        </div>
-                        <span class="date-badge">Sep 2019 - Apr 2023</span>
-                    </div>
-                    <ul>
-                        <li>Directed reconciliation operations ensuring accurate and timely reporting.</li>
-                        <li>Identified risks and implemented proactive control measures.</li>
-                        <li>Championed continuous improvement projects to streamline operations.</li>
-                        <li>Managed client servicing for sensitive trust accounts.</li>
-                        <li>Built strong stakeholder relationships and promoted collaboration.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="timeline-block">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="time-meta">
-                        <div>
-                            <span class="role-title">Fund Accounting Supervisor</span> <br>
-                            <span class="comp-name">JP Morgan Chase & Co.</span>
-                        </div>
-                        <span class="date-badge">Aug 2016 - Aug 2019</span>
-                    </div>
-                    <ul>
-                        <li>Oversaw NAV validation, corporate actions, and fund activity analysis.</li>
-                        <li>Led QA controls ensuring integrity of financial reporting.</li>
-                        <li>Drove automation via Xceptor and VBA, reducing manual workload.</li>
-                        <li>Redesigned shift structure and balanced workload across teams.</li>
-                    </ul>
-                    <div class="tech-tags">
-                        <span class="tech-tag">Xceptor</span>
-                        <span class="tech-tag">VBA Automation</span>
-                        <span class="tech-tag">NAV Validation</span>
-                        <span class="tech-tag">QA Controls</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timeline-block">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="time-meta">
-                        <div>
-                            <span class="role-title">Junior Assistant Manager II</span> <br>
-                            <span class="comp-name">BDO (Banco de Oro)</span>
-                        </div>
-                        <span class="date-badge">Feb 2013 - Jul 2016</span>
-                    </div>
-                    <ul>
-                        <li>Led workforce management and volume forecasting.</li>
-                        <li>Created detailed performance reports and dashboards.</li>
-                        <li>Trained and coached staff on updated procedures.</li>
-                        <li>Advised clients on investments, loans, and account solutions.</li>
-                    </ul>
-                    <div class="tech-tags">
-                        <span class="tech-tag">Workforce Planning</span>
-                        <span class="tech-tag">Volume Forecasting</span>
-                        <span class="tech-tag">Client Financial Advisory</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timeline-block">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                    <div class="time-meta">
-                        <div>
-                            <span class="role-title">Operations Manager / Team Leader</span> <br>
-                            <span class="comp-name">HGS (Hinduja Global Solutions)</span>
-                        </div>
-                        <span class="date-badge">2008 - 2013</span>
-                    </div>
-                    <ul>
-                        <li>Managed scale BPO processing units for enterprise global clients like AT&T, running up to 144 FTEs.</li>
-                        <li>Oversaw intensive performance monitoring, skills training frameworks, and overall service quality metrics.</li>
-                        <li>Engineered and implemented targeted productivity improvements across matrixed configurations.</li>
-                        <li>Handled critical operational escalations and pioneered high-yield team coaching initiatives.</li>
-                    </ul>
-                    <div class="tech-tags">
-                        <span class="tech-tag">BPO Enterprise Management</span>
-                        <span class="tech-tag">144 FTE Scale</span>
-                        <span class="tech-tag">Escalation Controls</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section id="contact">
-        <div class="section-header">
-            <h2>Let's Coordinate</h2>
-        </div>
-        <div class="contact-layout">
-            <div>
-                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Reach out directly to discuss high-scale financial infrastructure optimization, operational risk management models, or automated framework architectures.</p>
-                <div class="contact-details">
-                    <div class="contact-box">
-                        <i class="fa-solid fa-envelope"></i>
-                        <div>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Direct Email</p>
-                            <a href="mailto:atdlayco@gmail.com" style="color: inherit; text-decoration: none; font-weight: 600;">atdlayco@gmail.com</a>
-                        </div>
-                    </div>
-                    <div class="contact-box">
-                        <i class="fa-solid fa-mobile-screen-button"></i>
-                        <div>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Mobile Contact</p>
-                            <p style="font-weight: 600;">+63 998 554 2836</p>
-                        </div>
-                    </div>
-                    <div class="contact-box">
-                        <i class="fa-solid fa-location-dot"></i>
-                        <div>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Location Base</p>
-                            <p style="font-weight: 600;">National Capital Region, Philippines</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div style="background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); padding: 2.5rem; border-radius: 16px;">
-                <h3 style="margin-bottom: 1.2rem;">Automation Ecosystem & Architecture</h3>
-                <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom: 2rem;">
-                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">Alteryx</span>
-                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">Xceptor</span>
-                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">UIPath</span>
-                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">JIRA (Agile)</span>
-                    <span class="tech-tag" style="border-color: rgba(96,165,250,0.4); color: #60a5fa;">VBA Scripting</span>
-                </div>
-
-                <h3 style="margin-bottom: 1rem;">Academic Base & Frameworks</h3>
-                <p style="font-weight: 600; color: #60a5fa; margin-bottom: 0.25rem;">B.S. Electrical Engineering</p>
-                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">University of Santo Tomas (UST), Philippines (2008)</p>
                 
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Core Management & Operational Credentials:</p>
-                <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-                    <span class="tech-tag">Coaching and Counselling</span>
-                    <span class="tech-tag">Supervisory Skills</span>
-                    <span class="tech-tag">Six Sigma Fundamentals</span>
-                    <span class="tech-tag">Lean Principles</span>
-                    <span class="tech-tag">Project Management</span>
-                    <span class="tech-tag">Emotional Economics</span>
-                    <span class="tech-tag">Time Management</span>
+                <div class="flex items-center gap-2" id="nav-auth-wrapper">
+                    <button onclick="openAuthModal()" id="auth-status-btn" class="bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span id="auth-btn-text">Sign In / Register</span>
+                    </button>
+                    <button onclick="executeSecureLogout()" id="nav-logout-btn" class="hidden bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/30 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+
+                <button onclick="openCheckoutModal()" class="relative bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow">
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                    <span>Checkout</span>
+                    <span id="cart-count" class="bg-black/30 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- SIDEBAR FILTERS -->
+        <aside class="lg:col-span-1 bg-[#1e1e1e] p-5 rounded-xl border border-gray-800 space-y-5 h-fit sticky top-20">
+            <div>
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
+                <select id="sort-select" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    <option value="newest">Last Stocked (Newest)</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                </select>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Filter Rarity</h3>
+                <select id="rarity-select" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    <option value="ALL">Show All Rarities</option>
+                    <option value="SP">Special Rare (SP)</option>
+                    <option value="TR">Treasure Rare (TR)</option>
+                    <option value="AA">Alternate Art (AA)</option>
+                    <option value="SEC">Secret Rare (SEC)</option>
+                    <option value="SR">Super Rare (SR)</option>
+                    <option value="UC">Uncommon (UC)</option>
+                    <option value="R">Rare (R)</option>
+                    <option value="P">Promo (P)</option>
+                    <option value="C">Common (C)</option>
+                </select>
+            </div>
+
+            <div id="buyer-tracker-box" class="hidden border border-red-500/20 bg-red-950/10 p-3.5 rounded-lg space-y-2.5 text-xs">
+                <h4 class="font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5"><i class="w-3.5 h-3.5" data-lucide="package"></i> Your Active Orders</h4>
+                <div id="buyer-orders-queue" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            </div>
+        </aside>
+
+        <!-- MAIN GRIDBOARD -->
+        <main class="lg:col-span-3">
+            <div class="flex justify-between items-center mb-4 text-xs text-gray-400 font-medium">
+                <span id="results-count">Loading cards from inventory database...</span>
+                <span>Currency: <strong class="text-red-400">PHP (₱)</strong></span>
+            </div>
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </main>
+    </div>
+
+    <!-- AUTHENTICATION FORM MODAL -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <h2 id="auth-title" class="text-base font-bold mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="text-red-500"></i> Create Buyer Account</h2>
+            
+            <form id="auth-form" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Email Address</label>
+                    <input type="email" id="auth-email" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Password</label>
+                    <input type="password" id="auth-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div id="auth-profile-fields" class="space-y-3">
+                    <div>
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Delivery Name</label>
+                        <input type="text" id="auth-name" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Shipping Address</label>
+                        <input type="text" id="auth-address" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Phone Contact Number</label>
+                        <input type="tel" id="auth-phone" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 font-bold py-2 rounded text-white mt-2 tracking-wide uppercase">Confirm</button>
+                <p onclick="toggleAuthMode()" id="auth-toggle-msg" class="text-center text-[11px] text-gray-400 hover:text-red-400 cursor-pointer pt-2 transition-colors">Already have an account? Sign In here.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECURE TRAY SECURE CHECKOUT MODAL -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            
+            <div id="checkout-form-container">
+                <h2 class="text-xl font-bold mb-1 flex items-center gap-2"><i data-lucide="shopping-bag" class="text-red-500"></i> Secure Checkout</h2>
+                <p id="checkout-welcome-tip" class="text-xs text-gray-400 mb-4">Checking out as Guest.</p>
+                
+                <div id="checkout-items-list" class="max-h-36 overflow-y-auto bg-black/30 rounded-lg p-2.5 mb-4 text-xs space-y-2 border border-gray-800"></div>
+
+                <div class="flex justify-between items-center text-sm font-bold bg-white/5 border border-gray-800 p-2 rounded-lg mb-4 font-mono">
+                    <span class="text-gray-400">GRAND TOTAL:</span>
+                    <span id="checkout-grand-total" class="text-red-400 text-base">₱0</span>
+                </div>
+
+                <form id="checkout-form" class="space-y-3.5">
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
+                        <input type="text" id="cust-name" required placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Shipping Address</label>
+                        <textarea id="cust-address" required rows="2" placeholder="Quezon City, Metro Manila" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500 resize-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label>
+                        <input type="tel" id="cust-phone" required placeholder="09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    </div>
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow-lg flex items-center justify-center gap-2 mt-2 uppercase tracking-wider text-xs">Place Order</button>
+                </form>
+            </div>
+
+            <div id="checkout-success-container" class="hidden text-center py-4">
+                <div class="bg-green-500/10 text-green-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-500/30"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
+                <h2 class="text-xl font-bold text-white mb-1">Order Confirmed!</h2>
+                <p class="text-xs text-gray-400 mb-4">Your data and inventory levels have been synchronized successfully.</p>
+                <button onclick="closeCheckoutModal()" class="w-full bg-[#2a2a2a] hover:bg-[#333] border border-gray-700 text-gray-200 py-2 rounded-lg text-sm font-semibold">Return to Catalog</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD ZOOM TEXTURE MODAL -->
+    <div id="zoom-modal" style="display: none;" class="fixed inset-0 bg-black/90 backdrop-blur-md items-center justify-center z-50 p-4 select-none">
+        <button onclick="closeZoomModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white bg-[#1e1e1e]/80 p-2 rounded-full border border-gray-800 z-50"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <div class="max-w-md w-full flex flex-col items-center gap-3" onclick="event.stopPropagation()">
+            <div id="zoom-frame" class="zoom-container w-full aspect-[3/4] bg-[#121212] rounded-2xl border border-gray-800 shadow-2xl">
+                <img id="zoom-target-img" src="" alt="" class="zoom-image w-full h-full object-cover">
+            </div>
+            <p class="text-center text-xs text-gray-400 font-medium tracking-wide flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 text-red-400"></i> Hover mouse over card textures to magnify parameters.</p>
+        </div>
+    </div>
+
+    <!-- ENCRYPTED SYSTEM LEDGER MONITOR DASHBOARD -->
+    <div id="admin-modal" style="display: none;" class="fixed inset-0 bg-black/95 backdrop-blur-md items-center justify-center z-50 p-4">
+        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-6xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-3">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-red-500 flex items-center gap-2"><i data-lucide="shield-check"></i> Encrypted Server Admin Console</h2>
+                <button onclick="closeAdminPanel()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1 rounded text-gray-300">Close Dashboard</button>
+            </div>
+
+            <!-- SERVER SIDE GATEKEEPER SIGN IN PORTAL -->
+            <div id="admin-auth-gate" class="py-12 text-center space-y-4 max-w-sm mx-auto">
+                <p class="text-xs text-gray-400">Sign in using your master Supabase administrator email credentials to unlock catalog write permissions.</p>
+                <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
+                <input type="password" id="admin-pass-input" placeholder="Admin Account Password" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
+                <button onclick="verifyAdminAuth()" class="w-full bg-red-600 hover:bg-red-700 font-bold text-xs py-2.5 rounded shadow uppercase tracking-wider flex items-center justify-center gap-2"><i class="w-4 h-4" data-lucide="unlock"></i> Establish Secure Sync</button>
+            </div>
+
+            <div id="admin-workspace" class="hidden space-y-8">
+                <!-- INVENTORY PORTAL MODULE -->
+                <div class="bg-black/20 border border-gray-800 p-4 rounded-xl space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5"><i data-lucide="plus-circle" class="text-green-500 w-4 h-4"></i> Stock New Inventory Item Listing</h3>
+                    <form id="admin-inventory-form" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Card Name</label>
+                            <input type="text" id="inv-name" required placeholder="e.g. Monkey.D.Luffy" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Set Code</label>
+                            <input type="text" id="inv-set" required placeholder="e.g. OP05-119" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Rarity</label>
+                            <input type="text" id="inv-rarity" required placeholder="e.g. AA" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Price (PHP)</label>
+                            <input type="number" id="inv-price" required placeholder="14500" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Initial Stock Level</label>
+                            <input type="number" id="inv-stock" required placeholder="5" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Front Image URL (Optional)</label>
+                            <input type="url" id="inv-front" placeholder="Pasting empty fields defaults to placeholder texture" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Back Image URL (Optional)</label>
+                            <input type="url" id="inv-back" placeholder="Pasting empty fields defaults to placeholder texture" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 font-bold py-2 rounded text-white tracking-wide uppercase text-xs">Save Card to Cloud</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- CLIENT ORDER LEDGER QUEUE MODULE -->
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
+                    <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-gray-900 border-b border-gray-800 text-gray-400 font-semibold select-none">
+                                    <th class="p-3">Customer Details</th>
+                                    <th class="p-3">Shipping Target Address</th>
+                                    <th class="p-3">Ordered Items Inventory Trace</th>
+                                    <th class="p-3">Total Tally</th>
+                                    <th class="p-3">Process Status</th>
+                                    <th class="p-3 text-center">Clearance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-tbody" class="divide-y divide-gray-800/60 text-gray-300"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <footer>
-        <p>&copy; 2026 Alvin Troy Dela Paz Layco. Built for elite execution performance.</p>
+    <!-- REAR CONSOLE FOOTER LINK -->
+    <footer class="bg-[#1e1e1e] border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
+        <p class="mb-2">&copy; 2026 StrawHatDraws TCG Sales. Secure Cloud Backend Connected.</p>
+        <p>
+            <span onclick="openAdminPanel()" class="cursor-pointer text-gray-700 hover:text-red-500/40 transition-colors text-[10px] select-none font-mono">
+                [🛡️ Secure System Ledger Console]
+            </span>
+        </p>
     </footer>
 
+    <script>
+        const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
+        
+        let supabaseClient = null;
+        if(SUPABASE_URL.indexOf("your-project-id") === -1) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true
+                }
+            });
+        }
+
+        let isRegisterMode = true;
+        let currentUserProfile = null; 
+        let cart = [];
+        let items = []; 
+
+        const DEMO_FALLBACK_ITEMS = [
+            { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' },
+            { id: 2, name: "Roronoa Zoro", set: "OP01-025", rarity: "SR", price: 950, stock: 5, frontImg: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' },
+            { id: 3, name: "Nami (Special)", set: "OP01-016", rarity: "SP", price: 6200, stock: 0, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front' }
+        ];
+        let localOrdersBackup = [{ id: "mock-101", customer_name: "Juan dela Cruz", shipping_address: "Quezon City, Manila", phone_number: "09171234567", items_ordered: [1, 2], order_status: "Pending" }];
+
+        async function fetchLiveInventory() {
+            if (!supabaseClient) {
+                items = DEMO_FALLBACK_ITEMS;
+                renderGrid();
+                return;
+            }
+            try {
+                let { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false });
+                if (error) throw error;
+                
+                items = cards.map(c => ({
+                    id: c.id, name: c.name, set: c.set_code || c.set || "OP-UNKNOWN", rarity: c.rarity, price: Number(c.price), stock: Number(c.stock),
+                    frontImg: c.front_img || c.frontImg, backImg: c.back_img || c.backImg, viewState: 'front'
+                }));
+            } catch (err) {
+                console.warn("Database sync dropped, pulling back cache models:", err.message);
+                items = DEMO_FALLBACK_ITEMS;
+            }
+            renderGrid();
+        }
+
+        /* --- DECOUPLED INDEPENDENT ORDER PIPELINE EXTRACTOR --- */
+        async function fetchBuyerRealtimeOrders() {
+            if(!supabaseClient || !currentUserProfile || !currentUserProfile.id) return;
+            try {
+                let { data: myOrders } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
+                const queueBox = document.getElementById('buyer-orders-queue');
+                const container = document.getElementById('buyer-tracker-box');
+                
+                if(myOrders && myOrders.length > 0) {
+                    container.classList.remove('hidden');
+                    queueBox.innerHTML = '';
+                    myOrders.forEach(o => {
+                        const div = document.createElement('div');
+                        div.className = "p-2 bg-black/40 rounded border border-gray-800 flex justify-between items-center text-[11px]";
+                        let statusColor = "text-yellow-500";
+                        if(o.order_status === 'Processed') statusColor = "text-green-400";
+                        if(o.order_status === 'Shipped') statusColor = "text-blue-400";
+                        
+                        div.innerHTML = `
+                            <span class="font-mono text-gray-400 truncate max-w-[100px]">${o.id}</span>
+                            <span class="font-bold ${statusColor}">${o.order_status || 'Pending'}</span>
+                        `;
+                        queueBox.innerHTML += div.outerHTML;
+                    });
+                }
+            } catch(e) { console.warn("Tracker lookup skipped:", e); }
+        }
+
+        /* --- SECURE ADMIN CORE HANDLERS --- */
+        window.verifyAdminAuth = async function() {
+            const email = document.getElementById('admin-email-input').value;
+            const password = document.getElementById('admin-pass-input').value;
+            if(!supabaseClient) return;
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if(error) throw error;
+                
+                document.getElementById('admin-auth-gate').classList.add('hidden');
+                document.getElementById('admin-workspace').classList.remove('hidden');
+                await renderAdminOrdersLedger();
+            } catch (err) { alert(`Denied: ${err.message}`); }
+        }
+
+        /* --- INVENTORY DISPATCH --- */
+        document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!supabaseClient) return;
+            
+            const frontVal = document.getElementById('inv-front').value.trim();
+            const backVal = document.getElementById('inv-back').value.trim();
+
+            const cardPayload = {
+                name: document.getElementById('inv-name').value,
+                set_code: document.getElementById('inv-set').value,
+                rarity: document.getElementById('inv-rarity').value,
+                price: Number(document.getElementById('inv-price').value),
+                stock: Number(document.getElementById('inv-stock').value),
+                front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400"
+            };
+
+            const { data, error } = await supabaseClient.from('cards').insert([cardPayload]);
+            if(error) { alert(`Error: ${error.message}`); } else {
+                alert("Uploaded successfully!");
+                document.getElementById('admin-inventory-form').reset();
+                await fetchLiveInventory();
+            }
+        });
+
+        /* --- AUTH CONTROLLERS --- */
+        window.openAuthModal = function() {
+            if(currentUserProfile) return;
+            document.getElementById('auth-modal').style.display = 'flex';
+        }
+        window.closeAuthModal = function() { document.getElementById('auth-modal').style.display = 'none'; }
+        
+        window.executeSecureLogout = async function() {
+            if(confirm("Log out of account?")) {
+                currentUserProfile = null;
+                if(supabaseClient) { await supabaseClient.auth.signOut(); }
+                document.getElementById('auth-btn-text').innerText = "Sign In / Register";
+                document.getElementById('nav-logout-btn').classList.add('hidden');
+                document.getElementById('buyer-tracker-box').classList.add('hidden');
+                window.location.reload();
+            }
+        }
+
+        window.toggleAuthMode = function() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('auth-title').innerHTML = isRegisterMode ? `<i data-lucide="user-plus" class="text-red-500"></i> Create Account` : `<i data-lucide="log-in" class="text-red-500"></i> Sign In`;
+            document.getElementById('auth-profile-fields').style.display = isRegisterMode ? 'block' : 'none';
+            document.getElementById('auth-toggle-msg').innerText = isRegisterMode ? "Already have an account? Sign In here." : "Need an account? Register here.";
+            lucide.createIcons();
+        }
+
+        // FIXED REGISTRATION SUBMIT ENGINE: Clean form prevention ensures no background loop freezes
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value || email.split('@')[0];
+            const address = document.getElementById('auth-address').value || "Metro Manila";
+            const phone = document.getElementById('auth-phone').value || "None";
+
+            if (!supabaseClient) {
+                currentUserProfile = { id: "guest", name, address, phone };
+                document.getElementById('auth-btn-text').innerText = name;
+                document.getElementById('nav-logout-btn').classList.remove('hidden');
+                closeAuthModal();
+                return;
+            }
+
+            try {
+                if (isRegisterMode) {
+                    let { data, error } = await supabaseClient.auth.signUp({ 
+                        email, password, options: { data: { name, address, phone } }
+                    });
+                    if (error) throw error;
+                    if(data.user) {
+                        await supabaseClient.from('profiles').insert([{ id: data.user.id, name, address, phone }]);
+                    }
+                    alert("Registration successful! Logging session parameters in.");
+                } else {
+                    let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    closeAuthModal();
+                }
+            } catch(err) { alert(`Auth Error: ${err.message}`); }
+        });
+
+        /* --- CHECKOUT --- */
+        window.openCheckoutModal = function() {
+            if(cart.length === 0) { alert("Your cart is empty."); return; }
+            const tray = document.getElementById('checkout-items-list');
+            tray.innerHTML = '';
+            let runningSum = 0;
+            
+            const itemSummaryCounts = [...new Set(cart)];
+            itemSummaryCounts.forEach(id => {
+                const matchItem = items.find(i => i.id === id);
+                if (!matchItem) return;
+                const quant = cart.filter(cid => cid === id).length;
+                runningSum += (matchItem.price * quant);
+                
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center text-gray-300 py-1 border-b border-gray-800/40 last:border-0";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-red-400 font-mono font-bold">${quant}x</span>
+                        <span>${matchItem.name}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-gray-200">₱${(matchItem.price * quant).toLocaleString()}</span>
+                        <button onclick="removeFromCart(${id}); openCheckoutModal();" class="text-red-400 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                `;
+                tray.appendChild(div);
+            });
+
+            document.getElementById('checkout-grand-total').innerText = "₱" + runningSum.toLocaleString();
+
+            if(currentUserProfile) {
+                document.getElementById('cust-name').value = currentUserProfile.name;
+                document.getElementById('cust-address').value = currentUserProfile.address;
+                document.getElementById('cust-phone').value = currentUserProfile.phone;
+            }
+            document.getElementById('checkout-modal').style.display = 'flex';
+            lucide.createIcons();
+        }
+        window.closeCheckoutModal = function() { document.getElementById('checkout-modal').style.display = 'none'; }
+
+        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const orderPayload = {
+                id: "ORD-" + Date.now(),
+                customer_name: document.getElementById('cust-name').value,
+                shipping_address: document.getElementById('cust-address').value,
+                phone_number: document.getElementById('cust-phone').value,
+                items_ordered: cart
+            };
+
+            for (let id of cart) {
+                const targetObj = items.find(i => i.id === id);
+                if (targetObj && targetObj.stock > 0) {
+                    targetObj.stock--;
+                    if(supabaseClient) { await supabaseClient.from('cards').update({ stock: targetObj.stock }).eq('id', id); }
+                }
+            }
+
+            if(supabaseClient) {
+                await supabaseClient.from('Orders').insert([orderPayload]);
+            } else { localOrdersBackup.unshift(orderPayload); }
+
+            cart = [];
+            document.getElementById('cart-count').innerText = 0;
+            document.getElementById('checkout-form-container').classList.add('hidden');
+            document.getElementById('checkout-success-container').classList.remove('hidden');
+            renderGrid();
+        });
+
+        /* --- MICROSCOPIC LENS ZOOM ENGINE --- */
+        window.launchZoomModal = function(imgSrc) {
+            const targetImg = document.getElementById('zoom-target-img');
+            targetImg.src = imgSrc;
+            targetImg.style.transformOrigin = 'center center';
+            document.getElementById('zoom-modal').style.display = 'flex';
+            lucide.createIcons();
+        }
+        window.closeZoomModal = function() { document.getElementById('zoom-modal').style.display = 'none'; }
+
+        document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
+        });
+
+        /* --- SYSTEM MONITOR ADMINISTRATIVE LEDGER --- */
+        window.openAdminPanel = function() { document.getElementById('admin-modal').style.display = 'flex'; }
+        window.closeAdminPanel = function() {
+            document.getElementById('admin-modal').style.display = 'none';
+            document.getElementById('admin-auth-gate').classList.remove('hidden');
+            document.getElementById('admin-workspace').classList.add('hidden');
+            document.getElementById('admin-pass-input').value = '';
+            document.getElementById('admin-email-input').value = '';
+        }
+
+        async function renderAdminOrdersLedger() {
+            const tbody = document.getElementById('admin-orders-tbody');
+            tbody.innerHTML = '';
+            let dataset = localOrdersBackup;
+            if(supabaseClient) {
+                let { data } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
+                if(data) dataset = data;
+            }
+
+            dataset.forEach(ord => {
+                let itemsListHTML = '';
+                let totalOrderPrice = 0;
+                if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
+                    const counts = {};
+                    ord.items_ordered.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+                    itemsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">';
+                    Object.keys(counts).forEach(id => {
+                        const matchCard = items.find(i => i.id == id);
+                        if(matchCard) { totalOrderPrice += (matchCard.price * counts[id]); }
+                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${matchCard ? matchCard.name : 'Unknown Card'}</div>`;
+                    });
+                    itemsListHTML += '</div>';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-white/5 border-b border-gray-800 text-top";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">${ord.customer_name}</td>
+                    <td class="p-3 text-gray-400">${ord.shipping_address}</td>
+                    <td class="p-3">${itemsListHTML}</td>
+                    <td class="p-3 font-mono text-green-400 font-bold">₱${totalOrderPrice.toLocaleString()}</td>
+                    <td class="p-3 font-bold text-yellow-500">⏳ ${ord.order_status || 'Pending'}</td>
+                    <td class="p-3 text-center"><button onclick="purgeOrderLogRecord('${ord.id}')" class="text-red-400 text-xs hover:underline">Clear Row</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.purgeOrderLogRecord = async function(id) {
+            if(!confirm("Purge record permanently?")) return;
+            if(supabaseClient) { await supabaseClient.from('Orders').delete().eq('id', id); }
+            await renderAdminOrdersLedger();
+        }
+
+        /* --- VISUAL DISPLAY INTERFACE --- */
+        window.togglePhoto = function(id, view) {
+            let rowObj = items.find(i => i.id === id);
+            if(rowObj) { rowObj.viewState = view; renderGrid(); }
+        }
+        window.addToCart = function(id) {
+            let rowObj = items.find(i => i.id === id);
+            if(rowObj && rowObj.stock > cart.filter(cid => cid === id).length) {
+                cart.push(id); updateCartUI(); renderGrid();
+            }
+        }
+        window.removeFromCart = function(id) {
+            const index = cart.indexOf(id);
+            if (index > -1) { cart.splice(index, 1); updateCartUI(); renderGrid(); }
+        }
+        function updateCartUI() { document.getElementById('cart-count').innerText = cart.length; }
+
+        function renderGrid() {
+            const grid = document.getElementById('product-grid');
+            if (!grid) return;
+            const search = document.getElementById('search-input').value.toLowerCase().trim();
+            const rarity = document.getElementById('rarity-select').value;
+            const sortBy = document.getElementById('sort-select').value;
+    
+            // UPDATED FILTER LOGIC:
+            let filtered = items.filter(i => {
+                const matchesSearch = i.name.toLowerCase().includes(search) || i.set.toLowerCase().includes(search);
+        
+                // Normalize both sides to uppercase and trim spaces
+                const itemRarity = (i.rarity || "").toUpperCase().trim();
+                const selectedRarity = rarity.toUpperCase().trim();
+        
+                const matchesRarity = (rarity === 'ALL' || itemRarity === selectedRarity);
+        
+                return matchesSearch && matchesRarity;
+            });
+
+            if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+            else if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+
+            document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory card records.`;
+            grid.innerHTML = '';
+            filtered.forEach(item => {
+                const soldOut = item.stock <= 0;
+                const inCartCount = cart.filter(cid => cid === item.id).length;
+                const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg;
+                
+                const div = document.createElement('div');
+                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut ? 'opacity-40 select-none' : ''}`;
+                
+                let actionButtonMarkup = soldOut ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>` :
+                    (inCartCount > 0 ? `
+                        <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
+                            <button onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button>
+                            <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span>
+                            <button onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button>
+                        </div>` : `<button onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
+
+                div.innerHTML = `
+                    <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
+                        <img src="${dynamicImgSrc}" alt="" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';" onclick="launchZoomModal('${dynamicImgSrc}')" class="w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200">
+                        <div class="absolute top-2 left-2 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">Stock: ${item.stock}</div>
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
+                            <button onclick="togglePhoto(${item.id}, 'front')" ${soldOut ? 'disabled' : ''} class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
+                            <button onclick="togglePhoto(${item.id}, 'back')" ${soldOut ? 'disabled' : ''} class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button>
+                        </div>
+                        <span class="absolute top-2 right-2 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow">${item.rarity}</span>
+                    </div>
+                    <div class="flex flex-col justify-between flex-1">
+                        <div><span class="text-[10px] font-mono text-gray-500">${item.set}</span><h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${item.name}</h3></div>
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-800/50"><span class="text-sm font-bold text-gray-100">₱${item.price.toLocaleString()}</span><div>${actionButtonMarkup}</div></div>
+                    </div>`;
+                grid.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        document.getElementById('search-input').addEventListener('input', renderGrid);
+        document.getElementById('rarity-select').addEventListener('change', renderGrid);
+        document.getElementById('sort-select').addEventListener('change', renderGrid);
+
+        /* --- CRITICAL DECOUPLED AUTH STATE RADAR ENGINE --- */
+        if (supabaseClient) {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (session && session.user) {
+                    // Safe variable bundling inside the handler completely prevents API deadlocks
+                    currentUserProfile = {
+                        id: session.user.id,
+                        name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+                        address: session.user.user_metadata?.address || "Metro Manila",
+                        phone: session.user.user_metadata?.phone || "None"
+                    };
+                    document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
+                    document.getElementById('nav-logout-btn').classList.remove('hidden');
+                    
+                    // Dispatched cleanly out of the main block scope to keep form operations free
+                    setTimeout(() => { fetchBuyerRealtimeOrders(); }, 50);
+                } else {
+                    currentUserProfile = null;
+                    document.getElementById('auth-btn-text').innerText = "Sign In / Register";
+                    document.getElementById('nav-logout-btn').classList.add('hidden');
+                    document.getElementById('buyer-tracker-box').classList.add('hidden');
+                }
+            });
+        }
+
+        // Run baseline setup immediately on layout paint cycles
+        (async () => {
+            await fetchLiveInventory();
+        })();
+    </script>
 </body>
 </html>
