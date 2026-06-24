@@ -409,7 +409,7 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
 
         let supabaseClient = null;
-        if (SUPABASE_URL.indexOf("your-project-id") === -1) {
+        if (SUPABASE_URL.indexOf("your-project-id") === -1 && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY_HERE") {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
                     persistSession: true,
@@ -656,7 +656,7 @@
                     const { data, error } = await supabaseClient
                         .from('Orders')
                         .select('*')
-                        .order('id', { ascending: false });
+                        .order('created_at', { ascending: false });
 
                     if (error) {
                         console.warn("Could not load customer orders:", error.message);
@@ -681,7 +681,7 @@
 
                 const filteredOrders = uniqueOrders.filter(o => {
                     if (currentUserProfile.id !== 'guest') {
-                        if (o.user_id === currentUserProfile.id || o.buyer_id === currentUserProfile.id) return true;
+                        if (o.user_id === currentUserProfile.id) return true;
                     }
 
                     const isRealPhone = (ph) => ph && ph !== "None" && ph.trim().length > 5;
@@ -830,9 +830,7 @@
 
             if (currentUserProfile && currentUserProfile.id !== 'guest') {
                 if (emailWrapper) emailWrapper.style.display = 'none';
-                if (emailInput) {
-                    emailInput.required = false;
-                }
+                if (emailInput) emailInput.required = false;
             } else {
                 if (emailWrapper) emailWrapper.style.display = 'block';
                 if (emailInput) {
@@ -977,7 +975,6 @@
                     if (data.user) {
                         await supabaseClient.from('profiles').insert([{
                             id: data.user.id,
-                            email,
                             name,
                             address: validatedData.address,
                             phone: validatedData.phone,
@@ -1013,11 +1010,6 @@
             const card = items.find(i => i.id === cardId);
             if (!card) return;
 
-            if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
-                showCustomToast("This auction bidding window has already closed!", "error");
-                return;
-            }
-
             let bidAmount = 0;
 
             if (isCustom) {
@@ -1036,33 +1028,47 @@
                 bidAmount = Number(card.price) + selectVal;
             }
 
-            if (bidAmount <= Number(card.price)) {
-                showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
-                return;
-            }
-
             const bidderName = currentUserProfile.name || "Collector";
-            card.price = bidAmount;
-            card.top_bidder = bidderName;
 
             if (supabaseClient) {
                 try {
-                    const { error } = await supabaseClient
-                        .from('cards')
-                        .update({ price: bidAmount, top_bidder: bidderName })
-                        .eq('id', cardId);
+                    const { data, error } = await supabaseClient.rpc('place_bid_secure', {
+                        p_card_id: cardId,
+                        p_bid_amount: bidAmount,
+                        p_bidder_name: bidderName
+                    });
+
                     if (error) throw error;
+
+                    if (data) {
+                        card.price = Number(data.price);
+                        card.top_bidder = data.top_bidder;
+                        card.bidding_ends_at = data.bidding_ends_at;
+                    }
+
+                    pendingCustomBidInputs[cardId] = "";
                     showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success");
+                    await fetchLiveInventory(true);
                 } catch(err) {
-                    console.warn("DB update failed. Saving mock bid locally.");
-                    showCustomToast("Local bid cached successfully!", "success");
+                    showCustomToast(err.message || "Bid failed.", "error");
                 }
             } else {
+                if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
+                    showCustomToast("This auction bidding window has already closed!", "error");
+                    return;
+                }
+
+                if (bidAmount <= Number(card.price)) {
+                    showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
+                    return;
+                }
+
+                card.price = bidAmount;
+                card.top_bidder = bidderName;
+                pendingCustomBidInputs[cardId] = "";
+                renderGrid();
                 showCustomToast("Local simulator bid placed successfully!", "success");
             }
-
-            pendingCustomBidInputs[cardId] = "";
-            renderGrid();
         };
 
         window.openCheckoutModal = async function() {
@@ -1145,7 +1151,6 @@
 
         document.getElementById('checkout-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            console.log("Checkout submit handler fired");
 
             const submitBtn = document.getElementById('checkout-submit-btn');
             const originalHTML = submitBtn.innerHTML;
@@ -1168,47 +1173,6 @@
                 const validationResult = await performStructuredAddressValidation(
                     house, street, barangay, city, region, postal, phone
                 );
-
-                const requestedCounts = {};
-                cart.forEach(id => { requestedCounts[id] = (requestedCounts[id] || 0) + 1; });
-
-                let validationSucceeded = true;
-                let offendingDetails = [];
-
-                for (const [idStr, qty] of Object.entries(requestedCounts)) {
-                    const cardId = Number(idStr);
-                    const targetCard = items.find(i => i.id === cardId);
-                    const currentSystemStock = targetCard ? targetCard.stock : 0;
-
-                    if (qty > currentSystemStock) {
-                        validationSucceeded = false;
-                        offendingDetails.push(
-                            `${targetCard ? targetCard.name : 'Unknown Card'} (In Cart: ${qty}x, Available Stock: ${currentSystemStock}x)`
-                        );
-                    }
-                }
-
-                if (!validationSucceeded) {
-                    showCustomToast("Checkout blocked! Stocks have updated: " + offendingDetails.join(' | '), "error");
-
-                    const adjustedCart = [];
-                    for (const [idStr, qty] of Object.entries(requestedCounts)) {
-                        const cardId = Number(idStr);
-                        const targetCard = items.find(i => i.id === cardId);
-                        const currentSystemStock = targetCard ? targetCard.stock : 0;
-                        const safeLimit = Math.min(qty, currentSystemStock);
-                        for (let i = 0; i < safeLimit; i++) adjustedCart.push(cardId);
-                    }
-
-                    cart = adjustedCart;
-                    updateCartUI();
-
-                    if (cart.length > 0) openCheckoutModal();
-                    else closeCheckoutModal();
-
-                    renderGrid();
-                    return;
-                }
 
                 const guestEmailInput = document.getElementById('cust-email');
                 let parsedEmail = guestEmailInput ? guestEmailInput.value.trim() : "";
@@ -1240,74 +1204,69 @@
                     google_maps_pin: validationResult.mapsPin,
                     items_ordered: JSON.parse(JSON.stringify([...cart])),
                     order_status: "Pending",
-                    user_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null,
-                    buyer_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null
+                    user_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null
                 };
 
                 let orderWriteSuccessful = false;
 
                 if (supabaseClient) {
-                    const dbPayload = {
-                        customer_name: orderPayload.customer_name,
-                        customer_email: orderPayload.customer_email,
-                        shipping_address: orderPayload.shipping_address,
-                        phone_number: orderPayload.phone_number,
-                        items_ordered: orderPayload.items_ordered,
-                        order_status: orderPayload.order_status,
-                        google_maps_pin: orderPayload.google_maps_pin,
-                        user_id: orderPayload.user_id,
-                        buyer_id: orderPayload.buyer_id
-                    };
+                    console.log("Attempting secure order RPC with payload:", orderPayload);
 
-                    console.log("Attempting Orders insert with payload:", dbPayload);
-
-                    const { data, error } = await supabaseClient
-                        .from('Orders')
-                        .insert([dbPayload])
-                        .select();
+                    const { data, error } = await supabaseClient.rpc('place_order_secure', {
+                        p_customer_name: orderPayload.customer_name,
+                        p_customer_email: orderPayload.customer_email,
+                        p_shipping_address: orderPayload.shipping_address,
+                        p_phone_number: orderPayload.phone_number,
+                        p_google_maps_pin: orderPayload.google_maps_pin,
+                        p_items_ordered: orderPayload.items_ordered,
+                        p_user_id: orderPayload.user_id
+                    });
 
                     if (error) {
-                        console.error("Orders insert failed:", error);
-                        console.error("Rejected payload:", dbPayload);
-                        throw new Error(`Order registration rejected by Supabase database: ${error.message}`);
+                        console.error("Secure order RPC failed:", error);
+                        console.error("Rejected payload:", orderPayload);
+                        throw new Error(`Secure checkout failed: ${error.message}`);
                     }
 
-                    if (data && data[0]) {
-                        orderPayload.id = data[0].id || ("ORD-" + Date.now());
+                    if (data) {
+                        orderPayload.id = data.id;
+                        orderPayload.order_status = data.order_status || "Pending";
                         orderWriteSuccessful = true;
                     }
                 } else {
+                    const requestedCounts = {};
+                    cart.forEach(id => { requestedCounts[id] = (requestedCounts[id] || 0) + 1; });
+
+                    for (const [idStr, qty] of Object.entries(requestedCounts)) {
+                        const cardId = Number(idStr);
+                        const targetCard = items.find(i => i.id === cardId);
+                        const currentSystemStock = targetCard ? targetCard.stock : 0;
+
+                        if (qty > currentSystemStock) {
+                            throw new Error(`Insufficient stock for ${targetCard ? targetCard.name : 'Unknown Card'}. Requested ${qty}, available ${currentSystemStock}.`);
+                        }
+                    }
+
+                    cart.forEach(id => {
+                        const targetCard = items.find(i => i.id === id);
+                        if (targetCard && targetCard.stock > 0) {
+                            targetCard.stock--;
+                            saveLocalStock(id, targetCard.stock);
+                        }
+                    });
+
                     orderPayload.id = "ORD-" + Date.now();
                     orderWriteSuccessful = true;
                 }
 
                 if (orderWriteSuccessful) {
-                    for (let id of cart) {
-                        const targetObj = items.find(i => i.id === id);
-                        if (targetObj && targetObj.stock > 0) {
-                            targetObj.stock--;
-                            saveLocalStock(id, targetObj.stock);
-
-                            if (supabaseClient) {
-                                try {
-                                    const { error } = await supabaseClient
-                                        .from('cards')
-                                        .update({ stock: targetObj.stock })
-                                        .eq('id', id);
-
-                                    if (error) throw error;
-                                } catch (err) {
-                                    console.warn("Table cards update restricted via RLS rules. Cached client-side instead.");
-                                }
-                            }
-                        }
-                    }
-
                     localOrdersBackup.unshift(orderPayload);
                     saveLocalOrders(localOrdersBackup);
 
                     cart = [];
                     updateCartUI();
+
+                    await fetchLiveInventory(true);
 
                     document.getElementById('checkout-form-container').classList.add('hidden');
                     document.getElementById('checkout-success-container').classList.remove('hidden');
@@ -1330,9 +1289,6 @@
                 }
             } catch (err) {
                 console.error("Checkout failed:", err);
-                if (err && err.message) {
-                    console.error("Checkout error message:", err.message);
-                }
                 showCustomToast(err.message || "Checkout failed.", 'error');
             } finally {
                 submitBtn.disabled = false;
@@ -1378,7 +1334,6 @@
                 if (data.user) {
                     await supabaseClient.from('profiles').insert([{
                         id: data.user.id,
-                        email: lastGuestCheckoutData.email,
                         name: lastGuestCheckoutData.name,
                         address: lastGuestCheckoutData.address,
                         phone: lastGuestCheckoutData.phone,
@@ -1475,7 +1430,7 @@
             let dbOrdersList = [];
             if (supabaseClient) {
                 try {
-                    const { data } = await supabaseClient.from('Orders').select('*').order('id', { ascending: false });
+                    const { data } = await supabaseClient.from('Orders').select('*').order('created_at', { ascending: false });
                     if (data) dbOrdersList = data;
                 } catch(e) {
                     console.warn("Failed to fetch orders from Supabase:", e);
@@ -1506,7 +1461,7 @@
 
                     Object.keys(counts).forEach(id => {
                         const matchCard = items.find(i => i.id == id);
-                        if (matchCard) totalOrderPrice += matchCard.price * counts[id];
+                        if (matchCard) totalOrderPrice += Number(matchCard.price) * counts[id];
                         itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${escapeHtml(matchCard ? matchCard.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(matchCard ? matchCard.set : 'UNKNOWN')})</span></div>`;
                     });
 
@@ -1674,14 +1629,14 @@
                 return matchesSection && matchesSearch && matchesRarity;
             });
 
-            if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
-            else if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+            if (sortBy === 'price-asc') filtered.sort((a, b) => Number(a.price) - Number(b.price));
+            else if (sortBy === 'price-desc') filtered.sort((a, b) => Number(b.price) - Number(a.price));
 
             document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory card records.`;
             grid.innerHTML = '';
 
             filtered.forEach(item => {
-                const soldOut = item.stock <= 0;
+                const soldOut = Number(item.stock) <= 0;
                 const inCartCount = cart.filter(cid => cid === item.id).length;
                 const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg;
                 const safeName = escapeHtml(item.name);
@@ -1717,7 +1672,7 @@
                         </div>
                     `;
 
-                    const bidIncrements = Array.from({ length: 15 }, (_, idx) => 10 + (idx * 20));
+                    const bidIncrements = [10, 20, 50, 100, 200, 500];
                     const selectOptions = bidIncrements.map(val =>
                         `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>`
                     ).join('');
@@ -1805,7 +1760,7 @@
             const backVal = document.getElementById('inv-back').value.trim();
             const typeVal = document.getElementById('inv-type').value;
             const biddingEndsVal = document.getElementById('inv-bidding-ends').value;
-            const normalizedDbType = typeVal === 'bidding' ? 'BID' : 'SALE';
+            const normalizedDbType = typeVal === 'bidding' ? 'bidding' : 'sale';
 
             const cardPayload = {
                 name: document.getElementById('inv-name').value,
