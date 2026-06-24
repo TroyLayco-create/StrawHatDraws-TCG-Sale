@@ -594,7 +594,14 @@
                     <td class="p-3 text-gray-400">${ord.shipping_address}</td>
                     <td class="p-3">${itemsListHTML}</td>
                     <td class="p-3 font-mono text-green-400 font-bold">₱${totalOrderPrice.toLocaleString()}</td>
-                    <td class="p-3 font-bold text-yellow-500">⏳ ${ord.order_status || 'Pending'}</td>
+                // Inside renderAdminOrdersLedger...
+                    <td class="p-3">
+                        <select onchange="updateOrderStatus('${ord.id}', this.value)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1 text-xs">
+                            <option value="Pending" ${ord.order_status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Processed" ${ord.order_status === 'Processed' ? 'selected' : ''}>Processed</option>
+                            <option value="Shipped" ${ord.order_status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                        </select>
+                    </td>
                     <td class="p-3 text-center"><button onclick="purgeOrderLogRecord('${ord.id}')" class="text-red-400 text-xs hover:underline">Clear Row</button></td>
                 `;
                 tbody.appendChild(tr);
@@ -606,6 +613,50 @@
             if(supabaseClient) { await supabaseClient.from('Orders').delete().eq('id', id); }
             await renderAdminOrdersLedger();
         }
+
+
+        /* --- SYSTEM MONITOR ADMINISTRATIVE LEDGER --- */
+        window.openAdminPanel = function() { document.getElementById('admin-modal').style.display = 'flex'; }
+        window.closeAdminPanel = function() {
+            document.getElementById('admin-modal').style.display = 'none';
+            document.getElementById('admin-auth-gate').classList.remove('hidden');
+            document.getElementById('admin-workspace').classList.add('hidden');
+            document.getElementById('admin-pass-input').value = '';
+            document.getElementById('admin-email-input').value = '';
+        }
+
+        async function renderAdminOrdersLedger() {
+            // ... (your existing code)
+        }
+
+        window.purgeOrderLogRecord = async function(id) {
+            if(!confirm("Purge record permanently?")) return;
+            if(supabaseClient) { await supabaseClient.from('Orders').delete().eq('id', id); }
+            await renderAdminOrdersLedger();
+        }
+
+        // --- ADD THE NEW FUNCTION HERE ---
+        window.updateOrderStatus = async function(orderId, newStatus) {
+            if (!supabaseClient) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('Orders')
+                    .update({ order_status: newStatus })
+                    .eq('id', orderId);
+                    
+                if (error) throw error;
+                
+                alert("Status updated to: " + newStatus);
+                await renderAdminOrdersLedger(); 
+            } catch (err) {
+                alert("Failed to update status: " + err.message);
+            }
+        };
+
+        /* --- VISUAL DISPLAY INTERFACE --- */
+        window.togglePhoto = function(id, view) {
+            // ... (rest of your code)
 
         /* --- VISUAL DISPLAY INTERFACE --- */
         window.togglePhoto = function(id, view) {
