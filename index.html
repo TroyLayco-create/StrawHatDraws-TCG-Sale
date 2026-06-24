@@ -143,6 +143,9 @@
                     <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Password</label>
                     <input type="password" id="auth-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                 </div>
+                <p onclick="sendPasswordResetEmail()" class="text-right text-[11px] text-gray-400 hover:text-red-400 cursor-pointer transition-colors">
+                    Forgot Password?
+                </p>
                 <div id="auth-profile-fields" class="space-y-3">
                     <div>
                         <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Delivery Name</label>
@@ -404,6 +407,38 @@
         <span id="toast-message"></span>
     </div>
 
+    <div id="reset-password-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-[120] p-4">
+        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeResetPasswordModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+
+            <h2 class="text-base font-bold mb-2 flex items-center gap-2">
+                <i data-lucide="key-round" class="text-red-500"></i>
+                Reset Your Password
+            </h2>
+            <p class="text-xs text-gray-400 mb-4">
+                Enter your new password below to complete your password reset.
+            </p>
+
+            <form id="reset-password-form" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">New Password</label>
+                    <input type="password" id="reset-new-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Confirm New Password</label>
+                    <input type="password" id="reset-confirm-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                </div>
+
+                <button type="submit" id="reset-password-submit-btn" class="w-full bg-red-600 hover:bg-red-700 font-bold py-2.5 rounded text-white tracking-wide uppercase flex items-center justify-center gap-2">
+                    Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
@@ -485,6 +520,7 @@
         let pendingCustomBidInputs = {};
         let lastInventorySignature = '';
         let inventoryPollInFlight = false;
+        let recoveryMode = false;
 
         const DEMO_FALLBACK_ITEMS = [
             { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' },
@@ -861,6 +897,69 @@
             document.getElementById('auth-modal').style.display = 'none';
         };
 
+        window.openResetPasswordModal = function() {
+            const modal = document.getElementById('reset-password-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                lucide.createIcons();
+            }
+        };
+
+        window.closeResetPasswordModal = function() {
+            const modal = document.getElementById('reset-password-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        window.sendPasswordResetEmail = async function() {
+            if (!supabaseClient) {
+                showCustomToast("Supabase client is not connected.", "error");
+                return;
+            }
+
+            const email = document.getElementById('auth-email').value.trim();
+            if (!email) {
+                showCustomToast("Enter your email address first.", "error");
+                return;
+            }
+
+            try {
+                const redirectUrl = 'https://troylayco-create.github.io/StrawHatDraws-TCG-Sale/?mode=reset';
+
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: redirectUrl
+                });
+
+                if (error) throw error;
+
+                showCustomToast("Password reset email sent. Check your inbox.", "success");
+            } catch (err) {
+                showCustomToast(`Reset email failed: ${err.message}`, "error");
+            }
+        };
+
+        async function handlePasswordRecoveryFromUrl() {
+            if (!supabaseClient) return;
+
+            try {
+                const currentUrl = new URL(window.location.href);
+                const hash = currentUrl.hash || '';
+                const queryMode = currentUrl.searchParams.get('mode');
+
+                if (
+                    queryMode === 'reset' ||
+                    hash.includes('type=recovery') ||
+                    hash.includes('access_token=')
+                ) {
+                    recoveryMode = true;
+                    openResetPasswordModal();
+                }
+            } catch (err) {
+                console.warn("Recovery URL parse skipped:", err);
+            }
+        }
+
         window.executeSecureLogout = async function() {
             const confirmed = await askCustomConfirmation("Sign Out", "Are you sure you want to log out of your session?");
             if(confirmed) {
@@ -993,6 +1092,56 @@
                 }
             } catch(err) {
                 showCustomToast(`Auth Error: ${err.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHTML;
+                lucide.createIcons();
+            }
+        });
+
+        document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!supabaseClient) {
+                showCustomToast("Supabase client is not connected.", "error");
+                return;
+            }
+
+            const newPassword = document.getElementById('reset-new-password').value;
+            const confirmPassword = document.getElementById('reset-confirm-password').value;
+            const submitBtn = document.getElementById('reset-password-submit-btn');
+            const originalHTML = submitBtn.innerHTML;
+
+            if (!newPassword || newPassword.length < 6) {
+                showCustomToast("Password must be at least 6 characters long.", "error");
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showCustomToast("Passwords do not match.", "error");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4"></i> Updating Password...`;
+            lucide.createIcons();
+
+            try {
+                const { error } = await supabaseClient.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) throw error;
+
+                showCustomToast("Password updated successfully. You can now sign in.", "success");
+                closeResetPasswordModal();
+                recoveryMode = false;
+                document.getElementById('reset-password-form').reset();
+
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            } catch (err) {
+                showCustomToast(`Password reset failed: ${err.message}`, "error");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
@@ -1829,6 +1978,12 @@
 
         if (supabaseClient) {
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                if (event === 'PASSWORD_RECOVERY') {
+                    recoveryMode = true;
+                    openResetPasswordModal();
+                    return;
+                }
+
                 if (session && session.user) {
                     currentUserProfile = {
                         id: session.user.id,
@@ -1863,6 +2018,7 @@
         }
 
         (async () => {
+            await handlePasswordRecoveryFromUrl();
             await hydrateCurrentUserFromSession();
             await fetchLiveInventory(true);
             if (currentUserProfile) {
