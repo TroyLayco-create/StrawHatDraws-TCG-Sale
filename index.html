@@ -1154,12 +1154,18 @@
                 openAuthModal();
                 return;
             }
-
+        
             const card = items.find(i => i.id === cardId);
             if (!card) return;
-
+        
+            // GLOBAL SAFETY GATE: Blocks execution for both Supabase cloud transactions and fallback instances
+            if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
+                showCustomToast("This auction bidding window has already closed!", "error");
+                return;
+            }
+        
             let bidAmount = 0;
-
+        
             if (isCustom) {
                 const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value);
                 if (!customVal || isNaN(customVal) || customVal <= 0) {
@@ -1175,7 +1181,7 @@
                 }
                 bidAmount = Number(card.price) + selectVal;
             }
-
+        
             const bidderName = currentUserProfile.name || "Collector";
             if (supabaseClient) {
                 try {
@@ -1185,13 +1191,13 @@
                         p_bidder_name: bidderName
                     });
                     if (error) throw error;
-
+        
                     if (data) {
                         card.price = Number(data.price);
                         card.top_bidder = data.top_bidder;
                         card.bidding_ends_at = data.bidding_ends_at;
                     }
-
+        
                     pendingCustomBidInputs[cardId] = "";
                     showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success");
                     await fetchLiveInventory(true);
@@ -1199,16 +1205,11 @@
                     showCustomToast(err.message || "Bid failed.", "error");
                 }
             } else {
-                if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
-                    showCustomToast("This auction bidding window has already closed!", "error");
-                    return;
-                }
-
                 if (bidAmount <= Number(card.price)) {
                     showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
                     return;
                 }
-
+        
                 card.price = bidAmount;
                 card.top_bidder = bidderName;
                 pendingCustomBidInputs[cardId] = "";
