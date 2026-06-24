@@ -1785,29 +1785,43 @@
                 } else {
                     biddingHeaderMarkup = `
                         <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
-                            <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder: <span class="text-white">${topBidderName}</span>
+                            <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder: 
+                            <span class="text-white">${topBidderName}</span>
                         </div>
                         <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString()}">
                         </div>
                     `;
-                    const bidIncrements = [10, 20, 50, 100, 200, 500];
-                    const selectOptions = bidIncrements.map(val =>
-                        `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>`
-                    ).join('');
-                    actionMarkup = `
-                        <div class="flex flex-col gap-2 mt-2 w-full text-xs">
-                            <div class="flex gap-1.5">
-                                <select id="bid-select-${item.id}" onchange="pendingBidSelections[${item.id}] = this.value" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none">
-                                    ${selectOptions}
-                                </select>
-                                <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
+                
+                    // Calculate if the current item's bidding timeline has expired
+                    const isAuctionEnded = item.bidding_ends_at && new Date(item.bidding_ends_at).getTime() < Date.now();
+                
+                    if (isAuctionEnded) {
+                        // Swap inputs out for a disabled visual lockout layout
+                        actionMarkup = `
+                            <div class="w-full text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg text-xs mt-2 uppercase tracking-wider select-none">
+                                Bidding Closed
                             </div>
-                            <div class="flex gap-1.5">
-                                <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Custom Bid Add-On (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
-                                <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
+                        `;
+                    } else {
+                        const bidIncrements = [10, 20, 50, 100, 200, 500];
+                        const selectOptions = bidIncrements.map(val =>
+                            `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>`
+                        ).join('');
+                        actionMarkup = `
+                            <div class="flex flex-col gap-2 mt-2 w-full text-xs">
+                                <div class="flex gap-1.5">
+                                    <select id="bid-select-${item.id}" onchange="pendingBidSelections[${item.id}] = this.value" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none">
+                                        ${selectOptions}
+                                    </select>
+                                    <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
+                                </div>
+                                <div class="flex gap-1.5">
+                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Custom Bid Add-On (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
+                                    <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
 
                 div.innerHTML = `
