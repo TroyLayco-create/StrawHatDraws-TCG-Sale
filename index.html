@@ -1414,6 +1414,14 @@
         }
 
         window.changeOrderStatus = async function(orderId, newStatus) {
+            // 1. Update local storage cache immediately so local/mock orders work
+            const localOrder = localOrdersBackup.find(o => String(o.id) === String(orderId));
+            if (localOrder) {
+                localOrder.order_status = newStatus;
+                saveLocalOrders(localOrdersBackup);
+            }
+        
+            // 2. Push change to the cloud if Supabase is connected
             if (supabaseClient) {
                 try {
                     const { error } = await supabaseClient.from('Orders').update({ order_status: newStatus }).eq('id', orderId);
@@ -1421,8 +1429,13 @@
                 } catch(err) {
                     console.warn(`Failed to update status in cloud database: ${err.message}`);
                 }
+            } else {
+                // 3. Fallback: If running without a database, manually refresh the UI 
+                // since no real-time stream exists to do it for us
+                renderAdminOrdersLedger();
             }
             
+            showCustomToast("Order status updated successfully!", "success");
         };
 
         window.purgeOrderLogRecord = async function(id, buttonEl) {
