@@ -1182,7 +1182,18 @@
 
             try {
                 await fetchLiveInventory(false);
-
+            
+                // Enhanced: Validate fresh inventory quantities against requested cart amounts
+                for (const cartItemId of cart) {
+                    const freshCardRecord = items.find(i => i.id === cartItemId);
+                    const desiredQtyInCart = cart.filter(id => id === cartItemId).length;
+            
+                    if (!freshCardRecord || freshCardRecord.stock < desiredQtyInCart) {
+                        const problematicCardName = freshCardRecord ? freshCardRecord.name : "Selected Card";
+                        throw new Error(`Inventory Conflict: "${problematicCardName}" has sold out or has insufficient quantity available since your session loaded.`);
+                    }
+                }
+            
                 let customerName = "";
                 let customerEmail = "";
                 let deliveryAddress = "N/A - Facebook Direct Contact";
@@ -1592,7 +1603,7 @@
                     biddingHeaderMarkup = `
                         <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
                             <i data-lucide="crown" class="w-4 h-4"></i> High Bidder:
-                            <span class="text-white">${topBidderName}</span>
+                            <span class="text-white" data-bidder-id="${item.id}">${topBidderName}</span>
                         </div>
                         <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || ''}">
                         </div>
@@ -1656,7 +1667,9 @@
                         </div>
                         <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
                             <div class="flex justify-between items-center gap-3">
-                                <span class="text-sm font-bold text-gray-100">${activeListingSection === 'sale' ? formatPHP(item.price) : 'Current Bid: ' + formatPHP(item.price)}</span>
+                                <span class="text-sm font-bold text-gray-100" data-price-id="${item.id}">
+                                    ${activeListingSection === 'sale' ? formatPHP(item.price) : 'Current Bid: ' + formatPHP(item.price)}
+                                </span>
                                 ${activeListingSection === 'sale' ? `<div>${actionMarkup}</div>` : ''}
                             </div>
                             ${activeListingSection === 'bidding' ? `
@@ -1715,12 +1728,14 @@
             countdowns.forEach(el => {
                 const expiryTime = el.getAttribute('data-timer-expiry');
                 if (!expiryTime || expiryTime.trim() === '') return;
-
+        
                 const expiryDate = new Date(expiryTime);
                 const timeRemaining = expiryDate.getTime() - Date.now();
-
+        
+                let incomingMarkupOutput = '';
+        
                 if (timeRemaining <= 0) {
-                    el.innerHTML = `<span class="text-red-500 font-bold uppercase text-xs">🔴 Ended</span>`;
+                    incomingMarkupOutput = `<span class="text-red-500 font-bold uppercase text-xs">🔴 Ended</span>`;
                 } else {
                     const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
                     const hrs = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -1731,39 +1746,51 @@
                     const formattedDate = expiryDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
                     const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true });
                     const dayString = days > 0 ? `${days}d ` : '';
-
-                    el.innerHTML = `
+        
+                    incomingMarkupOutput = `
                         <div class="text-yellow-500 font-mono font-bold">⏳ ${dayString}${formatNum(hrs)}h ${formatNum(mins)}m ${formatNum(secs)}s</div>
                         <div class="text-[10px] text-gray-300 font-medium mt-0.5">Ends ${formattedDate} at ${ampm}</div>
                     `;
                 }
+        
+                // Enhanced: Guard condition protecting the browser context from layout thrashing if text hasn't changed
+                if (el.innerHTML !== incomingMarkupOutput) {
+                    el.innerHTML = incomingMarkupOutput;
+                }
             });
         }, 1000);
 
-        setInterval(async () => {
-            if (supabaseClient) return;
-            if (inventoryPollInFlight) return;
-            inventoryPollInFlight = true;
-            try {
-                await fetchLiveInventory(false);
-            } finally {
-                inventoryPollInFlight = false;
-            }
-        }, 5000);
-
-        document.getElementById('search-input').addEventListener('input', renderGrid);
-        document.getElementById('rarity-select').addEventListener('change', renderGrid);
-        document.getElementById('sort-select').addEventListener('change', renderGrid);
-
-        if (supabaseClient) {
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                if (event === 'PASSWORD_RECOVERY') {
-                    recoveryMode = true;
-                    openResetPasswordModal();
-                    return;
+        // Enhanced: Safe recursive loop design to prevent stacking concurrent network calls
+            async function runSafeInventoryPollingLoop() {
+                if (supabaseClient) return;
+                if (inventoryPollInFlight) return;
+                
+                inventoryPollInFlight = true;
+                try {
+                    await fetchLiveInventory(false);
+                } catch (pollErr) {
+                    console.warn("Inventory fallback poll issue encountered:", pollErr);
+                } finally {
+                    inventoryPollInFlight = false;
+                    // Schedule the next poll cycle only AFTER the current one completely completes
+                    setTimeout(runSafeInventoryPollingLoop, 5000);
                 }
-
-                if (session && session.user) {
+            }
+            
+            // Instantiate the recursive interval replacement loop hook
+            if (!supabaseClient) {
+                setTimeout(runSafeInventoryPollingLoop, 5000);
+            }
+            
+            if (supabaseClient) {
+                supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'PASSWORD_RECOVERY') {
+                        recoveryMode = true;
+                        openResetPasswordModal();
+                        return;
+                    }
+            
+                    if (session && session.user) {
                     currentUserProfile = {
                         id: session.user.id,
                         name: session.user.user_metadata?.name || session.user.email.split('@')[0],
@@ -1812,10 +1839,21 @@
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards' }, (payload) => {
                         const targetIndex = items.findIndex(i => i.id === payload.new.id);
                         if (targetIndex !== -1) {
+                            // Update internal state quietly in the background
                             items[targetIndex].price = Number(payload.new.price);
                             items[targetIndex].top_bidder = payload.new.top_bidder;
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
-                            renderGrid(); 
+                            
+                            // Enhanced: Pinpoint targeted nodes to preserve input field focus & ongoing user typing
+                            const bidderElement = document.querySelector(`[data-bidder-id="${payload.new.id}"]`);
+                            const priceElement = document.querySelector(`[data-price-id="${payload.new.id}"]`);
+                            
+                            if (bidderElement) {
+                                bidderElement.innerText = payload.new.top_bidder || 'No bids yet';
+                            }
+                            if (priceElement) {
+                                priceElement.innerText = 'Current Bid: ' + formatPHP(Number(payload.new.price));
+                            }
                         }
                     })
                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'cards' }, (payload) => {
