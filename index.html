@@ -149,9 +149,7 @@
                     <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Password</label>
                     <input type="password" id="auth-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                 </div>
-                <p onclick="sendPasswordResetEmail()" class="text-right text-[11px] text-gray-400 hover:text-red-400 cursor-pointer transition-colors">
-                    Forgot Password?
-                </p>
+                <p onclick="sendPasswordResetEmail()" class="text-right text-[11px] text-gray-400 hover:text-red-400 cursor-pointer transition-colors">Forgot Password?</p>
                 <div id="auth-profile-fields" class="space-y-3">
                     <div>
                         <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Name</label>
@@ -174,7 +172,7 @@
             
             <div id="checkout-form-container">
                 <h2 class="text-xl font-bold mb-1 flex items-center gap-2"><i data-lucide="shopping-bag" class="text-red-500"></i> Secure Checkout</h2>
-                <p id="checkout-welcome-tip" class="text-xs text-gray-400 mb-4">Checking out as Guest.</p>
+                <p id="checkout-welcome-tip" class="text-xs text-gray-400 mb-4">Review your selected cards below before finalizing.</p>
                 
                 <div id="checkout-items-list" class="max-h-36 overflow-y-auto bg-black/30 rounded-lg p-2.5 mb-4 text-xs space-y-2 border border-gray-800"></div>
 
@@ -184,53 +182,38 @@
                 </div>
 
                 <form id="checkout-form" class="space-y-3.5">
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
-                        <input type="text" id="cust-name" required placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    <div id="checkout-logged-in-msg" class="hidden text-sm text-green-400 font-medium bg-green-950/20 border border-green-500/20 p-3 rounded-lg text-center">
+                        ✨ You are signed in! Click "Place Order" below to quickly confirm and process your items.
                     </div>
 
-                    <div id="checkout-email-wrapper">
-                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
-                        <input type="email" id="cust-email" required placeholder="juan@example.com" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                    </div>
+                    <div id="checkout-guest-fields" class="space-y-3.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
+                            <input type="text" id="cust-name" placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                        </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">House / Unit #, Bldg</label>
-                            <input type="text" id="cust-house" required placeholder="e.g. Rm 204 Bldg B" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
+                            <input type="email" id="cust-email" placeholder="juan@example.com" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Street Name</label>
-                            <input type="text" id="cust-street" required placeholder="e.g. 104 Katipunan Ave" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Barangay</label>
-                            <input type="text" id="cust-barangay" required placeholder="e.g. Loyola Heights" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Delivery Address</label>
+                            <textarea id="cust-address" placeholder="House No., Street Name, Barangay, City, Province, Postal Code" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500 h-16 resize-none"></textarea>
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">City / Municipality</label>
-                            <input type="text" id="cust-city" required placeholder="e.g. Quezon City" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Region / Province</label>
-                            <input type="text" id="cust-region" required placeholder="e.g. Metro Manila" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Facebook Page URL or Profile Handle</label>
+                            <input type="text" id="cust-facebook" placeholder="e.g., https://www.facebook.com/username or handle" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
                         </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Postal Code</label>
-                            <input type="text" id="cust-postal" required placeholder="e.g. 1108" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+
+                        <div class="border-t border-gray-800 pt-3 mt-2">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-red-400 mb-1">🎁 Create Member Account? (Optional)</label>
+                            <p class="text-[10px] text-gray-400 mb-2">Type a password below to securely save your profile details. Leave it empty if you prefer checkout as a pure guest.</p>
+                            <input type="password" id="cust-password" placeholder="Enter password (minimum 6 characters)" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Phone Number</label>
-                        <input type="tel" id="cust-phone" required placeholder="09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                    </div>
                     <button type="button" onclick="submitCheckoutOrder()" id="checkout-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow-lg flex items-center justify-center gap-2 mt-2 uppercase tracking-wider text-xs">Place Order</button>
                 </form>
             </div>
@@ -238,24 +221,7 @@
             <div id="checkout-success-container" class="hidden text-center py-4">
                 <div class="bg-green-500/10 text-green-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-500/30"><i data-lucide="check-circle" class="w-8 h-8"></i></div>
                 <h2 class="text-xl font-bold text-white mb-1">Order Confirmed!</h2>
-                <p class="text-xs text-gray-400 mb-4">Your data and inventory levels have been synchronized successfully.</p>
-                
-                <div id="guest-conversion-box" class="hidden mt-6 border-t border-gray-800 pt-6 text-left space-y-3 bg-[#251818]/10 p-3.5 rounded-lg border border-red-500/10">
-                    <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="sparkles" class="w-4 h-4"></i> Save Details For Next Purchase?</h3>
-                    <p class="text-[11px] text-gray-400 leading-relaxed">Choose a password below to convert your guest session into a permanent member profile. You can log in next time to instantly retrieve your structured delivery address and track real-time orders!</p>
-                    
-                    <form id="conversion-register-form" class="space-y-3 mt-2">
-                        <div class="text-[10px] font-mono text-gray-500">Registered Email: <span id="conversion-email-label" class="text-red-400 font-bold"></span></div>
-                        <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Choose Password</label>
-                            <input type="password" id="conversion-password" required placeholder="Choose a secure password" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-xs text-white focus:outline-none focus:border-red-500">
-                        </div>
-                        <button type="submit" id="conversion-submit-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-[11px] tracking-wide uppercase flex items-center justify-center gap-1.5">
-                            <i data-lucide="user-check" class="w-3.5 h-3.5"></i> Create My Account
-                        </button>
-                    </form>
-                </div>
-
+                <p class="text-xs text-gray-400 mb-4">Your order data has been synchronized and processed successfully.</p>
                 <button onclick="closeCheckoutModal()" class="w-full bg-[#2a2a2a] hover:bg-[#333] border border-gray-700 text-gray-200 py-2 rounded-lg text-sm font-semibold mt-4">Return to Catalog</button>
             </div>
         </div>
@@ -388,29 +354,20 @@
             <button onclick="closeResetPasswordModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
                 <i data-lucide="x" class="w-4 h-4"></i>
             </button>
-
             <h2 class="text-base font-bold mb-2 flex items-center gap-2">
-                <i data-lucide="key-round" class="text-red-500"></i>
-                Reset Your Password
+                <i data-lucide="key-round" class="text-red-500"></i> Reset Your Password
             </h2>
-            <p class="text-xs text-gray-400 mb-4">
-                Enter your new password below to complete your password reset.
-            </p>
-
+            <p class="text-xs text-gray-400 mb-4">Enter your new password below to complete your password reset.</p>
             <form id="reset-password-form" class="space-y-3.5 text-xs">
                 <div>
                     <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">New Password</label>
                     <input type="password" id="reset-new-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                 </div>
-
                 <div>
                     <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Confirm New Password</label>
                     <input type="password" id="reset-confirm-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                 </div>
-
-                <button type="submit" id="reset-password-submit-btn" class="w-full bg-red-600 hover:bg-red-700 font-bold py-2.5 rounded text-white tracking-wide uppercase flex items-center justify-center gap-2">
-                    Update Password
-                </button>
+                <button type="submit" id="reset-password-submit-btn" class="w-full bg-red-600 hover:bg-red-700 font-bold py-2.5 rounded text-white tracking-wide uppercase flex items-center justify-center gap-2">Update Password</button>
             </form>
         </div>
     </div>
@@ -465,7 +422,7 @@
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;'); // <--  Fixed with safe HTML string entities
+                .replace(/'/g, '&#39;');
         }
 
         function formatPHP(num) {
@@ -500,7 +457,7 @@
         const DEMO_FALLBACK_ITEMS = [
             { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' },
             { id: 2, name: "Roronoa Zoro", set: "OP01-025", rarity: "SR", price: 950, stock: 5, frontImg: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' },
-            { id: 3, name: "Nami (Special Auction)", set: "OP01-016", rarity: "SP", price: 6200, stock: 1, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'bidding', top_bidder: 'ZoroLover99', bidding_ends_at: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString() }
+            { id: 3, name: "Nami (Special Auction)", set: "OP01-016", rarity: "SP", price: 6200, stock: 1, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'bidding', top_bidder: 'No bids yet', bidding_ends_at: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString() }
         ];
 
         function showCustomToast(message, type = 'info') {
@@ -531,7 +488,6 @@
                 const modal = document.getElementById('custom-confirm-modal');
                 const titleEl = document.getElementById('confirm-modal-title');
                 const msgEl = document.getElementById('confirm-modal-message');
-                
                 const cancelBtn = document.getElementById('confirm-modal-cancel');
                 const submitBtn = document.getElementById('confirm-modal-submit');
 
@@ -690,14 +646,9 @@
                     if (currentUserProfile.id !== 'guest') {
                         if (o.user_id === currentUserProfile.id) return true;
                     }
-
-                    const isRealPhone = (ph) => ph && ph !== "None" && ph.trim().length > 5;
-                    if (isRealPhone(o.phone_number) && isRealPhone(currentUserProfile.phone)) {
-                        if (o.phone_number.trim() === currentUserProfile.phone.trim()) return true;
-                    }
-
                     return false;
                 });
+
                 if (filteredOrders.length > 0) {
                     container.classList.remove('hidden');
                     queueBox.innerHTML = '';
@@ -742,54 +693,29 @@
             }
         }
 
-        async function performStructuredAddressValidation(house, street, barangay, city, region, postal, phone) {
-            const cleanedPhone = phone.trim().replace(/[\s\-().]/g, '');
-            const phoneRegex = /^(09|\+639|639)\d{9}$/;
-            if (!phoneRegex.test(cleanedPhone)) {
-                throw new Error("Invalid mobile number. Must be a valid Philippine mobile number (e.g. 09171234567).");
+        async function performSimpleAddressAndFBValidation(address, fbInput) {
+            const cleanedAddress = address ? address.trim() : "";
+            let facebookPage = fbInput ? fbInput.trim() : "";
+
+            if (!cleanedAddress || cleanedAddress.length < 10) {
+                throw new Error("Please enter a complete delivery address for tracking validation dispatch.");
             }
 
-            if (!house || !street || !barangay || !city || !region || !postal) {
-                throw new Error("All address fields are required to calculate delivery coordinates.");
+            const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i;
+            const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
+
+            if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) {
+                throw new Error("Please enter a valid live Facebook profile URL or handle link for order notifications.");
             }
 
-            const formattedAddress = `${house}, ${street}, Brgy. ${barangay}, ${city}, ${region}, ${postal}, Philippines`;
-            const fallbackMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formattedAddress)}`;
-
-            try {
-                const nominatimQuery = `${house} ${street}, ${barangay}, ${city}, ${region}, Philippines`;
-                const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nominatimQuery)}&countrycodes=ph&limit=1&addressdetails=1`;
-
-                const response = await fetch(nominatimUrl, {
-                    headers: { 'Accept': 'application/json', 'User-Agent': 'StrawHatDraws-TCG-Sales' }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        const result = data[0];
-                        return {
-                            phone: cleanedPhone,
-                            address: formattedAddress,
-                            mapsPin: `https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`,
-                            structured: { house, street, barangay, city, region, postal }
-                        };
-                    }
-                }
-
-                return {
-                    phone: cleanedPhone,
-                    address: formattedAddress,
-                    mapsPin: fallbackMapsUrl,
-                    structured: { house, street, barangay, city, region, postal }
-                };
-            } catch (err) {
-                return {
-                    phone: cleanedPhone,
-                    address: formattedAddress,
-                    mapsPin: fallbackMapsUrl,
-                    structured: { house, street, barangay, city, region, postal }
-                };
+            if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) {
+                facebookPage = `https://www.facebook.com/${facebookPage}`;
             }
+
+            return {
+                address: cleanedAddress,
+                facebook: facebookPage
+            };
         }
 
         async function hydrateCurrentUserFromSession() {
@@ -814,32 +740,12 @@
         window.submitCheckoutOrder = async function() {
             const form = document.getElementById('checkout-form');
             if (!form) {
-                showCustomToast("Checkout form not found.", "error");
+                showCustomToast("Checkout form structure missing.", "error");
                 return;
             }
 
-            const emailWrapper = document.getElementById('checkout-email-wrapper');
-            const emailInput = document.getElementById('cust-email');
-
-            if (currentUserProfile && currentUserProfile.id !== 'guest') {
-                if (emailWrapper) emailWrapper.style.display = 'none';
-                if (emailInput) emailInput.required = false;
-            } else {
-                if (emailWrapper) emailWrapper.style.display = 'block';
-                if (emailInput) {
-                    emailInput.required = true;
-                    if (!emailInput.value.trim()) {
-                        showCustomToast("Email address is required for guest checkout.", "error");
-                        emailInput.focus();
-                        return;
-                    }
-                }
-            }
-
-            if (!form.reportValidity()) {
-                showCustomToast("Please complete all required checkout fields.", "error");
-                return;
-            }
+            const confirmed = await askCustomConfirmation("Place Order", "Are you sure you want to finalize this order checkout sequence?");
+            if (!confirmed) return;
 
             const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
             form.dispatchEvent(submitEvent);
@@ -881,7 +787,7 @@
             }
 
             try {
-                const redirectUrl = 'https://troylayco-create.github.io/StrawHatDraws-TCG-Sale/?mode=reset';
+                const redirectUrl = window.location.origin + window.location.pathname + '?mode=reset';
                 const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
                     redirectTo: redirectUrl
                 });
@@ -977,7 +883,6 @@
                     return;
                 }
 
-                // FACEBOOK VALIDATION GATEWAY: Checks if input matches a standard FB page URL pattern or standard text username format
                 const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i;
                 const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
 
@@ -986,7 +891,6 @@
                     return;
                 }
 
-                // If user just input a raw text handle, normalize it into a proper destination link format automatically
                 if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) {
                     facebookPage = `https://www.facebook.com/${facebookPage}`;
                 }
@@ -997,11 +901,10 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i> Syncing Secure Credentials...`;
             lucide.createIcons();
-
             try {
                 if (!supabaseClient) {
                     currentUserProfile = {
-                        id: "guest",
+                        id: "fallback_user",
                         name,
                         facebook_page: facebookPage
                     };
@@ -1016,6 +919,7 @@
                     const { data, error } = await supabaseClient.auth.signUp({
                         email, password,
                         options: {
+                            emailRedirectTo: window.location.origin + window.location.pathname,
                             data: {
                                 name,
                                 facebook_page: facebookPage
@@ -1028,7 +932,6 @@
                         localStorage.setItem('shd_last_reg_timestamp', Date.now());
                     }
 
-                    // Checking if email confirmation is actively pending (session will return null)
                     if (data.user && !data.session) {
                         showCustomToast("Registration initialized! Please check your email inbox to verify your account before signing in.", "info");
                     } else {
@@ -1044,12 +947,13 @@
                 }
             } catch(err) {
                 showCustomToast(`Auth Error: ${err.message}`, 'error');
-            } finally {
+            } finaly {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 lucide.createIcons();
             }
         });
+
         document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -1091,13 +995,15 @@
                 window.history.replaceState({}, document.title, cleanUrl);
             } catch (err) {
                 showCustomToast(`Password reset failed: ${err.message}`, "error");
-            } finally {
+            } finaly {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 lucide.createIcons();
             }
         });
+
         window.placeListingBid = async function(cardId, isCustom = false) {
+            // LOCKOUT BLOCK: Strictly restrict live bidding execution to verified member profiles
             if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) {
                 showCustomToast("Only registered accounts can bid! Please sign in or create an account.", "error");
                 openAuthModal();
@@ -1107,14 +1013,12 @@
             const card = items.find(i => i.id === cardId);
             if (!card) return;
         
-            // GLOBAL SAFETY GATE: Blocks execution for both Supabase cloud transactions and fallback instances
             if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
                 showCustomToast("This auction bidding window has already closed!", "error");
                 return;
             }
         
             let bidAmount = 0;
-        
             if (isCustom) {
                 const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value);
                 if (!customVal || isNaN(customVal) || customVal <= 0) {
@@ -1131,7 +1035,6 @@
                 bidAmount = Number(card.price) + selectVal;
             }
         
-            // This block is now perfectly closed and separated!
             if (bidAmount <= Number(card.price)) {
                 showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
                 return;
@@ -1208,32 +1111,21 @@
 
             document.getElementById('checkout-grand-total').innerText = formatPHP(runningSum);
 
-            const emailWrapper = document.getElementById('checkout-email-wrapper');
-            const emailInput = document.getElementById('cust-email');
+            const loggedInMsg = document.getElementById('checkout-logged-in-msg');
+            const guestFields = document.getElementById('checkout-guest-fields');
+
             if (currentUserProfile && currentUserProfile.id !== 'guest') {
-                document.getElementById('cust-name').value = currentUserProfile.name || '';
-                document.getElementById('cust-phone').value = currentUserProfile.phone || '';
-
-                if (emailWrapper) emailWrapper.style.display = 'none';
-                if (emailInput) emailInput.required = false;
-                if (supabaseClient) {
-                    try {
-                        const { data: { session } } = await supabaseClient.auth.getSession();
-                        if (emailInput) emailInput.value = session?.user?.email || '';
-                    } catch (e) {}
-                }
-
-                if (currentUserProfile.structured) {
-                    document.getElementById('cust-house').value = currentUserProfile.structured.house || '';
-                    document.getElementById('cust-street').value = currentUserProfile.structured.street || '';
-                    document.getElementById('cust-barangay').value = currentUserProfile.structured.barangay || '';
-                    document.getElementById('cust-city').value = currentUserProfile.structured.city || '';
-                    document.getElementById('cust-region').value = currentUserProfile.structured.region || '';
-                    document.getElementById('cust-postal').value = currentUserProfile.structured.postal || '';
-                }
+                loggedInMsg.classList.remove('hidden');
+                guestFields.classList.add('hidden');
             } else {
-                if (emailWrapper) emailWrapper.style.display = 'block';
-                if (emailInput) emailInput.required = true;
+                loggedInMsg.classList.add('hidden');
+                guestFields.classList.remove('hidden');
+                
+                document.getElementById('cust-name').value = '';
+                document.getElementById('cust-email').value = '';
+                document.getElementById('cust-address').value = '';
+                document.getElementById('cust-facebook').value = '';
+                document.getElementById('cust-password').value = '';
             }
 
             document.getElementById('checkout-modal').style.display = 'flex';
@@ -1251,57 +1143,61 @@
             const originalHTML = submitBtn.innerHTML;
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2 inline-block"></i> Verifying Stocks & Map Pins...`;
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2 inline-block"></i> Processing Transaction...`;
             lucide.createIcons();
 
             try {
                 await fetchLiveInventory(false);
 
-                const house = document.getElementById('cust-house').value;
-                const street = document.getElementById('cust-street').value;
-                const barangay = document.getElementById('cust-barangay').value;
-                const city = document.getElementById('cust-city').value;
-                const region = document.getElementById('cust-region').value;
-                const postal = document.getElementById('cust-postal').value;
-                const phone = document.getElementById('cust-phone').value;
+                let customerName = "";
+                let customerEmail = "";
+                let deliveryAddress = "";
+                let facebookContact = "";
+                let optPassword = "";
 
-                const validationResult = await performStructuredAddressValidation(
-                    house, street, barangay, city, region, postal, phone
-                );
-                const guestEmailInput = document.getElementById('cust-email');
-                let parsedEmail = guestEmailInput ? guestEmailInput.value.trim() : "";
-                if (currentUserProfile && currentUserProfile.id !== 'guest' && supabaseClient) {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    parsedEmail = session?.user?.email || parsedEmail || "";
+                if (currentUserProfile && currentUserProfile.id !== 'guest') {
+                    customerName = currentUserProfile.name || "Registered Member";
+                    deliveryAddress = currentUserProfile.address || "Profile Address Provided On File";
+                    facebookContact = currentUserProfile.facebook_page || "Linked Account Profile";
+                    
+                    if (supabaseClient) {
+                        const { data: { session } } = await supabaseClient.auth.getSession();
+                        customerEmail = session?.user?.email || "";
+                    }
+                } else {
+                    customerName = document.getElementById('cust-name').value.trim();
+                    customerEmail = document.getElementById('cust-email').value.trim();
+                    const inputAddress = document.getElementById('cust-address').value;
+                    const inputFB = document.getElementById('cust-facebook').value;
+                    optPassword = document.getElementById('cust-password').value;
+
+                    if (!customerName || !customerEmail) {
+                        throw new Error("Name and Email inputs are mandatory for checkout records verification.");
+                    }
+
+                    const validatedInfo = await performSimpleAddressAndFBValidation(inputAddress, inputFB);
+                    deliveryAddress = validatedInfo.address;
+                    facebookContact = validatedInfo.facebook;
+
+                    if (optPassword && optPassword.length < 6) {
+                        throw new Error("Your optional profile creation password must contain at least 6 characters.");
+                    }
                 }
 
-                lastGuestCheckoutData = {
-                    email: parsedEmail,
-                    name: document.getElementById('cust-name').value,
-                    house,
-                    street,
-                    barangay,
-                    city,
-                    region,
-                    postal,
-                    phone: validationResult.phone,
-                    address: validationResult.address,
-                    mapsPin: validationResult.mapsPin
-                };
                 const orderPayload = {
-                    customer_name: lastGuestCheckoutData.name,
-                    customer_email: lastGuestCheckoutData.email || null,
-                    shipping_address: validationResult.address,
-                    phone_number: validationResult.phone,
-                    google_maps_pin: validationResult.mapsPin,
+                    customer_name: customerName,
+                    customer_email: customerEmail || null,
+                    shipping_address: deliveryAddress,
+                    phone_number: facebookContact, 
+                    google_maps_pin: facebookContact,
                     items_ordered: JSON.parse(JSON.stringify([...cart])),
                     order_status: "Pending",
                     user_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null
                 };
+
                 let orderWriteSuccessful = false;
 
                 if (supabaseClient) {
-                    console.log("Attempting secure order RPC with payload:", orderPayload);
                     const { data, error } = await supabaseClient.rpc('place_order_secure', {
                         p_customer_name: orderPayload.customer_name,
                         p_customer_email: orderPayload.customer_email,
@@ -1312,29 +1208,13 @@
                         p_user_id: orderPayload.user_id
                     });
 
-                    if (error) {
-                        console.error("Secure order RPC failed:", error);
-                        console.error("Rejected payload:", orderPayload);
-                        throw new Error(`Secure checkout failed: ${error.message}`);
-                    }
-
+                    if (error) throw new Error(`Database Secure RPC Failed: ${error.message}`);
                     if (data) {
                         orderPayload.id = data.id;
                         orderPayload.order_status = data.order_status || "Pending";
                         orderWriteSuccessful = true;
                     }
                 } else {
-                    const requestedCounts = {};
-                    cart.forEach(id => { requestedCounts[id] = (requestedCounts[id] || 0) + 1; });
-                    for (const [idStr, qty] of Object.entries(requestedCounts)) {
-                        const cardId = Number(idStr);
-                        const targetCard = items.find(i => i.id === cardId);
-                        const currentSystemStock = targetCard ? targetCard.stock : 0;
-                        if (qty > currentSystemStock) {
-                            throw new Error(`Insufficient stock for ${targetCard ? targetCard.name : 'Unknown Card'}. Requested ${qty}, available ${currentSystemStock}.`);
-                        }
-                    }
-
                     cart.forEach(id => {
                         const targetCard = items.find(i => i.id === id);
                         if (targetCard && targetCard.stock > 0) {
@@ -1342,101 +1222,50 @@
                             saveLocalStock(id, targetCard.stock);
                         }
                     });
-
                     orderPayload.id = "ORD-" + Date.now();
                     orderWriteSuccessful = true;
                 }
 
                 if (orderWriteSuccessful) {
+                    if (optPassword && (!currentUserProfile || currentUserProfile.id === 'guest') && supabaseClient) {
+                        try {
+                            await supabaseClient.auth.signUp({
+                                email: customerEmail,
+                                password: optPassword,
+                                options: {
+                                    emailRedirectTo: window.location.origin + window.location.pathname,
+                                    data: { name: customerName, facebook_page: facebookContact, address: deliveryAddress }
+                                }
+                            });
+                            showCustomToast("Account initialized! Check email inbox to verify login profile credentials.", "info");
+                        } catch (accountErr) {
+                            console.warn("Background registration initialization dropped:", accountErr.message);
+                        }
+                    }
+
                     localOrdersBackup.unshift(orderPayload);
                     saveLocalOrders(localOrdersBackup);
 
                     cart = [];
                     updateCartUI();
-
                     await fetchLiveInventory(true);
 
                     document.getElementById('checkout-form-container').classList.add('hidden');
                     document.getElementById('checkout-success-container').classList.remove('hidden');
-
-                    const conversionBox = document.getElementById('guest-conversion-box');
-                    if ((!currentUserProfile || currentUserProfile.id === 'guest') && supabaseClient && lastGuestCheckoutData && lastGuestCheckoutData.email) {
-                        document.getElementById('conversion-email-label').innerText = lastGuestCheckoutData.email;
-                        conversionBox.classList.remove('hidden');
-                    } else {
-                        conversionBox.classList.add('hidden');
-                    }
-
                     renderGrid();
-                    showCustomToast("Successfully processed order transaction!", "success");
-
+                    showCustomToast("Successfully processed order item checkout!", "success");
                     if (currentUserProfile) await fetchBuyerRealtimeOrders();
-                    if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
-                        await renderAdminOrdersLedger();
-                    }
                 }
             } catch (err) {
-                console.error("Checkout failed:", err);
-                showCustomToast(err.message || "Checkout failed.", 'error');
-            } finally {
+                console.error("Checkout transaction dropped:", err);
+                showCustomToast(err.message || "Checkout execution interface error.", 'error');
+            } finaly {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 lucide.createIcons();
             }
         });
-        document.getElementById('conversion-register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!supabaseClient || !lastGuestCheckoutData) return;
 
-            const password = document.getElementById('conversion-password').value;
-            const submitBtn = document.getElementById('conversion-submit-btn');
-            const originalHTML = submitBtn.innerHTML;
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-3.5 h-3.5"></i> Initializing Account...`;
-            lucide.createIcons();
-
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email: lastGuestCheckoutData.email,
-                    password,
-                    options: {
-                        data: {
-                            name: lastGuestCheckoutData.name,
-                            address: lastGuestCheckoutData.address,
-                            phone: lastGuestCheckoutData.phone,
-                            google_maps_pin: lastGuestCheckoutData.mapsPin,
-                            structured_house: lastGuestCheckoutData.house,
-                            structured_street: lastGuestCheckoutData.street,
-                            structured_barangay: lastGuestCheckoutData.barangay,
-                            structured_city: lastGuestCheckoutData.city,
-                            structured_region: lastGuestCheckoutData.region,
-                            structured_postal: lastGuestCheckoutData.postal
-                        }
-                    }
-                });
-                if (error) throw error;
-
-                if (data.user) {
-                    await supabaseClient.from('profiles').insert([{
-                        id: data.user.id,
-                        name: lastGuestCheckoutData.name,
-                        address: lastGuestCheckoutData.address,
-                        phone: lastGuestCheckoutData.phone,
-                        google_maps_pin: lastGuestCheckoutData.mapsPin
-                    }]);
-                }
-
-                showCustomToast("Account successfully created! You are now logged in.", "success");
-                document.getElementById('guest-conversion-box').classList.add('hidden');
-            } catch(err) {
-                showCustomToast(`Conversion Failed: ${err.message}`, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalHTML;
-                lucide.createIcons();
-            }
-        });
         window.launchZoomModal = function(imgSrc) {
             const targetImg = document.getElementById('zoom-target-img');
             targetImg.src = imgSrc;
@@ -1560,12 +1389,11 @@
                     <td class="p-3 font-semibold text-white">
                         <div>${escapeHtml(ord.customer_name)}</div>
                         <div class="text-[10px] text-gray-500">${escapeHtml(ord.customer_email || '')}</div>
-                        <div class="text-[10px] text-gray-500 font-mono">${escapeHtml(ord.phone_number || '')}</div>
                     </td>
                     <td class="p-3">
                         <div class="text-gray-400 max-w-xs leading-relaxed text-[11px]">${escapeHtml(ord.shipping_address || '')}</div>
                         <a href="${mapsPinUrl}" target="_blank" class="mt-2 inline-flex items-center gap-1.5 text-[10px] text-red-400 hover:text-red-300 font-bold bg-red-950/20 px-2 py-0.5 rounded border border-red-500/20 transition-colors">
-                            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Open Google Maps Pin
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Link Destination
                         </a>
                     </td>
                     <td class="p-3">${itemsListHTML}</td>
@@ -1736,19 +1564,14 @@
                 } else {
                     biddingHeaderMarkup = `
                         <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
-                            <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder: 
+                            <i data-lucide="crown" class="w-4 h-4"></i> High Bidder: 
                             <span class="text-white">${topBidderName}</span>
                         </div>
-                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" 
-                             data-timer-expiry="${item.bidding_ends_at || ''}">
+                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || ''}">
                         </div>
                     `;
-                
-                    // Calculate if the current item's bidding timeline has expired
                     const isAuctionEnded = item.bidding_ends_at && new Date(item.bidding_ends_at).getTime() < Date.now();
-                
                     if (isAuctionEnded) {
-                        // Swap inputs out for a disabled visual lockout layout
                         actionMarkup = `
                             <div class="w-full text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg text-xs mt-2 uppercase tracking-wider select-none">
                                 Bidding Closed
@@ -1779,7 +1602,6 @@
                 div.innerHTML = `
                     <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
                         ${biddingHeaderMarkup}
-
                         <img
                             src="${dynamicImgSrc}"
                             alt="${safeName}"
@@ -1787,36 +1609,29 @@
                             onclick="launchZoomModal('${dynamicImgSrc}')"
                             class="relative z-10 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200"
                         >
-
                         <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 pointer-events-none">
                             <i data-lucide="zoom-in" class="w-3 h-3"></i>
                             <span>Zoom</span>
                         </div>
-
                         <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none">
                             ${activeListingSection === 'sale' ? 'Stock: ' + item.stock : 'Auction'}
                         </div>
-
                         <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
                             <button type="button" onclick="togglePhoto(${item.id}, 'front')" class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
                             <button type="button" onclick="togglePhoto(${item.id}, 'back')" class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button>
                         </div>
-
                         <span class="absolute top-2 right-2 z-20 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow pointer-events-none">${safeRarity}</span>
                     </div>
-
                     <div class="flex flex-col justify-between flex-1">
                         <div>
                             <span class="text-[10px] font-mono text-gray-500">${safeSet}</span>
                             <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${safeName}</h3>
                         </div>
-
                         <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
                             <div class="flex justify-between items-center gap-3">
                                 <span class="text-sm font-bold text-gray-100">${activeListingSection === 'sale' ? formatPHP(item.price) : 'Current Bid: ' + formatPHP(item.price)}</span>
                                 ${activeListingSection === 'sale' ? `<div>${actionMarkup}</div>` : ''}
                             </div>
-
                             ${activeListingSection === 'bidding' ? `
                                 <div class="text-[10px] text-gray-400 mt-1">
                                     Ends at: <span class="text-yellow-400 font-medium">${item.bidding_ends_at ? formatAuctionEnd(item.bidding_ends_at) : 'No end time set'}</span>
@@ -1888,7 +1703,6 @@
                     const formatNum = (num) => String(num).padStart(2, '0');
                     const formattedDate = expiryDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
                     const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true });
-                    
                     const dayString = days > 0 ? `${days}d ` : '';
 
                     el.innerHTML = `
@@ -1900,13 +1714,12 @@
         }, 1000);
 
         setInterval(async () => {
-            if (supabaseClient) return; // Disables polling when connected to database
-        
+            if (supabaseClient) return;
             if (inventoryPollInFlight) return;
             inventoryPollInFlight = true;
             try {
                 await fetchLiveInventory(false);
-            } finally {
+            } finaly {
                 inventoryPollInFlight = false;
             }
         }, 5000);
@@ -1931,7 +1744,6 @@
                     };
                     document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
                     document.getElementById('nav-logout-btn').classList.remove('hidden');
-
                     setTimeout(() => { fetchBuyerRealtimeOrders(); }, 50);
                 } else {
                     currentUserProfile = null;
@@ -1947,20 +1759,14 @@
 
         (async () => {
             await handlePasswordRecoveryFromUrl();
+            setTimeout(() => { handlePasswordRecoveryFromUrl(); }, 1200);
 
-            setTimeout(() => {
-                handlePasswordRecoveryFromUrl();
-            }, 1200);
-
-            // EXTRA PROTECTION: Catch email confirmation landing tokens from Supabase redirect
             const urlHash = window.location.hash;
             if (urlHash.includes("type=signup") || (urlHash.includes("access_token=") && !urlHash.includes("type=recovery"))) {
                 if (!sessionStorage.getItem('shd_activation_toast_shown')) {
                     setTimeout(() => {
                         showCustomToast("🎉 Account Activated Successfully! Welcome to StrawHatDraws TCG.", "success");
                         sessionStorage.setItem('shd_activation_toast_shown', 'true');
-                        
-                        // Clean up the messy token data from the URL address bar cleanly
                         const cleanUrl = window.location.origin + window.location.pathname;
                         window.history.replaceState({}, document.title, cleanUrl);
                     }, 1000);
@@ -1975,23 +1781,15 @@
             if (supabaseClient) {
                 supabaseClient
                     .channel('live-auction-stream')
-                    .on(
-                        'postgres_changes',
-                        { event: '*', schema: 'public', table: 'cards' },
-                        (payload) => {
-                            fetchLiveInventory(true); // Re-renders item grids instantly
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, (payload) => {
+                        fetchLiveInventory(true);
+                    })
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'Orders' }, (payload) => {
+                        fetchBuyerRealtimeOrders(); 
+                        if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
+                            renderAdminOrdersLedger();
                         }
-                    )
-                    .on(
-                        'postgres_changes',
-                        { event: '*', schema: 'public', table: 'Orders' },
-                        (payload) => {
-                            fetchBuyerRealtimeOrders(); 
-                            if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
-                                renderAdminOrdersLedger();
-                            }
-                        }
-                    )
+                    })
                     .subscribe();
             }
             lucide.createIcons();
