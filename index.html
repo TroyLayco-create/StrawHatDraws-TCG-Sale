@@ -1792,7 +1792,8 @@
                             <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder: 
                             <span class="text-white">${topBidderName}</span>
                         </div>
-                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString()}">
+                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" 
+                             data-timer-expiry="${item.bidding_ends_at || ''}">
                         </div>
                     `;
                 
@@ -1871,7 +1872,7 @@
 
                             ${activeListingSection === 'bidding' ? `
                                 <div class="text-[10px] text-gray-400 mt-1">
-                                    Ends at: <span class="text-yellow-400 font-medium">${formatAuctionEnd(item.bidding_ends_at || new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString())}</span>
+                                    Ends at: <span class="text-yellow-400 font-medium">${item.bidding_ends_at ? formatAuctionEnd(item.bidding_ends_at) : 'No end time set'}</span>
                                 </div>
                                 ${actionMarkup}
                             ` : ''}
