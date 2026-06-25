@@ -624,11 +624,19 @@
                     }
                 }
 
-                const combined = [...localOrdersBackup, ...dbOrders];
                 const seenIds = new Set();
                 const uniqueOrders = [];
 
-                combined.forEach(o => {
+                // 1. Process fresh live database entries first
+                dbOrders.forEach(o => {
+                    if (o && o.id && !seenIds.has(o.id)) {
+                        seenIds.add(o.id);
+                        uniqueOrders.push(o);
+                    }
+                });
+
+                // 2. Only fallback to local backups if the database doesn't have it
+                localOrdersBackup.forEach(o => {
                     if (o && o.id && !seenIds.has(o.id)) {
                         seenIds.add(o.id);
                         uniqueOrders.push(o);
