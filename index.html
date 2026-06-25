@@ -186,26 +186,18 @@
                         ✨ You are signed in! Click "Place Order" below to quickly confirm and process your items.
                     </div>
 
-                    <div id="checkout-guest-fields" class="space-y-3.5">
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
-                            <input type="text" id="cust-name" placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
-                            <input type="email" id="cust-email" placeholder="juan@example.com" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Facebook Page URL or Profile Handle</label>
-                            <input type="text" id="cust-facebook" placeholder="e.g., https://www.facebook.com/username or handle" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-
-                        <div class="border-t border-gray-800 pt-3 mt-2">
-                            <label class="block text-[11px] font-bold uppercase tracking-wider text-red-400 mb-1">🎁 Create Member Account? (Optional)</label>
-                            <p class="text-[10px] text-gray-400 mb-2">Type a password below to securely save your profile details. Leave it empty if you prefer checkout as a pure guest.</p>
-                            <input type="password" id="cust-password" placeholder="Enter password (minimum 6 characters)" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    <div id="checkout-guest-fields" class="space-y-3.5 hidden">
+                        <div class="border border-red-500/30 bg-red-950/20 p-4 rounded-lg text-center space-y-3">
+                            <p class="text-xs sm:text-sm text-gray-200 font-medium leading-relaxed">
+                                ⚠️ <strong class="text-red-400">Account Registration Required</strong><br>
+                                Anonymous checkout is disabled. You must create an account and click the verification link sent to your email address before finalizing orders.
+                            </p>
+                            <p class="text-[11px] text-gray-400">
+                                Once registered and confirmed via your inbox link, your shopping catalog cart items will remain fully preserved for instant check out!
+                            </p>
+                            <button type="button" onclick="closeCheckoutModal(); openAuthModal();" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 mx-auto shadow-md">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign In / Create Account
+                            </button>
                         </div>
                     </div>
 
@@ -368,315 +360,325 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
+        const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co"[cite: 84];
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs"[cite: 84];
 
-        let supabaseClient = null;
-        if (SUPABASE_URL.indexOf("your-project-id") === -1 && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY_HERE") {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                auth: {
-                    persistSession: true,
-                    autoRefreshToken: true,
-                    detectSessionInUrl: true
-                }
-            });
-        }
+        let supabaseClient = null[cite: 84];
+        if (SUPABASE_URL.indexOf("your-project-id") === -1 && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY_HERE") { [cite: 84]
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { [cite: 84]
+                auth: { [cite: 84]
+                    persistSession: true, [cite: 84]
+                    autoRefreshToken: true, [cite: 84]
+                    detectSessionInUrl: true [cite: 85]
+                } [cite: 84]
+            }); [cite: 84]
+        } [cite: 86]
 
-        function getLocalOrders() {
-            try {
-                const saved = localStorage.getItem('shd_local_orders');
-                return saved ? JSON.parse(saved) : [];
-            } catch(e) { return []; }
-        }
+        function getLocalOrders() { [cite: 86]
+            try { [cite: 86]
+                const saved = localStorage.getItem('shd_local_orders'); [cite: 86]
+                return saved ? JSON.parse(saved) : []; [cite: 87]
+            } catch(e) { return []; [cite: 87]
+            } [cite: 88]
+        } [cite: 88]
 
-        function saveLocalOrders(orders) {
-            try {
-                localStorage.setItem('shd_local_orders', JSON.stringify(orders));
-            } catch(e) {}
-        }
+        function saveLocalOrders(orders) { [cite: 88]
+            try { [cite: 88]
+                localStorage.setItem('shd_local_orders', JSON.stringify(orders)); [cite: 88]
+            } catch(e) {} [cite: 89]
+        } [cite: 89]
 
-        function getLocalStock(cardId, defaultStock) {
-            try {
-                const stocks = JSON.parse(localStorage.getItem('shd_card_stocks') || '{}');
-                if (stocks[cardId] !== undefined) return Number(stocks[cardId]);
-            } catch(e) {}
-            return defaultStock;
-        }
+        function getLocalStock(cardId, defaultStock) { [cite: 89]
+            try { [cite: 89]
+                const stocks = JSON.parse(localStorage.getItem('shd_card_stocks') || '{}'); [cite: 89]
+                if (stocks[cardId] !== undefined) return Number(stocks[cardId]); [cite: 90]
+            } catch(e) {} [cite: 90]
+            return defaultStock; [cite: 90]
+        } [cite: 91]
 
-        function saveLocalStock(cardId, newStock) {
-            try {
-                const stocks = JSON.parse(localStorage.getItem('shd_card_stocks') || '{}');
-                stocks[cardId] = newStock;
-                localStorage.setItem('shd_card_stocks', JSON.stringify(stocks));
-            } catch(e) {}
-        }
+        function saveLocalStock(cardId, newStock) { [cite: 91]
+            try { [cite: 91]
+                const stocks = JSON.parse(localStorage.getItem('shd_card_stocks') || '{}'); [cite: 91]
+                stocks[cardId] = newStock; [cite: 92]
+                localStorage.setItem('shd_card_stocks', JSON.stringify(stocks)); [cite: 92]
+            } catch(e) {} [cite: 92]
+        } [cite: 92]
 
-        function escapeHtml(str) {
-            return String(str ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
+        // FIX: Replaced broken single quote strings and updated character maps
+        function escapeHtml(str) { [cite: 92]
+            return String(str ?? '') [cite: 92]
+                .replace(/&/g, '&amp;') [cite: 92]
+                .replace(/</g, '&lt;') [cite: 92]
+                .replace(/>/g, '&gt;') [cite: 92]
+                .replace(/"/g, '&quot;') [cite: 93]
+                .replace(/'/g, '&#39;'); [cite: 94]
+        } [cite: 94]
 
-        function formatPHP(num) {
-            return `₱${Number(num || 0).toLocaleString()}`;
-        }
+        function formatPHP(num) { [cite: 94]
+            return `₱${Number(num || 0).toLocaleString()}`; [cite: 94]
+        } [cite: 95]
 
-        function formatAuctionEnd(datetimeStr) {
-            if (!datetimeStr) return "No end time";
-            const dt = new Date(datetimeStr);
-            return dt.toLocaleString('en-PH', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
-        }
+        function formatAuctionEnd(datetimeStr) { [cite: 95]
+            if (!datetimeStr) return "No end time"; [cite: 95]
+            const dt = new Date(datetimeStr); [cite: 96]
+            return dt.toLocaleString('en-PH', { [cite: 96]
+                year: 'numeric', [cite: 96]
+                month: 'short', [cite: 96]
+                day: 'numeric', [cite: 96]
+                hour: 'numeric', [cite: 96]
+                minute: '2-digit', [cite: 96]
+                hour12: true [cite: 97]
+            }); [cite: 98]
+        } [cite: 98]
 
-        let isRegisterMode = true;
-        let currentUserProfile = null;
-        let cart = [];
-        let items = [];
-        let lastGuestCheckoutData = null;
-        let activeListingSection = 'sale';
-        let localOrdersBackup = getLocalOrders();
-        let pendingBidSelections = {};
-        let pendingCustomBidInputs = {};
-        let lastInventorySignature = '';
-        let inventoryPollInFlight = false;
-        let recoveryMode = false;
-        const DEMO_FALLBACK_ITEMS = [
-            { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' },
-            { id: 2, name: "Roronoa Zoro", set: "OP01-025", rarity: "SR", price: 950, stock: 5, frontImg: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' },
-            { id: 3, name: "Nami (Special Auction)", set: "OP01-016", rarity: "SP", price: 6200, stock: 1, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'bidding', top_bidder: 'No bids yet', bidding_ends_at: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString() }
-        ];
+        let isRegisterMode = true[cite: 98];
+        let currentUserProfile = null[cite: 98];
+        let cart = [][cite: 98];
+        let items = [][cite: 99];
+        let lastGuestCheckoutData = null[cite: 99];
+        let activeListingSection = 'sale'[cite: 99];
+        let localOrdersBackup = getLocalOrders()[cite: 99];
+        let pendingBidSelections = {}[cite: 99];
+        let pendingCustomBidInputs = {}[cite: 100];
+        let lastInventorySignature = ''[cite: 100];
+        let inventoryPollInFlight = false[cite: 100];
+        let recoveryMode = false[cite: 100];
+        const DEMO_FALLBACK_ITEMS = [ [cite: 101]
+            { id: 1, name: "Monkey.D.Luffy (Parallel Art)", set: "OP05-119", rarity: "AA", price: 14500, stock: 3, frontImg: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' }, [cite: 101]
+            { id: 2, name: "Roronoa Zoro", set: "OP01-025", rarity: "SR", price: 950, stock: 5, frontImg: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'sale' }, [cite: 101]
+            { id: 3, name: "Nami (Special Auction)", set: "OP01-016", rarity: "SP", price: 6200, stock: 1, frontImg: "https://images.unsplash.com/photo-1563089145-599997674d42?w=400", backImg: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400", viewState: 'front', type: 'bidding', top_bidder: 'No bids yet', bidding_ends_at: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString() } [cite: 102]
+        ]; [cite: 102]
+        function showCustomToast(message, type = 'info') { [cite: 103]
+            const toast = document.getElementById('custom-toast'); [cite: 103]
+            const iconSpan = document.getElementById('toast-icon'); [cite: 104]
+            const msgSpan = document.getElementById('toast-message'); [cite: 104]
 
-        function showCustomToast(message, type = 'info') {
-            const toast = document.getElementById('custom-toast');
-            const iconSpan = document.getElementById('toast-icon');
-            const msgSpan = document.getElementById('toast-message');
+            msgSpan.innerText = message; [cite: 104]
+            if (type === 'success') { [cite: 105]
+                iconSpan.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>'; [cite: 105]
+                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-green-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300"; [cite: 106]
+            } else if (type === 'error') { [cite: 107]
+                iconSpan.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i>'; [cite: 107]
+                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-red-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300"; [cite: 108]
+            } else { [cite: 109]
+                iconSpan.innerHTML = '<i data-lucide="info" class="w-4 h-4 text-blue-500"></i>'; [cite: 109]
+                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-blue-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none"; [cite: 110]
+            } [cite: 111]
 
-            msgSpan.innerText = message;
-            if (type === 'success') {
-                iconSpan.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>';
-                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-green-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300";
-            } else if (type === 'error') {
-                iconSpan.innerHTML = '<i data-lucide="alert-triangle" class="w-4 h-4 text-red-500"></i>';
-                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-red-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300";
-            } else {
-                iconSpan.innerHTML = '<i data-lucide="info" class="w-4 h-4 text-blue-500"></i>';
-                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-blue-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none";
-            }
+            lucide.createIcons(); [cite: 111]
+            setTimeout(() => { [cite: 112]
+                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-900 border border-gray-800 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none"; [cite: 112]
+            }, 4500); [cite: 112]
+        } [cite: 113]
 
-            lucide.createIcons();
-            setTimeout(() => {
-                toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-900 border border-gray-800 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none";
-            }, 4500);
-        }
+        function askCustomConfirmation(title, message) { [cite: 113]
+            return new Promise((resolve) => { [cite: 113]
+                const modal = document.getElementById('custom-confirm-modal'); [cite: 113]
+                const titleEl = document.getElementById('confirm-modal-title'); [cite: 113]
+                const msgEl = document.getElementById('confirm-modal-message'); [cite: 113]
+                
+                const cancelBtn = document.getElementById('confirm-modal-cancel'); [cite: 114]
+                const submitBtn = document.getElementById('custom-confirm-modal').querySelector('#confirm-modal-submit'); [cite: 114]
 
-        function askCustomConfirmation(title, message) {
-            return new Promise((resolve) => {
-                const modal = document.getElementById('custom-confirm-modal');
-                const titleEl = document.getElementById('confirm-modal-title');
-                const msgEl = document.getElementById('confirm-modal-message');
-                const cancelBtn = document.getElementById('confirm-modal-cancel');
-                const submitBtn = document.getElementById('custom-confirm-modal').querySelector('#confirm-modal-submit');
+                titleEl.innerText = title; [cite: 114]
+                msgEl.innerText = message; [cite: 114]
+                modal.style.display = 'flex'; [cite: 114]
+                lucide.createIcons(); [cite: 114]
 
-                titleEl.innerText = title;
-                msgEl.innerText = message;
-                modal.style.display = 'flex';
-                lucide.createIcons();
+                function cleanup(result) { [cite: 115]
+                    modal.style.display = 'none'; [cite: 115]
+                    cancelBtn.removeEventListener('click', onCancel); [cite: 115]
+                    submitBtn.removeEventListener('click', onSubmit); [cite: 115]
+                    resolve(result); [cite: 115]
+                } [cite: 116]
+                function onCancel() { cleanup(false); [cite: 116]
+                } [cite: 117]
+                function onSubmit() { cleanup(true); [cite: 117]
+                } [cite: 118]
 
-                function cleanup(result) {
-                    modal.style.display = 'none';
-                    cancelBtn.removeEventListener('click', onCancel);
-                    submitBtn.removeEventListener('click', onSubmit);
-                    resolve(result);
-                }
-                function onCancel() { cleanup(false); }
-                function onSubmit() { cleanup(true); }
+                cancelBtn.addEventListener('click', onCancel); [cite: 118]
+                submitBtn.addEventListener('click', onSubmit); [cite: 119]
+            }); [cite: 119]
+        } [cite: 119]
 
-                cancelBtn.addEventListener('click', onCancel);
-                submitBtn.addEventListener('click', onSubmit);
-            });
-        }
+        function updateCartUI() { [cite: 119]
+            document.getElementById('cart-count').innerText = cart.length; [cite: 119]
+        } [cite: 120]
 
-        function updateCartUI() {
-            document.getElementById('cart-count').innerText = cart.length;
-        }
+        function buildInventorySignature(list) { [cite: 120]
+            return JSON.stringify( [cite: 120]
+                (list || []).map(item => ({ [cite: 120]
+                    id: item.id, [cite: 120]
+                    stock: item.stock, [cite: 120]
+                    price: item.price, [cite: 121]
+                    top_bidder: item.top_bidder, [cite: 121]
+                    bidding_ends_at: item.bidding_ends_at, [cite: 121]
+                    type: item.type [cite: 121]
+                })) [cite: 121]
+            ); [cite: 122]
+        } [cite: 122]
 
-        function buildInventorySignature(list) {
-            return JSON.stringify(
-                (list || []).map(item => ({
-                    id: item.id,
-                    stock: item.stock,
-                    price: item.price,
-                    top_bidder: item.top_bidder,
-                    bidding_ends_at: item.bidding_ends_at,
-                    type: item.type
-                }))
-            );
-        }
+        function changeListingSection(section) { [cite: 122]
+            activeListingSection = section; [cite: 122]
+            const saleTab = document.getElementById('tab-section-sale'); [cite: 123]
+            const biddingTab = document.getElementById('tab-section-bidding'); [cite: 123]
 
-        function changeListingSection(section) {
-            activeListingSection = section;
-            const saleTab = document.getElementById('tab-section-sale');
-            const biddingTab = document.getElementById('tab-section-bidding');
+            if (section === 'sale') { [cite: 123]
+                saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all"; [cite: 123]
+                biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all"; [cite: 124]
+            } else { [cite: 125]
+                biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all"; [cite: 125]
+                saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all"; [cite: 126]
+            } [cite: 127]
+            renderGrid(); [cite: 127]
+        } [cite: 128]
 
-            if (section === 'sale') {
-                saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
-                biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
-            } else {
-                biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
-                saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
-            }
-            renderGrid();
-        }
+        async function fetchLiveInventory(forceRender = false) { [cite: 128]
+            let nextItems = []; [cite: 128]
+            if (!supabaseClient) { [cite: 129]
+                nextItems = DEMO_FALLBACK_ITEMS.map(item => { [cite: 129]
+                    const existing = items.find(i => i.id === item.id); [cite: 129]
+                    return { [cite: 129]
+                        ...item, [cite: 129]
+                        stock: getLocalStock(item.id, item.stock), [cite: 130]
+                        viewState: existing?.viewState || item.viewState || 'front' [cite: 130]
+                    }; [cite: 130]
+                }); [cite: 131]
+            } else { [cite: 131]
+                try { [cite: 131]
+                    const { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false }); [cite: 131]
+                    if (error) throw error; [cite: 132]
 
-        async function fetchLiveInventory(forceRender = false) {
-            let nextItems = [];
-            if (!supabaseClient) {
-                nextItems = DEMO_FALLBACK_ITEMS.map(item => {
-                    const existing = items.find(i => i.id === item.id);
-                    return {
-                        ...item,
-                        stock: getLocalStock(item.id, item.stock),
-                        viewState: existing?.viewState || item.viewState || 'front'
-                    };
-                });
-            } else {
-                try {
-                    const { data: cards, error } = await supabaseClient.from('cards').select('*').order('id', { ascending: false });
-                    if (error) throw error;
+                    if (!cards || cards.length === 0) { [cite: 132]
+                        nextItems = DEMO_FALLBACK_ITEMS.map(item => { [cite: 132]
+                            const existing = items.find(i => i.id === item.id); [cite: 132]
+                            return { [cite: 133]
+                                ...item, [cite: 133]
+                                stock: getLocalStock(item.id, item.stock), [cite: 133]
+                                viewState: existing?.viewState || item.viewState || 'front' [cite: 134]
+                            }; [cite: 134]
+                        }); [cite: 135]
+                    } else { [cite: 135]
+                        nextItems = cards.map(c => { [cite: 135]
+                            const existing = items.find(i => i.id === c.id); [cite: 135]
+                            const defaultStock = Number(c.stock || 0); [cite: 135]
+                            const dbType = (c.type || "sale").toLowerCase().trim(); [cite: 136]
+                            const normalizedType = dbType === 'bid' ? 'bidding' : dbType; [cite: 136]
 
-                    if (!cards || cards.length === 0) {
-                        nextItems = DEMO_FALLBACK_ITEMS.map(item => {
-                            const existing = items.find(i => i.id === item.id);
-                            return {
-                                ...item,
-                                stock: getLocalStock(item.id, item.stock),
-                                viewState: existing?.viewState || item.viewState || 'front'
-                            };
-                        });
-                    } else {
-                        nextItems = cards.map(c => {
-                            const existing = items.find(i => i.id === c.id);
-                            const defaultStock = Number(c.stock || 0);
-                            const dbType = (c.type || "sale").toLowerCase().trim();
-                            const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
+                            return { [cite: 136]
+                                id: c.id, [cite: 137]
+                                name: c.name || "Unnamed Card", [cite: 137]
+                                set: c.set_code || c.set || "OP-UNKNOWN", [cite: 137]
+                                rarity: c.rarity || "N/A", [cite: 138]
+                                price: Number(c.price || 0), [cite: 138]
+                                type: normalizedType, [cite: 139]
+                                top_bidder: c.top_bidder || null, [cite: 139]
+                                bidding_ends_at: c.bidding_ends_at || null, [cite: 139]
+                                stock: Math.min(defaultStock, getLocalStock(c.id, defaultStock)), [cite: 140]
+                                frontImg: c.front_img || c.frontImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400", [cite: 140]
+                                backImg: c.back_img || c.backImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=401", [cite: 141]
+                                viewState: existing?.viewState || 'front' [cite: 142]
+                            }; [cite: 144]
+                        }); [cite: 144]
+                    } [cite: 144]
+                } catch (err) { [cite: 144]
+                    console.warn("Database sync dropped, pulling back cache models:", err.message); [cite: 144]
+                    nextItems = DEMO_FALLBACK_ITEMS.map(item => { [cite: 145]
+                        const existing = items.find(i => i.id === item.id); [cite: 145]
+                        return { [cite: 145]
+                            ...item, [cite: 145]
+                            stock: getLocalStock(item.id, item.stock), [cite: 146]
+                            viewState: existing?.viewState || item.viewState || 'front' [cite: 146]
+                        }; [cite: 146]
+                    }); [cite: 147]
+                } [cite: 147]
+            } [cite: 147]
 
-                            return {
-                                id: c.id,
-                                name: c.name || "Unnamed Card",
-                                set: c.set_code || c.set || "OP-UNKNOWN",
-                                rarity: c.rarity || "N/A",
-                                price: Number(c.price || 0),
-                                type: normalizedType,
-                                top_bidder: c.top_bidder || null,
-                                bidding_ends_at: c.bidding_ends_at || null,
-                                stock: Math.min(defaultStock, getLocalStock(c.id, defaultStock)),
-                                frontImg: c.front_img || c.frontImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
-                                backImg: c.back_img || c.backImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
-                                viewState: existing?.viewState || 'front'
-                            };
-                        });
-                    }
-                } catch (err) {
-                    console.warn("Database sync dropped, pulling back cache models:", err.message);
-                    nextItems = DEMO_FALLBACK_ITEMS.map(item => {
-                        const existing = items.find(i => i.id === item.id);
-                        return {
-                            ...item,
-                            stock: getLocalStock(item.id, item.stock),
-                            viewState: existing?.viewState || item.viewState || 'front'
-                        };
-                    });
-                }
-            }
+            const nextSig = buildInventorySignature(nextItems); [cite: 147]
+            const changed = nextSig !== lastInventorySignature; [cite: 148]
 
-            const nextSig = buildInventorySignature(nextItems);
-            const changed = nextSig !== lastInventorySignature;
+            items = nextItems; [cite: 148]
+            lastInventorySignature = nextSig; [cite: 148]
 
-            items = nextItems;
-            lastInventorySignature = nextSig;
+            if (forceRender || changed) renderGrid(); [cite: 148]
+        } [cite: 149]
 
-            if (forceRender || changed) renderGrid();
-        }
+        // FIX: Cast all identifiers to String to block local database synchronization lag errors
+        async function fetchBuyerRealtimeOrders() { [cite: 149]
+            if (!currentUserProfile || !currentUserProfile.id) return; [cite: 149]
+            try { [cite: 150]
+                let dbOrders = []; [cite: 150]
+                if (supabaseClient) { [cite: 151]
+                    const { data, error } = await supabaseClient [cite: 151]
+                        .from('Orders') [cite: 152]
+                        .select('*') [cite: 152]
+                        .order('created_at', { ascending: false }); [cite: 152]
 
-        async function fetchBuyerRealtimeOrders() {
-            if (!currentUserProfile || !currentUserProfile.id) return;
-            try {
-                let dbOrders = [];
-                if (supabaseClient) {
-                    const { data, error } = await supabaseClient
-                        .from('Orders')
-                        .select('*')
-                        .order('created_at', { ascending: false });
+                    if (error) { [cite: 152]
+                        console.warn("Could not load customer orders:", error.message); [cite: 152]
+                    } else if (data) { [cite: 153]
+                        dbOrders = data; [cite: 153]
+                    } [cite: 154]
+                } [cite: 154]
 
-                    if (error) {
-                        console.warn("Could not load customer orders:", error.message);
-                    } else if (data) {
-                        dbOrders = data;
-                    }
-                }
+                const seenIds = new Set(); [cite: 155]
+                const uniqueOrders = []; [cite: 155]
 
-                const seenIds = new Set();
-                const uniqueOrders = [];
+                dbOrders.forEach(o => { [cite: 155]
+                    if (o && o.id) { [cite: 155]
+                        const stringId = String(o.id); [cite: 155]
+                        if (!seenIds.has(stringId)) { [cite: 155]
+                            seenIds.add(stringId); [cite: 155]
+                            uniqueOrders.push(o); [cite: 155]
+                        } [cite: 155]
+                    } [cite: 156]
+                }); [cite: 156]
 
-                // 1. Process fresh live database entries first
-                dbOrders.forEach(o => {
-                    if (o && o.id && !seenIds.has(o.id)) {
-                        seenIds.add(o.id);
-                        uniqueOrders.push(o);
-                    }
-                });
+                localOrdersBackup.forEach(o => { [cite: 156]
+                    if (o && o.id) { [cite: 156]
+                        const stringId = String(o.id); [cite: 156]
+                        if (!seenIds.has(stringId)) { [cite: 156]
+                            seenIds.add(stringId); [cite: 156]
+                            uniqueOrders.push(o); [cite: 156]
+                        } [cite: 156]
+                    } [cite: 156]
+                }); [cite: 156]
 
-                // 2. Only fallback to local backups if the database doesn't have it
-                localOrdersBackup.forEach(o => {
-                    if (o && o.id && !seenIds.has(o.id)) {
-                        seenIds.add(o.id);
-                        uniqueOrders.push(o);
-                    }
-                });
-                const queueBox = document.getElementById('buyer-orders-queue');
-                const container = document.getElementById('buyer-tracker-box');
+                const queueBox = document.getElementById('buyer-orders-queue'); [cite: 157]
+                const container = document.getElementById('buyer-tracker-box'); [cite: 157]
 
-                const filteredOrders = uniqueOrders.filter(o => {
-                    if (currentUserProfile.id !== 'guest') {
-                        if (o.user_id === currentUserProfile.id) return true;
-                    }
-                    return false;
-                });
+                const filteredOrders = uniqueOrders.filter(o => { [cite: 157]
+                    if (currentUserProfile.id !== 'guest') { [cite: 157]
+                        if (o.user_id === currentUserProfile.id) return true; [cite: 157]
+                    } [cite: 157]
+                    return false; [cite: 158]
+                }); [cite: 159]
 
-                if (filteredOrders.length > 0) {
-                    container.classList.remove('hidden');
-                    queueBox.innerHTML = '';
+                if (filteredOrders.length > 0) { [cite: 159]
+                    container.classList.remove('hidden'); [cite: 159]
+                    queueBox.innerHTML = ''; [cite: 160]
 
-                    filteredOrders.forEach(o => {
-                        let statusColor = "text-yellow-500";
-                        if (o.order_status === 'Processed') statusColor = "text-green-400";
-                        if (o.order_status === 'Shipped') statusColor = "text-blue-400";
-                        if (o.order_status === 'Cancelled') statusColor = "text-red-400";
+                    filteredOrders.forEach(o => { [cite: 160]
+                        let statusColor = "text-yellow-500"; [cite: 160]
+                        if (o.order_status === 'Processed') statusColor = "text-green-400"; [cite: 160]
+                        if (o.order_status === 'Shipped') statusColor = "text-blue-400"; [cite: 160]
+                        if (o.order_status === 'Cancelled') statusColor = "text-red-400"; [cite: 161]
 
-                        let itemsHtml = '';
-                        if (Array.isArray(o.items_ordered)) {
-                            const counts = {};
-                            o.items_ordered.forEach(id => {
-                                counts[id] = (counts[id] || 0) + 1;
-                            });
+                        let itemsHtml = ''; [cite: 161]
+                        if (Array.isArray(o.items_ordered)) { [cite: 161]
+                            const counts = {}; [cite: 162]
+                            o.items_ordered.forEach(id => { [cite: 162]
+                                counts[id] = (counts[id] || 0) + 1; [cite: 162]
+                            }); [cite: 163]
 
-                            itemsHtml = Object.keys(counts).map(id => {
-                                const card = items.find(i => i.id == id);
-                                return `<div class="text-[10px] text-gray-300">${counts[id]}x ${escapeHtml(card ? card.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(card ? card.set : 'UNKNOWN')})</span></div>`;
-                            }).join('');
-                        }
+                            itemsHtml = Object.keys(counts).map(id => { [cite: 163]
+                                const card = items.find(i => i.id == id); [cite: 163]
+                                return `<div class="text-[10px] text-gray-300">${counts[id]}x ${escapeHtml(card ? card.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(card ? card.set : 'UNKNOWN')})</span></div>`; [cite: 164]
+                            }).join(''); [cite: 165]
+                        } [cite: 165]
 
-                        const card = document.createElement('div');
-                        card.className = "p-2.5 bg-black/40 rounded border border-gray-800 space-y-1.5";
+                        const card = document.createElement('div'); [cite: 165]
+                        card.className = "p-2.5 bg-black/40 rounded border border-gray-800 space-y-1.5"; [cite: 166]
                         card.innerHTML = `
                             <div class="flex justify-between items-center gap-2">
                                 <span class="font-mono text-gray-400 text-[10px] break-all">${escapeHtml(o.id)}</span>
@@ -684,425 +686,423 @@
                             </div>
                             <div class="text-[10px] text-gray-500">${escapeHtml(o.customer_name || '')}</div>
                             <div class="space-y-1">${itemsHtml}</div>
-                        `;
-                        queueBox.appendChild(card);
-                    });
-                } else {
-                    container.classList.add('hidden');
-                    queueBox.innerHTML = '';
-                }
-            } catch (e) {
-                console.warn("Tracker lookup skipped:", e);
-            }
-        }
+                        `; [cite: 167]
+                        queueBox.appendChild(card); [cite: 169]
+                    }); [cite: 169]
+                } else { [cite: 169]
+                    container.classList.add('hidden'); [cite: 169]
+                    queueBox.innerHTML = ''; [cite: 170]
+                } [cite: 170]
+            } catch (e) { [cite: 170]
+                console.warn("Tracker lookup skipped:", e); [cite: 170]
+            } [cite: 171]
+        } [cite: 171]
 
-        async function performSimpleFBValidation(fbInput) {
-            let facebookPage = fbInput ? fbInput.trim() : "";
+        async function performSimpleFBValidation(fbInput) { [cite: 171]
+            let facebookPage = fbInput ? fbInput.trim() : ""; [cite: 171]
 
-            const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i;
-            const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
+            const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i; [cite: 172]
+            const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/; [cite: 172]
+            if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) { [cite: 173]
+                throw new Error("Please enter a valid live Facebook profile URL or handle link for order notifications."); [cite: 173]
+            } [cite: 174]
 
-            if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) {
-                throw new Error("Please enter a valid live Facebook profile URL or handle link for order notifications.");
-            }
+            if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) { [cite: 174]
+                facebookPage = `https://www.facebook.com/${facebookPage}`; [cite: 174]
+            } [cite: 175]
 
-            if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) {
-                facebookPage = `https://www.facebook.com/${facebookPage}`;
-            }
+            return { [cite: 175]
+                facebook: facebookPage [cite: 175]
+            }; [cite: 176]
+        } [cite: 176]
 
-            return {
-                facebook: facebookPage
-            };
-        }
+        async function hydrateCurrentUserFromSession() { [cite: 176]
+            if (!supabaseClient) return; [cite: 176]
+            try { [cite: 177]
+                const { data: { session } } = await supabaseClient.auth.getSession(); [cite: 177]
+                if (session && session.user) { [cite: 178]
+                    currentUserProfile = { [cite: 178]
+                        id: session.user.id, [cite: 178]
+                        name: session.user.user_metadata?.name || session.user.email.split('@')[0], [cite: 178]
+                        facebook_page: session.user.user_metadata?.facebook_page || '' [cite: 179]
+                    }; [cite: 181]
+                    document.getElementById('auth-btn-text').innerText = currentUserProfile.name; [cite: 181]
+                    document.getElementById('nav-logout-btn').classList.remove('hidden'); [cite: 181]
+                    await fetchBuyerRealtimeOrders(); [cite: 181]
+                } [cite: 181]
+            } catch (err) { [cite: 181]
+                console.warn("Session hydration failed:", err); [cite: 181]
+            } [cite: 182]
+        } [cite: 182]
 
-        async function hydrateCurrentUserFromSession() {
-            if (!supabaseClient) return;
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session && session.user) {
-                    currentUserProfile = {
-                        id: session.user.id,
-                        name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-                        facebook_page: session.user.user_metadata?.facebook_page || ''
-                    };
-                    document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
-                    document.getElementById('nav-logout-btn').classList.remove('hidden');
-                    await fetchBuyerRealtimeOrders();
-                }
-            } catch (err) {
-                console.warn("Session hydration failed:", err);
-            }
-        }
+        window.submitCheckoutOrder = async function() { [cite: 182]
+            const form = document.getElementById('checkout-form'); [cite: 182]
+            if (!form) { [cite: 183]
+                showCustomToast("Checkout form structure missing.", "error"); [cite: 183]
+                return; [cite: 184]
+            } [cite: 184]
 
-        window.submitCheckoutOrder = async function() {
-            const form = document.getElementById('checkout-form');
-            if (!form) {
-                showCustomToast("Checkout form structure missing.", "error");
-                return;
-            }
+            const confirmed = await askCustomConfirmation("Place Order", "Are you sure you want to finalize this order checkout sequence?"); [cite: 184]
+            if (!confirmed) return; [cite: 185]
 
-            const confirmed = await askCustomConfirmation("Place Order", "Are you sure you want to finalize this order checkout sequence?");
-            if (!confirmed) return;
+            const submitEvent = new Event('submit', { bubbles: true, cancelable: true }); [cite: 185]
+            form.dispatchEvent(submitEvent); [cite: 185]
+        }; [cite: 185]
 
-            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-            form.dispatchEvent(submitEvent);
-        };
+        window.openAuthModal = function() { [cite: 186]
+            if(currentUserProfile) return; [cite: 186]
+            document.getElementById('auth-modal').style.display = 'flex'; [cite: 186]
+        }; [cite: 187]
 
-        window.openAuthModal = function() {
-            if(currentUserProfile) return;
-            document.getElementById('auth-modal').style.display = 'flex';
-        };
+        window.closeAuthModal = function() { [cite: 187]
+            document.getElementById('auth-modal').style.display = 'none'; [cite: 187]
+        }; [cite: 188]
 
-        window.closeAuthModal = function() {
-            document.getElementById('auth-modal').style.display = 'none';
-        };
+        window.openResetPasswordModal = function() { [cite: 188]
+            const modal = document.getElementById('reset-password-modal'); [cite: 188]
+            if (modal) { [cite: 189]
+                modal.style.display = 'flex'; [cite: 189]
+                lucide.createIcons(); [cite: 190]
+            } [cite: 191]
+        }; [cite: 191]
 
-        window.openResetPasswordModal = function() {
-            const modal = document.getElementById('reset-password-modal');
-            if (modal) {
-                modal.style.display = 'flex';
-                lucide.createIcons();
-            }
-        };
-        window.closeResetPasswordModal = function() {
-            const modal = document.getElementById('reset-password-modal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        };
+        window.closeResetPasswordModal = function() { [cite: 191]
+            const modal = document.getElementById('reset-password-modal'); [cite: 191]
+            if (modal) { [cite: 192]
+                modal.style.display = 'none'; [cite: 192]
+            } [cite: 193]
+        }; [cite: 193]
 
-        window.sendPasswordResetEmail = async function() {
-            if (!supabaseClient) {
-                showCustomToast("Supabase client is not connected.", "error");
-                return;
-            }
+        window.sendPasswordResetEmail = async function() { [cite: 193]
+            if (!supabaseClient) { [cite: 193]
+                showCustomToast("Supabase client is not connected.", "error"); [cite: 193]
+                return; [cite: 194]
+            } [cite: 194]
 
-            const email = document.getElementById('auth-email').value.trim();
-            if (!email) {
-                showCustomToast("Enter your email address first.", "error");
-                return;
-            }
+            const email = document.getElementById('auth-email').value.trim(); [cite: 194]
+            if (!email) { [cite: 195]
+                showCustomToast("Enter your email address first.", "error"); [cite: 195]
+                return; [cite: 196]
+            } [cite: 196]
 
-            try {
-                const redirectUrl = window.location.origin + window.location.pathname + '?mode=reset';
-                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                    redirectTo: redirectUrl
-                });
-                if (error) throw error;
+            try { [cite: 196]
+                const redirectUrl = window.location.origin + window.location.pathname + '?mode=reset'; [cite: 196]
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { [cite: 197]
+                    redirectTo: redirectUrl [cite: 197]
+                }); [cite: 197]
+                if (error) throw error; [cite: 198]
 
-                showCustomToast("Password reset email sent. Check your inbox.", "success");
-            } catch (err) {
-                showCustomToast(`Reset email failed: ${err.message}`, "error");
-            }
-        };
+                showCustomToast("Password reset email sent. Check your inbox.", "success"); [cite: 198]
+            } catch (err) { [cite: 199]
+                showCustomToast(`Reset email failed: ${err.message}`, "error"); [cite: 199]
+            } [cite: 200]
+        }; [cite: 200]
 
-        async function handlePasswordRecoveryFromUrl() {
-            if (!supabaseClient) return;
-            try {
-                const currentUrl = new URL(window.location.href);
-                const hash = currentUrl.hash ? currentUrl.hash.replace(/^#/, '') : '';
-                const hashParams = new URLSearchParams(hash);
-                const queryMode = currentUrl.searchParams.get('mode');
-                const queryType = currentUrl.searchParams.get('type');
+        async function handlePasswordRecoveryFromUrl() { [cite: 200]
+            if (!supabaseClient) return; [cite: 201]
+            try { [cite: 201]
+                const currentUrl = new URL(window.location.href); [cite: 201]
+                const hash = currentUrl.hash ? currentUrl.hash.replace(/^#/, '') : ''; [cite: 202]
+                const hashParams = new URLSearchParams(hash); [cite: 202]
+                const queryMode = currentUrl.searchParams.get('mode'); [cite: 202]
+                const queryType = currentUrl.searchParams.get('type'); [cite: 203]
 
-                const hasAccessToken = !!hashParams.get('access_token');
-                const hasRefreshToken = !!hashParams.get('refresh_token');
-                const hashType = hashParams.get('type');
-                const hasErrorCode = !!hashParams.get('error_code');
-                const errorDescription = hashParams.get('error_description');
+                const hasAccessToken = !!hashParams.get('access_token'); [cite: 203]
+                const hasRefreshToken = !!hashParams.get('refresh_token'); [cite: 203]
+                const hashType = hashParams.get('type'); [cite: 203]
+                const hasErrorCode = !!hashParams.get('error_code'); [cite: 203]
+                const errorDescription = hashParams.get('error_description'); [cite: 204]
 
-                if (hasErrorCode) {
-                    showCustomToast(`Recovery link error: ${errorDescription || 'Invalid or expired link.'}`, "error");
-                    return;
-                }
+                if (hasErrorCode) { [cite: 204]
+                    showCustomToast(`Recovery link error: ${errorDescription || 'Invalid or expired link.'}`, "error"); [cite: 204]
+                    return; [cite: 205]
+                } [cite: 205]
 
-                const isRecoveryFlow =
-                    queryMode === 'reset' ||
-                    queryType === 'recovery' ||
-                    hashType === 'recovery' ||
-                    (hasAccessToken && hashType === 'recovery') || 
-                    (hasRefreshToken && hashType === 'recovery');
-                if (isRecoveryFlow) {
-                    recoveryMode = true;
-                    openResetPasswordModal();
-                }
-            } catch (err) {
-                console.warn("Recovery URL parse skipped:", err);
-            }
-        }
+                const isRecoveryFlow = [cite: 205]
+                    queryMode === 'reset' || [cite: 205]
+                    queryType === 'recovery' || [cite: 206]
+                    hashType === 'recovery' || [cite: 206]
+                    (hasAccessToken && hashType === 'recovery') || [cite: 206]
+                    (hasRefreshToken && hashType === 'recovery'); [cite: 206]
+                if (isRecoveryFlow) { [cite: 207]
+                    recoveryMode = true; [cite: 207]
+                    openResetPasswordModal(); [cite: 208]
+                } [cite: 208]
+            } catch (err) { [cite: 208]
+                console.warn("Recovery URL parse skipped:", err); [cite: 208]
+            } [cite: 209]
+        } [cite: 209]
 
-        window.executeSecureLogout = async function() {
-            const confirmed = await askCustomConfirmation("Sign Out", "Are you sure you want to log out of your session?");
-            if(confirmed) {
-                currentUserProfile = null;
-                cart = [];
-                updateCartUI();
-                renderGrid();
-                if (supabaseClient) await supabaseClient.auth.signOut();
-                document.getElementById('auth-btn-text').innerText = "Sign In / Register";
-                document.getElementById('nav-logout-btn').classList.add('hidden');
-                document.getElementById('buyer-tracker-box').classList.add('hidden');
-                showCustomToast("Logged out successfully.", "info");
-                setTimeout(() => window.location.reload(), 800);
-            }
-        };
+        window.executeSecureLogout = async function() { [cite: 209]
+            const confirmed = await askCustomConfirmation("Sign Out", "Are you sure you want to log out of your session?"); [cite: 209]
+            if(confirmed) { [cite: 210]
+                currentUserProfile = null; [cite: 210]
+                cart = []; [cite: 211]
+                updateCartUI(); [cite: 211]
+                renderGrid(); [cite: 211]
+                if (supabaseClient) await supabaseClient.auth.signOut(); [cite: 211]
+                document.getElementById('auth-btn-text').innerText = "Sign In / Register"; [cite: 211]
+                document.getElementById('nav-logout-btn').classList.add('hidden'); [cite: 211]
+                document.getElementById('buyer-tracker-box').classList.add('hidden'); [cite: 211]
+                showCustomToast("Logged out successfully.", "info"); [cite: 212]
+                setTimeout(() => window.location.reload(), 800); [cite: 212]
+            } [cite: 212]
+        }; [cite: 212]
 
-        window.toggleAuthMode = function() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('auth-title').innerHTML = isRegisterMode ? `<i data-lucide="user-plus" class="text-red-500"></i> Create Account` : `<i data-lucide="log-in" class="text-red-500"></i> Sign In`;
-            document.getElementById('auth-profile-fields').style.display = isRegisterMode ? 'block' : 'none';
-            document.getElementById('auth-toggle-msg').innerText = isRegisterMode ? "Already have an account? Sign In here." : "Need an account? Register here.";
-            
-            const nameInput = document.getElementById('auth-name');
-            const fbInput = document.getElementById('auth-facebook');
-            if (isRegisterMode) {
-                nameInput.setAttribute('required', '');
-                fbInput.setAttribute('required', '');
-            } else {
-                nameInput.removeAttribute('required');
-                fbInput.removeAttribute('required');
-            }
-            lucide.createIcons();
-        };
+        window.toggleAuthMode = function() { [cite: 213]
+            isRegisterMode = !isRegisterMode; [cite: 213]
+            document.getElementById('auth-title').innerHTML = isRegisterMode ? `<i data-lucide="user-plus" class="text-red-500"></i> Create Account` : `<i data-lucide="log-in" class="text-red-500"></i> Sign In`; [cite: 214]
+            document.getElementById('auth-profile-fields').style.display = isRegisterMode ? 'block' : 'none'; [cite: 214]
+            document.getElementById('auth-toggle-msg').innerText = isRegisterMode ? "Already have an account? Sign In here." : "Need an account? Register here."; [cite: 215]
+            const nameInput = document.getElementById('auth-name'); [cite: 216]
+            const fbInput = document.getElementById('auth-facebook'); [cite: 216]
+            if (isRegisterMode) { [cite: 216]
+                nameInput.setAttribute('required', ''); [cite: 216]
+                fbInput.setAttribute('required', ''); [cite: 217]
+            } else { [cite: 217]
+                nameInput.removeAttribute('required'); [cite: 217]
+                fbInput.removeAttribute('required'); [cite: 218]
+            } [cite: 218]
+            lucide.createIcons(); [cite: 218]
+        }; [cite: 218]
 
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('auth-form').addEventListener('submit', async (e) => { [cite: 219]
+            e.preventDefault(); [cite: 219]
 
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const name = document.getElementById('auth-name').value || email.split('@')[0];
-            let facebookPage = document.getElementById('auth-facebook') ? document.getElementById('auth-facebook').value.trim() : '';
+            const email = document.getElementById('auth-email').value.trim(); [cite: 219]
+            const password = document.getElementById('auth-password').value; [cite: 219]
+            const name = document.getElementById('auth-name').value || email.split('@')[0]; [cite: 219]
+            let facebookPage = document.getElementById('auth-facebook') ? document.getElementById('auth-facebook').value.trim() : ''; [cite: 219]
 
-            const lastReg = localStorage.getItem('shd_last_reg_timestamp');
-            if (isRegisterMode && lastReg && (Date.now() - Number(lastReg) < 30000)) {
-                const secondsLeft = Math.ceil((30000 - (Date.now() - Number(lastReg))) / 1000);
-                showCustomToast(`Anti-Spam active. Please wait ${secondsLeft}s before submitting another registration form.`, "error");
-                return;
-            }
+            const lastReg = localStorage.getItem('shd_last_reg_timestamp'); [cite: 219]
+            if (isRegisterMode && lastReg && (Date.now() - Number(lastReg) < 30000)) { [cite: 220]
+                const secondsLeft = Math.ceil((30000 - (Date.now() - Number(lastReg))) / 1000); [cite: 220]
+                showCustomToast(`Anti-Spam active. Please wait ${secondsLeft}s before submitting another registration form.`, "error"); [cite: 220]
+                return; [cite: 220]
+            } [cite: 220]
 
-            if (isRegisterMode) {
-                if (password.length < 6) {
-                    showCustomToast("Password must be at least 6 characters long.", "error");
-                    return;
-                }
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    showCustomToast("Please enter a valid structured email address.", "error");
-                    return;
-                }
+            if (isRegisterMode) { [cite: 221]
+                if (password.length < 6) { [cite: 221]
+                    showCustomToast("Password must be at least 6 characters long.", "error"); [cite: 221]
+                    return; [cite: 222]
+                } [cite: 222]
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; [cite: 222]
+                if (!emailRegex.test(email)) { [cite: 223]
+                    showCustomToast("Please enter a valid structured email address.", "error"); [cite: 223]
+                    return; [cite: 224]
+                } [cite: 224]
 
-                const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i;
-                const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
+                const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i; [cite: 224]
+                const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/; [cite: 225]
 
-                if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) {
-                    showCustomToast("Please enter a valid Facebook Page URL or clear profile handle.", "error");
-                    return;
-                }
+                if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) { [cite: 225]
+                    showCustomToast("Please enter a valid Facebook Page URL or clear profile handle.", "error"); [cite: 225]
+                    return; [cite: 226]
+                } [cite: 226]
 
-                if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) {
-                    facebookPage = `https://www.facebook.com/${facebookPage}`;
-                }
-            }
+                if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) { [cite: 226]
+                    facebookPage = `https://www.facebook.com/${facebookPage}`; [cite: 226]
+                } [cite: 227]
+            } [cite: 227]
 
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const originalHTML = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i> Syncing Secure Credentials...`;
-            lucide.createIcons();
-            try {
-                if (!supabaseClient) {
-                    currentUserProfile = {
-                        id: "fallback_user",
-                        name,
-                        facebook_page: facebookPage
-                    };
-                    document.getElementById('auth-btn-text').innerText = name;
-                    document.getElementById('nav-logout-btn').classList.remove('hidden');
-                    closeAuthModal();
-                    showCustomToast("Welcome to StrawHatDraws!", "success");
-                    return;
-                }
+            const submitBtn = document.getElementById('auth-submit-btn'); [cite: 227]
+            const originalHTML = submitBtn.innerHTML; [cite: 228]
+            submitBtn.disabled = true; [cite: 228]
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i> Syncing Secure Credentials...`; [cite: 228]
+            lucide.createIcons(); [cite: 228]
+            try { [cite: 229]
+                if (!supabaseClient) { [cite: 229]
+                    currentUserProfile = { [cite: 229]
+                        id: "fallback_user", [cite: 229]
+                        name, [cite: 229]
+                        facebook_page: facebookPage [cite: 230]
+                    }; [cite: 231]
+                    document.getElementById('auth-btn-text').innerText = name; [cite: 231]
+                    document.getElementById('nav-logout-btn').classList.remove('hidden'); [cite: 231]
+                    closeAuthModal(); [cite: 231]
+                    showCustomToast("Welcome to StrawHatDraws!", "success"); [cite: 231]
+                    return; [cite: 231]
+                } [cite: 231]
 
-                if (isRegisterMode) {
-                    const { data, error } = await supabaseClient.auth.signUp({
-                        email, password,
-                        options: {
-                            emailRedirectTo: window.location.origin + window.location.pathname,
-                            data: {
-                                name,
-                                facebook_page: facebookPage
-                            }
-                        }
-                    });
-                    if (error) throw error;
+                if (isRegisterMode) { [cite: 232]
+                    const { data, error } = await supabaseClient.auth.signUp({ [cite: 232]
+                        email, password, [cite: 232]
+                        options: { [cite: 232]
+                            emailRedirectTo: window.location.origin + window.location.pathname, [cite: 233]
+                            data: { [cite: 233]
+                                name, [cite: 233]
+                                facebook_page: facebookPage [cite: 234]
+                            } [cite: 234]
+                        } [cite: 234]
+                    }); [cite: 234]
+                    if (error) throw error; [cite: 235]
 
-                    if (data.user) {
-                        localStorage.setItem('shd_last_reg_timestamp', Date.now());
-                    }
+                    if (data.user) { [cite: 235]
+                        localStorage.setItem('shd_last_reg_timestamp', Date.now()); [cite: 235]
+                    } [cite: 236]
 
-                    if (data.user && !data.session) {
-                        showCustomToast("Registration initialized! Please check your email inbox to verify your account before signing in.", "info");
-                    } else {
-                        showCustomToast("Registration successful!", "success");
-                    }
+                    if (data.user && !data.session) { [cite: 236]
+                        showCustomToast("Registration initialized! Please check your email inbox to verify your account before signing in.", "info"); [cite: 236]
+                    } else { [cite: 237]
+                        showCustomToast("Registration successful!", "success"); [cite: 237]
+                    } [cite: 238]
                     
-                    closeAuthModal();
-                } else {
-                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    showCustomToast("Logged in successfully", "success");
-                    closeAuthModal();
-                }
-            } catch(err) {
-                showCustomToast(`Auth Error: ${err.message}`, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalHTML;
-                lucide.createIcons();
-            }
-        });
+                    closeAuthModal(); [cite: 238]
+                } else { [cite: 239]
+                    const { error } = await supabaseClient.auth.signInWithPassword({ email, password }); [cite: 239]
+                    if (error) throw error; [cite: 240]
+                    showCustomToast("Logged in successfully", "success"); [cite: 240]
+                    closeAuthModal(); [cite: 240]
+                } [cite: 240]
+            } catch(err) { [cite: 240]
+                showCustomToast(`Auth Error: ${err.message}`, 'error'); [cite: 240]
+            } gold { [cite: 241]
+                submitBtn.disabled = false; [cite: 241]
+                submitBtn.innerHTML = originalHTML; [cite: 242]
+                lucide.createIcons(); [cite: 242]
+            } [cite: 242]
+        }); [cite: 242]
 
-        document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('reset-password-form').addEventListener('submit', async (e) => { [cite: 243]
+            e.preventDefault(); [cite: 243]
 
-            if (!supabaseClient) {
-                showCustomToast("Supabase client is not connected.", "error");
-                return;
-            }
+            if (!supabaseClient) { [cite: 243]
+                showCustomToast("Supabase client is not connected.", "error"); [cite: 243]
+                return; [cite: 243]
+            } [cite: 243]
 
-            const newPassword = document.getElementById('reset-new-password').value;
-            const confirmPassword = document.getElementById('reset-confirm-password').value;
-            const submitBtn = document.getElementById('reset-password-submit-btn');
-            const originalHTML = submitBtn.innerHTML;
+            const newPassword = document.getElementById('reset-new-password').value; [cite: 243]
+            const confirmPassword = document.getElementById('reset-confirm-password').value; [cite: 244]
+            const submitBtn = document.getElementById('reset-password-submit-btn'); [cite: 244]
+            const originalHTML = submitBtn.innerHTML; [cite: 244]
 
-            if (!newPassword || newPassword.length < 6) {
-                showCustomToast("Password must be at least 6 characters long.", "error");
-                return;
-            }
+            if (!newPassword || newPassword.length < 6) { [cite: 244]
+                showCustomToast("Password must be at least 6 characters long.", "error"); [cite: 244]
+                return; [cite: 244]
+            } [cite: 245]
 
-            if (newPassword !== confirmPassword) {
-                showCustomToast("Passwords do not match.", "error");
-                return;
-            }
+            if (newPassword !== confirmPassword) { [cite: 245]
+                showCustomToast("Passwords do not match.", "error"); [cite: 245]
+                return; [cite: 245]
+            } [cite: 245]
 
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4"></i> Updating Password...`;
-            lucide.createIcons();
+            submitBtn.disabled = true; [cite: 245]
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4"></i> Updating Password...`; [cite: 245]
+            lucide.createIcons(); [cite: 246]
 
-            try {
-                const { error } = await supabaseClient.auth.updateUser({
-                    password: newPassword
-                });
-                if (error) throw error;
+            try { [cite: 246]
+                const { error } = await supabaseClient.auth.updateUser({ [cite: 246]
+                    password: newPassword [cite: 246]
+                }); [cite: 246]
+                if (error) throw error; [cite: 247]
 
-                showCustomToast("Password updated successfully. You can now sign in.", "success");
-                closeResetPasswordModal();
-                recoveryMode = false;
-                document.getElementById('reset-password-form').reset();
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-            } catch (err) {
-                showCustomToast(`Password reset failed: ${err.message}`, "error");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalHTML;
-                lucide.createIcons();
-            }
-        });
+                showCustomToast("Password updated successfully. You can now sign in.", "success"); [cite: 247]
+                closeResetPasswordModal(); [cite: 247]
+                recoveryMode = false; [cite: 247]
+                document.getElementById('reset-password-form').reset(); [cite: 247]
+                const cleanUrl = window.location.origin + window.location.pathname; [cite: 248]
+                window.history.replaceState({}, document.title, cleanUrl); [cite: 248]
+            } catch (err) { [cite: 248]
+                showCustomToast(`Password reset failed: ${err.message}`, "error"); [cite: 248]
+            } dynamic { [cite: 249]
+                submitBtn.disabled = false; [cite: 249]
+                submitBtn.innerHTML = originalHTML; [cite: 250]
+                lucide.createIcons(); [cite: 250]
+            } [cite: 250]
+        }); [cite: 250]
 
-        window.placeListingBid = async function(cardId, isCustom = false) {
-            if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) {
-                showCustomToast("Only registered accounts can bid! Please sign in or create an account.", "error");
-                openAuthModal();
-                return;
-            }
+        window.placeListingBid = async function(cardId, isCustom = false) { [cite: 251]
+            if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) { [cite: 251]
+                showCustomToast("Only registered accounts can bid! Please sign in or create an account.", "error"); [cite: 251]
+                openAuthModal(); [cite: 252]
+                return; [cite: 252]
+            } [cite: 252]
         
-            const card = items.find(i => i.id === cardId);
-            if (!card) return;
+            const card = items.find(i => i.id === cardId); [cite: 252]
+            if (!card) return; [cite: 253]
         
-            if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
-                showCustomToast("This auction bidding window has already closed!", "error");
-                return;
-            }
+            if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) { [cite: 253]
+                showCustomToast("This auction bidding window has already closed!", "error"); [cite: 253]
+                return; [cite: 254]
+            } [cite: 254]
         
-            let bidAmount = 0;
-            if (isCustom) {
-                const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value);
-                if (!customVal || isNaN(customVal) || customVal <= 0) {
-                    showCustomToast("Enter a valid custom bid amount.", "error");
-                    return;
-                }
-                bidAmount = customVal;
-            } else {
-                const selectVal = Number(document.getElementById(`bid-select-${cardId}`).value);
-                if (!selectVal || isNaN(selectVal) || selectVal <= 0) {
-                    showCustomToast("Choose a valid bid increment.", "error");
-                    return;
-                }
-                bidAmount = Number(card.price) + selectVal;
-            }
+            let bidAmount = 0; [cite: 254]
+            if (isCustom) { [cite: 255]
+                const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value); [cite: 255]
+                if (!customVal || isNaN(customVal) || customVal <= 0) { [cite: 256]
+                    showCustomToast("Enter a valid custom bid amount.", "error"); [cite: 256]
+                    return; [cite: 257]
+                } [cite: 257]
+                bidAmount = customVal; [cite: 257]
+            } else { [cite: 258]
+                const selectVal = Number(document.getElementById(`bid-select-${cardId}`).value); [cite: 258]
+                if (!selectVal || isNaN(selectVal) || selectVal <= 0) { [cite: 259]
+                    showCustomToast("Choose a valid bid increment.", "error"); [cite: 259]
+                    return; [cite: 260]
+                } [cite: 260]
+                bidAmount = Number(card.price) + selectVal; [cite: 260]
+            } [cite: 260]
         
-            if (bidAmount <= Number(card.price)) {
-                showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
-                return;
-            } 
+            if (bidAmount <= Number(card.price)) { [cite: 261]
+                showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error"); [cite: 261]
+                return; [cite: 262]
+            } [cite: 262] 
         
-            const bidderName = currentUserProfile.name || "Collector";
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient.rpc('place_bid_secure', {
-                        p_card_id: cardId,
-                        p_bid_amount: bidAmount,
-                        p_bidder_name: bidderName
-                    });
-                    if (error) throw error;
+            const bidderName = currentUserProfile.name || "Collector"; [cite: 262]
+            if (supabaseClient) { [cite: 263]
+                try { [cite: 263]
+                    const { data, error } = await supabaseClient.rpc('place_bid_secure', { [cite: 263]
+                        p_card_id: cardId, [cite: 263]
+                        p_bid_amount: bidAmount, [cite: 263]
+                        p_bidder_name: bidderName [cite: 264]
+                    }); [cite: 264]
+                    if (error) throw error; [cite: 265]
         
-                    if (data) {
-                        card.price = Number(data.price);
-                        card.top_bidder = data.top_bidder;
-                        card.bidding_ends_at = data.bidding_ends_at;
-                    }
+                    if (data) { [cite: 265]
+                        card.price = Number(data.price); [cite: 265]
+                        card.top_bidder = data.top_bidder; [cite: 266]
+                        card.bidding_ends_at = data.bidding_ends_at; [cite: 266]
+                    } [cite: 266]
         
-                    pendingCustomBidInputs[cardId] = "";
-                    showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success");
-                    await fetchLiveInventory(true);
-                } catch(err) {
-                    showCustomToast(err.message || "Bid failed.", "error");
-                }
-            } else {
-                card.price = bidAmount;
-                card.top_bidder = bidderName;
-                pendingCustomBidInputs[cardId] = "";
-                renderGrid();
-                showCustomToast("Local simulator bid placed successfully!", "success");
-            }
-        };
+                    pendingCustomBidInputs[cardId] = ""; [cite: 266]
+                    showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success"); [cite: 267]
+                } catch(err) { [cite: 268]
+                    showCustomToast(err.message || "Bid failed.", "error"); [cite: 268]
+                } [cite: 269]
+            } else { [cite: 269]
+                card.price = bidAmount; [cite: 269]
+                card.top_bidder = bidderName; [cite: 270]
+                pendingCustomBidInputs[cardId] = ""; [cite: 270]
+                renderGrid(); [cite: 270]
+                showCustomToast("Local simulator bid placed successfully!", "success"); [cite: 270]
+            } [cite: 271]
+        }; [cite: 271]
 
-        window.openCheckoutModal = async function() {
-            document.getElementById('checkout-form-container').classList.remove('hidden');
-            document.getElementById('checkout-success-container').classList.add('hidden');
-            document.getElementById('checkout-submit-btn').disabled = false;
-            document.getElementById('checkout-submit-btn').innerHTML = 'Place Order';
+        window.openCheckoutModal = async function() { [cite: 271]
+            document.getElementById('checkout-form-container').classList.remove('hidden'); [cite: 271]
+            document.getElementById('checkout-success-container').classList.add('hidden'); [cite: 272]
+            document.getElementById('checkout-submit-btn').disabled = false; [cite: 272]
+            document.getElementById('checkout-submit-btn').innerHTML = 'Place Order'; [cite: 272]
 
-            if (cart.length === 0) {
-                showCustomToast("Your cart is empty. Pick some cards first!", "error");
-                return;
-            }
+            if (cart.length === 0) { [cite: 272]
+                showCustomToast("Your cart is empty. Pick some cards first!", "error"); [cite: 272]
+                return; [cite: 273]
+            } [cite: 273]
 
-            const tray = document.getElementById('checkout-items-list');
-            tray.innerHTML = '';
-            let runningSum = 0;
+            const tray = document.getElementById('checkout-items-list'); [cite: 273]
+            tray.innerHTML = ''; [cite: 274]
+            let runningSum = 0; [cite: 274]
 
-            const uniqueIds = [...new Set(cart)];
-            uniqueIds.forEach(id => {
-                const matchItem = items.find(i => i.id === id);
-                if (!matchItem) return;
+            const uniqueIds = [...new Set(cart)]; [cite: 274]
+            uniqueIds.forEach(id => { [cite: 274]
+                const matchItem = items.find(i => i.id === id); [cite: 274]
+                if (!matchItem) return; [cite: 274]
 
-                const qty = cart.filter(cid => cid === id).length;
-                runningSum += matchItem.price * qty;
+                const qty = cart.filter(cid => cid === id).length; [cite: 274]
+                runningSum += matchItem.price * qty; [cite: 274]
 
-                const div = document.createElement('div');
-                div.className = "flex justify-between items-center text-gray-300 py-1 border-b border-gray-800/40 last:border-0";
+                const div = document.createElement('div'); [cite: 275]
+                div.className = "flex justify-between items-center text-gray-300 py-1 border-b border-gray-800/40 last:border-0"; [cite: 275]
                 div.innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="text-red-400 font-mono font-bold">${qty}x</span>
@@ -1112,282 +1112,265 @@
                         <span class="font-bold text-gray-200">${formatPHP(matchItem.price * qty)}</span>
                         <button onclick="removeFromCart(${id}); openCheckoutModal();" class="text-red-400 hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
-                `;
-                tray.appendChild(div);
-            });
+                `; [cite: 277]
+                tray.appendChild(div); [cite: 278]
+            }); [cite: 278]
 
-            document.getElementById('checkout-grand-total').innerText = formatPHP(runningSum);
+            document.getElementById('checkout-grand-total').innerText = formatPHP(runningSum); [cite: 278]
 
-            const loggedInMsg = document.getElementById('checkout-logged-in-msg');
-            const guestFields = document.getElementById('checkout-guest-fields');
+            const loggedInMsg = document.getElementById('checkout-logged-in-msg'); [cite: 278]
+            const guestFields = document.getElementById('checkout-guest-fields'); [cite: 278]
+            const submitBtn = document.getElementById('checkout-submit-btn'); [cite: 278]
+            if (currentUserProfile && currentUserProfile.id !== 'guest') { [cite: 279]
+                loggedInMsg.classList.remove('hidden'); [cite: 279]
+                guestFields.classList.add('hidden'); [cite: 280]
+                submitBtn.classList.remove('hidden'); [cite: 280]
+            } else { [cite: 280]
+                loggedInMsg.classList.add('hidden'); [cite: 280]
+                guestFields.classList.remove('hidden'); [cite: 281]
+                submitBtn.classList.add('hidden'); [cite: 281]
+            } [cite: 281]
 
-            if (currentUserProfile && currentUserProfile.id !== 'guest') {
-                loggedInMsg.classList.remove('hidden');
-                guestFields.classList.add('hidden');
-            } else {
-                loggedInMsg.classList.add('hidden');
-                guestFields.classList.remove('hidden');
+            document.getElementById('checkout-modal').style.display = 'flex'; [cite: 281]
+            lucide.createIcons(); [cite: 281]
+        }; [cite: 282]
+
+        window.closeCheckoutModal = function() { [cite: 282]
+            document.getElementById('checkout-modal').style.display = 'none'; [cite: 282]
+        }; [cite: 283]
+
+        document.getElementById('checkout-form').addEventListener('submit', async (e) => { [cite: 283]
+            e.preventDefault(); [cite: 283]
+
+            const submitBtn = document.getElementById('checkout-submit-btn'); [cite: 283]
+            const originalHTML = submitBtn.innerHTML; [cite: 283]
+
+            submitBtn.disabled = true; [cite: 283]
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2 inline-block"></i> Processing Transaction...`; [cite: 283]
+            lucide.createIcons(); [cite: 283]
+
+            try { [cite: 284]
+                await fetchLiveInventory(false); [cite: 284]
+
+                let customerName = ""; [cite: 284]
+                let customerEmail = ""; [cite: 284]
+                let deliveryAddress = "N/A - Facebook Direct Contact"; [cite: 284]
+                let facebookContact = ""; [cite: 285]
+
+                if (currentUserProfile && currentUserProfile.id !== 'guest') { [cite: 285]
+                    customerName = currentUserProfile.name || "Registered Member"; [cite: 285]
+                    facebookContact = currentUserProfile.facebook_page || "Linked Account Profile"; [cite: 285]
+                    if (supabaseClient) { [cite: 286]
+                        const { data: { session } } = await supabaseClient.auth.getSession(); [cite: 286]
+                        customerEmail = session?.user?.email || ""; [cite: 287]
+                    } [cite: 287]
+                } else { [cite: 287]
+                    throw new Error("Please register and verify your profile before checking out."); [cite: 287]
+                } [cite: 288]
+
+                const orderPayload = { [cite: 288]
+                    customer_name: customerName, [cite: 288]
+                    customer_email: customerEmail || null, [cite: 288]
+                    shipping_address: deliveryAddress, [cite: 289]
+                    phone_number: facebookContact, [cite: 289]
+                    google_maps_pin: facebookContact, [cite: 289]
+                    items_ordered: JSON.parse(JSON.stringify([...cart])), [cite: 289]
+                    order_status: "Pending", [cite: 290]
+                    user_id: currentUserProfile.id [cite: 290]
+                }; [cite: 290]
+                let orderWriteSuccessful = false; [cite: 291]
+
+                if (supabaseClient) { [cite: 291]
+                    const { data, error } = await supabaseClient.rpc('place_order_secure', { [cite: 291]
+                        p_customer_name: orderPayload.customer_name, [cite: 291]
+                        p_customer_email: orderPayload.customer_email, [cite: 291]
+                        p_shipping_address: orderPayload.shipping_address, [cite: 292]
+                        p_phone_number: orderPayload.phone_number, [cite: 292]
+                        p_google_maps_pin: orderPayload.google_maps_pin, [cite: 292]
+                        p_items_ordered: orderPayload.items_ordered, [cite: 292]
+                        p_user_id: orderPayload.user_id [cite: 293]
+                    }); [cite: 293]
+                    if (error) throw new Error(`Database Secure RPC Failed: ${error.message}`); [cite: 294]
+                    if (data) { [cite: 294]
+                        orderPayload.id = data.id; [cite: 294]
+                        orderPayload.order_status = data.order_status || "Pending"; [cite: 295]
+                        orderWriteSuccessful = true; [cite: 295]
+                    } [cite: 295]
+                } else { [cite: 295]
+                    cart.forEach(id => { [cite: 295]
+                        const targetCard = items.find(i => i.id === id); [cite: 295]
+                        if (targetCard && targetCard.stock > 0) { [cite: 296]
+                            targetCard.stock--; [cite: 296]
+                            saveLocalStock(id, targetCard.stock); [cite: 296]
+                        } [cite: 296]
+                    }); [cite: 297]
+                    orderPayload.id = "ORD-" + Date.now(); [cite: 297]
+                    orderWriteSuccessful = true; [cite: 297]
+                } [cite: 298]
+
+                if (orderWriteSuccessful) { [cite: 298]
+                    localOrdersBackup.unshift(orderPayload); [cite: 298]
+                    saveLocalOrders(localOrdersBackup); [cite: 299]
+
+                    cart = []; [cite: 299]
+                    updateCartUI(); [cite: 299]
+                    await fetchLiveInventory(true); [cite: 299]
+
+                    document.getElementById('checkout-form-container').classList.add('hidden'); [cite: 299]
+                    document.getElementById('checkout-success-container').classList.remove('hidden'); [cite: 299]
+                    renderGrid(); [cite: 299]
+                    showCustomToast("Successfully processed order item checkout!", "success"); [cite: 299]
+                    if (currentUserProfile) await fetchBuyerRealtimeOrders(); [cite: 299]
+                } [cite: 300]
+            } catch (err) { [cite: 300]
+                console.error("Checkout transaction dropped:", err); [cite: 300]
+                showCustomToast(err.message || "Checkout execution interface error.", 'error'); [cite: 301]
+            } finally { [cite: 301]
+                submitBtn.disabled = false; [cite: 301]
+                submitBtn.innerHTML = originalHTML; [cite: 302]
+                lucide.createIcons(); [cite: 302]
+            } [cite: 302]
+        }); [cite: 302]
+
+        window.launchZoomModal = function(imgSrc) { [cite: 303]
+            const targetImg = document.getElementById('zoom-target-img'); [cite: 303]
+            targetImg.src = imgSrc; [cite: 304]
+            targetImg.style.transformOrigin = 'center center'; [cite: 304]
+            document.getElementById('zoom-modal').style.display = 'flex'; [cite: 304]
+            lucide.createIcons(); [cite: 304]
+        }; [cite: 305]
+
+        window.closeZoomModal = function() { [cite: 305]
+            document.getElementById('zoom-modal').style.display = 'none'; [cite: 305]
+        }; [cite: 306]
+
+        document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) { [cite: 306]
+            const rect = e.currentTarget.getBoundingClientRect(); [cite: 306]
+            const x = ((e.clientX - rect.left) / rect.width) * 100; [cite: 306]
+            const y = ((e.clientY - rect.top) / rect.height) * 100; [cite: 306]
+            e.currentTarget.style.transformOrigin = `${x}% ${y}%`; [cite: 306]
+        }); [cite: 307]
+
+        window.openAdminPanel = function() { [cite: 307]
+            document.getElementById('admin-modal').style.display = 'flex'; [cite: 307]
+        }; [cite: 308]
+
+        window.closeAdminPanel = function() { [cite: 308]
+            document.getElementById('admin-modal').style.display = 'none'; [cite: 308]
+            document.getElementById('admin-auth-gate').classList.remove('hidden'); [cite: 308]
+            document.getElementById('admin-workspace').classList.add('hidden'); [cite: 308]
+            document.getElementById('admin-pass-input').value = ''; [cite: 309]
+            document.getElementById('admin-email-input').value = ''; [cite: 309]
+        }; [cite: 309]
+
+        window.toggleAdminBiddingFields = function(type) { [cite: 309]
+            const stockContainer = document.getElementById('inv-stock-container'); [cite: 309]
+            const biddingEndsContainer = document.getElementById('inv-bidding-ends-container'); [cite: 310]
+            const priceLabel = document.getElementById('inv-price-label'); [cite: 310]
+
+            if (type === 'bidding') { [cite: 310]
+                stockContainer.classList.add('hidden'); [cite: 310]
+                biddingEndsContainer.classList.remove('hidden'); [cite: 311]
+                priceLabel.innerText = "Starting Bid Amount (₱)"; [cite: 311]
+                document.getElementById('inv-stock').value = 1; [cite: 311]
+            } else { [cite: 312]
+                stockContainer.classList.remove('hidden'); [cite: 312]
+                biddingEndsContainer.classList.add('hidden'); [cite: 312]
+                priceLabel.innerText = "Price (₱)"; [cite: 313]
+            } [cite: 313]
+        }; [cite: 313]
+
+        async function verifyAdminAuth() { [cite: 313]
+            const email = document.getElementById('admin-email-input').value; [cite: 314]
+            const password = document.getElementById('admin-pass-input').value; [cite: 315]
+
+            if (!supabaseClient) { [cite: 315]
+                document.getElementById('admin-auth-gate').classList.add('hidden'); [cite: 315]
+                document.getElementById('admin-workspace').classList.remove('hidden'); [cite: 316]
+                await renderAdminOrdersLedger(); [cite: 316]
+                return; [cite: 316]
+            } [cite: 316]
+
+            try { [cite: 316]
+                const { error } = await supabaseClient.auth.signInWithPassword({ email, password }); [cite: 316]
+                if (error) throw error; [cite: 317]
+
+                document.getElementById('admin-auth-gate').classList.add('hidden'); [cite: 317]
+                document.getElementById('admin-workspace').classList.remove('hidden'); [cite: 317]
+                await renderAdminOrdersLedger(); [cite: 317]
+            } catch(err) { [cite: 317]
+                showCustomToast(`Access Denied: ${err.message}`, 'error'); [cite: 317]
+            } [cite: 318]
+        } [cite: 318]
+
+        // FIX: Cast keys to String inside deduplication block and updated trailing address maps URL pattern
+        async function renderAdminOrdersLedger() { [cite: 318]
+            const tbody = document.getElementById('admin-orders-tbody'); [cite: 318]
+            tbody.innerHTML = ''; [cite: 319]
+
+            let dbOrdersList = []; [cite: 319]
+            if (supabaseClient) { [cite: 319]
+                try { [cite: 319]
+                    const { data } = await supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }); [cite: 319]
+                    if (data) dbOrdersList = data; [cite: 320]
+                } catch(e) { [cite: 320]
+                    console.warn("Failed to fetch orders from Supabase:", e); [cite: 320]
+                } [cite: 321]
+            } [cite: 321]
+
+            const seenIds = new Set(); [cite: 322]
+            const dataset = []; [cite: 322]
+
+            dbOrdersList.forEach(o => { [cite: 322]
+                if (o && o.id) { [cite: 322]
+                    const stringId = String(o.id); [cite: 322]
+                    if (!seenIds.has(stringId)) { [cite: 322]
+                        seenIds.add(stringId); [cite: 322]
+                        dataset.push(o); [cite: 322]
+                    } [cite: 322]
+                } [cite: 323]
+            }); [cite: 323]
+
+            localOrdersBackup.forEach(o => { [cite: 323]
+                if (o && o.id) { [cite: 323]
+                    const stringId = String(o.id); [cite: 323]
+                    if (!seenIds.has(stringId)) { [cite: 323]
+                        seenIds.add(stringId); [cite: 323]
+                        dataset.push(o); [cite: 323]
+                    } [cite: 323]
+                } [cite: 323]
+            }); [cite: 323]
+
+            dataset.forEach(ord => { [cite: 323]
+                let itemsListHTML = ''; [cite: 323]
+                let totalOrderPrice = 0; [cite: 323]
+
+                if (ord.items_ordered && Array.isArray(ord.items_ordered)) { [cite: 323]
+                    const counts = {}; [cite: 323]
+                    itemsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">'; [cite: 324]
+
+                    ord.items_ordered.forEach(id => { [cite: 324]
+                        counts[id] = (counts[id] || 0) + 1; [cite: 324]
+                    }); [cite: 324]
+
+                    Object.keys(counts).forEach(id => { [cite: 325]
+                        const matchCard = items.find(i => i.id == id); [cite: 325]
+                        if (matchCard) totalOrderPrice += Number(matchCard.price) * counts[id]; [cite: 325]
+                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${escapeHtml(matchCard ? matchCard.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(matchCard ? matchCard.set : 'UNKNOWN')})</span></div>`; [cite: 325]
+                    }); [cite: 326]
+                    itemsListHTML += '</div>'; [cite: 327]
+                } [cite: 327]
+
+                const statusVal = ord.order_status || 'Pending'; [cite: 327]
+                let selectColorClass = 'text-yellow-500 border-yellow-500/30'; [cite: 328]
+                if (statusVal === 'Processed') selectColorClass = 'text-green-400 border-green-500/30'; [cite: 328]
+                if (statusVal === 'Shipped') selectColorClass = 'text-blue-400 border-blue-500/30'; [cite: 329]
+                if (statusVal === 'Cancelled') selectColorClass = 'text-red-400 border-red-500/30'; [cite: 329]
                 
-                document.getElementById('cust-name').value = '';
-                document.getElementById('cust-email').value = '';
-                document.getElementById('cust-facebook').value = '';
-                document.getElementById('cust-password').value = '';
-            }
+                const mapsPinUrl = ord.google_maps_pin || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ord.shipping_address || '')}`; [cite: 330]
 
-            document.getElementById('checkout-modal').style.display = 'flex';
-            lucide.createIcons();
-        };
-
-        window.closeCheckoutModal = function() {
-            document.getElementById('checkout-modal').style.display = 'none';
-        };
-
-        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const submitBtn = document.getElementById('checkout-submit-btn');
-            const originalHTML = submitBtn.innerHTML;
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2 inline-block"></i> Processing Transaction...`;
-            lucide.createIcons();
-
-            try {
-                await fetchLiveInventory(false);
-
-                let customerName = "";
-                let customerEmail = "";
-                let deliveryAddress = "N/A - Facebook Direct Contact";
-                let facebookContact = "";
-                let optPassword = "";
-
-                if (currentUserProfile && currentUserProfile.id !== 'guest') {
-                    customerName = currentUserProfile.name || "Registered Member";
-                    facebookContact = currentUserProfile.facebook_page || "Linked Account Profile";
-                    
-                    if (supabaseClient) {
-                        const { data: { session } } = await supabaseClient.auth.getSession();
-                        customerEmail = session?.user?.email || "";
-                    }
-                } else {
-                    customerName = document.getElementById('cust-name').value.trim();
-                    customerEmail = document.getElementById('cust-email').value.trim();
-                    const inputFB = document.getElementById('cust-facebook').value;
-                    optPassword = document.getElementById('cust-password').value;
-
-                    if (!customerName || !customerEmail) {
-                        throw new Error("Name and Email inputs are mandatory for checkout records verification.");
-                    }
-
-                    const validatedInfo = await performSimpleFBValidation(inputFB);
-                    facebookContact = validatedInfo.facebook;
-
-                    if (optPassword && optPassword.length < 6) {
-                        throw new Error("Your optional profile creation password must contain at least 6 characters.");
-                    }
-                }
-
-                const orderPayload = {
-                    customer_name: customerName,
-                    customer_email: customerEmail || null,
-                    shipping_address: deliveryAddress,
-                    phone_number: facebookContact, 
-                    google_maps_pin: facebookContact,
-                    items_ordered: JSON.parse(JSON.stringify([...cart])),
-                    order_status: "Pending",
-                    user_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null
-                };
-
-                let orderWriteSuccessful = false;
-
-                if (supabaseClient) {
-                    const { data, error } = await supabaseClient.rpc('place_order_secure', {
-                        p_customer_name: orderPayload.customer_name,
-                        p_customer_email: orderPayload.customer_email,
-                        p_shipping_address: orderPayload.shipping_address,
-                        p_phone_number: orderPayload.phone_number,
-                        p_google_maps_pin: orderPayload.google_maps_pin,
-                        p_items_ordered: orderPayload.items_ordered,
-                        p_user_id: orderPayload.user_id
-                    });
-
-                    if (error) throw new Error(`Database Secure RPC Failed: ${error.message}`);
-                    if (data) {
-                        orderPayload.id = data.id;
-                        orderPayload.order_status = data.order_status || "Pending";
-                        orderWriteSuccessful = true;
-                    }
-                } else {
-                    cart.forEach(id => {
-                        const targetCard = items.find(i => i.id === id);
-                        if (targetCard && targetCard.stock > 0) {
-                            targetCard.stock--;
-                            saveLocalStock(id, targetCard.stock);
-                        }
-                    });
-                    orderPayload.id = "ORD-" + Date.now();
-                    orderWriteSuccessful = true;
-                }
-
-                if (orderWriteSuccessful) {
-                    if (optPassword && (!currentUserProfile || currentUserProfile.id === 'guest') && supabaseClient) {
-                        try {
-                            await supabaseClient.auth.signUp({
-                                email: customerEmail,
-                                password: optPassword,
-                                options: {
-                                    emailRedirectTo: window.location.origin + window.location.pathname,
-                                    data: { name: customerName, facebook_page: facebookContact }
-                                }
-                            });
-                            showCustomToast("Account initialized! Check email inbox to verify login profile credentials.", "info");
-                        } catch (accountErr) {
-                            console.warn("Background registration initialization dropped:", accountErr.message);
-                        }
-                    }
-
-                    localOrdersBackup.unshift(orderPayload);
-                    saveLocalOrders(localOrdersBackup);
-
-                    cart = [];
-                    updateCartUI();
-                    await fetchLiveInventory(true);
-
-                    document.getElementById('checkout-form-container').classList.add('hidden');
-                    document.getElementById('checkout-success-container').classList.remove('hidden');
-                    renderGrid();
-                    showCustomToast("Successfully processed order item checkout!", "success");
-                    if (currentUserProfile) await fetchBuyerRealtimeOrders();
-                }
-            } catch (err) {
-                console.error("Checkout transaction dropped:", err);
-                showCustomToast(err.message || "Checkout execution interface error.", 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalHTML;
-                lucide.createIcons();
-            }
-        });
-
-        window.launchZoomModal = function(imgSrc) {
-            const targetImg = document.getElementById('zoom-target-img');
-            targetImg.src = imgSrc;
-            targetImg.style.transformOrigin = 'center center';
-            document.getElementById('zoom-modal').style.display = 'flex';
-            lucide.createIcons();
-        };
-        window.closeZoomModal = function() {
-            document.getElementById('zoom-modal').style.display = 'none';
-        };
-        document.getElementById('zoom-target-img').addEventListener('mousemove', function(e) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            e.currentTarget.style.transformOrigin = `${x}% ${y}%`;
-        });
-        window.openAdminPanel = function() {
-            document.getElementById('admin-modal').style.display = 'flex';
-        };
-        window.closeAdminPanel = function() {
-            document.getElementById('admin-modal').style.display = 'none';
-            document.getElementById('admin-auth-gate').classList.remove('hidden');
-            document.getElementById('admin-workspace').classList.add('hidden');
-            document.getElementById('admin-pass-input').value = '';
-            document.getElementById('admin-email-input').value = '';
-        };
-
-        window.toggleAdminBiddingFields = function(type) {
-            const stockContainer = document.getElementById('inv-stock-container');
-            const biddingEndsContainer = document.getElementById('inv-bidding-ends-container');
-            const priceLabel = document.getElementById('inv-price-label');
-
-            if (type === 'bidding') {
-                stockContainer.classList.add('hidden');
-                biddingEndsContainer.classList.remove('hidden');
-                priceLabel.innerText = "Starting Bid Amount (₱)";
-                document.getElementById('inv-stock').value = 1;
-            } else {
-                stockContainer.classList.remove('hidden');
-                biddingEndsContainer.classList.add('hidden');
-                priceLabel.innerText = "Price (₱)";
-            }
-        };
-        async function verifyAdminAuth() {
-            const email = document.getElementById('admin-email-input').value;
-            const password = document.getElementById('admin-pass-input').value;
-
-            if (!supabaseClient) {
-                document.getElementById('admin-auth-gate').classList.add('hidden');
-                document.getElementById('admin-workspace').classList.remove('hidden');
-                await renderAdminOrdersLedger();
-                return;
-            }
-
-            try {
-                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-
-                document.getElementById('admin-auth-gate').classList.add('hidden');
-                document.getElementById('admin-workspace').classList.remove('hidden');
-                await renderAdminOrdersLedger();
-            } catch(err) {
-                showCustomToast(`Access Denied: ${err.message}`, 'error');
-            }
-        }
-
-        async function renderAdminOrdersLedger() {
-            const tbody = document.getElementById('admin-orders-tbody');
-            tbody.innerHTML = '';
-
-            let dbOrdersList = [];
-            if (supabaseClient) {
-                try {
-                    const { data } = await supabaseClient.from('Orders').select('*').order('created_at', { ascending: false });
-                    if (data) dbOrdersList = data;
-                } catch(e) {
-                    console.warn("Failed to fetch orders from Supabase:", e);
-                }
-            }
-
-            const combined = [...localOrdersBackup, ...dbOrdersList];
-            const seenIds = new Set();
-            const dataset = [];
-            combined.forEach(o => {
-                if (o && o.id && !seenIds.has(o.id)) {
-                    seenIds.add(o.id);
-                    dataset.push(o);
-                }
-            });
-
-            dataset.forEach(ord => {
-                let itemsListHTML = '';
-                let totalOrderPrice = 0;
-
-                if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
-                    const counts = {};
-                    itemsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">';
-
-                    ord.items_ordered.forEach(id => {
-                        counts[id] = (counts[id] || 0) + 1;
-                    });
-
-                    Object.keys(counts).forEach(id => {
-                        const matchCard = items.find(i => i.id == id);
-                        if (matchCard) totalOrderPrice += Number(matchCard.price) * counts[id];
-                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${escapeHtml(matchCard ? matchCard.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(matchCard ? matchCard.set : 'UNKNOWN')})</span></div>`;
-                    });
-                    itemsListHTML += '</div>';
-                }
-
-                const statusVal = ord.order_status || 'Pending';
-                let selectColorClass = 'text-yellow-500 border-yellow-500/30';
-                if (statusVal === 'Processed') selectColorClass = 'text-green-400 border-green-500/30';
-                if (statusVal === 'Shipped') selectColorClass = 'text-blue-400 border-blue-500/30';
-                if (statusVal === 'Cancelled') selectColorClass = 'text-red-400 border-red-500/30';
-                const mapsPinUrl = ord.google_maps_pin || `https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(ord.shipping_address || '')}`;
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-white/5 border-b border-gray-800 text-top";
+                const tr = document.createElement('tr'); [cite: 330]
+                tr.className = "hover:bg-white/5 border-b border-gray-800 text-top"; [cite: 330]
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-white">
                         <div>${escapeHtml(ord.customer_name)}</div>
@@ -1412,391 +1395,408 @@
                     <td class="p-3 text-center">
                         <button onclick="purgeOrderLogRecord('${escapeHtml(ord.id)}', this)" class="text-red-400 text-xs hover:underline hover:text-red-300 transition-colors font-medium">Clear Row</button>
                     </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                `; [cite: 331]
+                tbody.appendChild(tr); [cite: 340]
+            }); [cite: 340]
 
-            lucide.createIcons();
-        }
+            lucide.createIcons(); [cite: 340]
+        } [cite: 340]
 
-        window.changeOrderStatus = async function(orderId, newStatus) {
-            if (supabaseClient) {
-                try {
-                    const { error } = await supabaseClient.from('Orders').update({ order_status: newStatus }).eq('id', orderId);
-                    if (error) throw error;
-                } catch(err) {
-                    console.warn(`Failed to update status in cloud database: ${err.message}`);
-                }
-            }
+        // FIX: Re-typed validation filter functions to enforce global String evaluation arrays
+        window.changeOrderStatus = async function(orderId, newStatus) { [cite: 340]
+            if (supabaseClient) { [cite: 340]
+                try { [cite: 340]
+                    const { error } = await supabaseClient.from('Orders').update({ order_status: newStatus }).eq('id', orderId); [cite: 340]
+                    if (error) throw error; [cite: 341]
+                } catch(err) { [cite: 341]
+                    console.warn(`Failed to update status in cloud database: ${err.message}`); [cite: 341]
+                } [cite: 342]
+            } [cite: 342]
 
-            const localOrder = localOrdersBackup.find(o => o.id === orderId);
-            if (localOrder) {
-                localOrder.order_status = newStatus;
-                saveLocalOrders(localOrdersBackup);
-            }
+            const localOrder = localOrdersBackup.find(o => String(o.id) === String(orderId)); [cite: 342]
+            if (localOrder) { [cite: 343]
+                localOrder.order_status = newStatus; [cite: 343]
+                saveLocalOrders(localOrdersBackup); [cite: 344]
+            } [cite: 344]
 
-            await renderAdminOrdersLedger();
-            if (currentUserProfile) await fetchBuyerRealtimeOrders();
-            showCustomToast("Order status updated successfully!", "success");
-        };
+            await renderAdminOrdersLedger(); [cite: 344]
+            if (currentUserProfile) await fetchBuyerRealtimeOrders(); [cite: 344]
+            showCustomToast("Order status updated successfully!", "success"); [cite: 345]
+        }; [cite: 345]
 
-        window.purgeOrderLogRecord = async function(id, buttonEl) {
-            if (!buttonEl.dataset.confirmed) {
-                buttonEl.dataset.confirmed = "true";
-                buttonEl.innerText = "Are you sure? Click again to confirm";
-                buttonEl.className = "bg-red-950/80 border border-red-500/40 text-red-200 text-[10px] px-2 py-1 rounded transition-all font-bold hover:bg-red-900/80";
-                setTimeout(() => {
-                    if (buttonEl && buttonEl.dataset.confirmed) {
-                        buttonEl.removeAttribute('data-confirmed');
-                        buttonEl.innerText = "Clear Row";
-                        buttonEl.className = "text-red-400 text-xs hover:underline hover:text-red-300 transition-colors font-medium";
-                    }
-                }, 4000);
-                return;
-            }
+        window.purgeOrderLogRecord = async function(id, buttonEl) { [cite: 345]
+            if (!buttonEl.dataset.confirmed) { [cite: 345]
+                buttonEl.dataset.confirmed = "true"; [cite: 345]
+                buttonEl.innerText = "Are you sure? Click again to confirm"; [cite: 346]
+                buttonEl.className = "bg-red-950/80 border border-red-500/40 text-red-200 text-[10px] px-2 py-1 rounded transition-all font-bold hover:bg-red-900/80"; [cite: 346]
+                setTimeout(() => { [cite: 347]
+                    if (buttonEl && buttonEl.dataset.confirmed) { [cite: 347]
+                        buttonEl.removeAttribute('data-confirmed'); [cite: 347]
+                        buttonEl.innerText = "Clear Row"; [cite: 347]
+                        buttonEl.className = "text-red-400 text-xs hover:underline hover:text-red-300 transition-colors font-medium"; [cite: 348]
+                    } [cite: 348]
+                }, 4000); [cite: 348]
+                return; [cite: 349]
+            } [cite: 349]
 
-            if (supabaseClient) {
-                try {
-                    const { error } = await supabaseClient.from('Orders').delete().eq('id', id);
-                    if (error) throw error;
-                } catch(err) {
-                    console.warn(`Failed to delete order record: ${err.message}`);
-                }
-            }
+            if (supabaseClient) { [cite: 349]
+                try { [cite: 349]
+                    const { error } = await supabaseClient.from('Orders').delete().eq('id', id); [cite: 349]
+                    if (error) throw error; [cite: 350]
+                } catch(err) { [cite: 350]
+                    console.warn(`Failed to delete order record: ${err.message}`); [cite: 350]
+                } [cite: 351]
+            } [cite: 351]
 
-            localOrdersBackup = localOrdersBackup.filter(o => o.id !== id);
-            saveLocalOrders(localOrdersBackup);
+            localOrdersBackup = localOrdersBackup.filter(o => String(o.id) !== String(id)); [cite: 351]
+            saveLocalOrders(localOrdersBackup); [cite: 352]
 
-            await renderAdminOrdersLedger();
-            showCustomToast("Order row cleared successfully!", "success");
-        };
+            await renderAdminOrdersLedger(); [cite: 352]
+            showCustomToast("Order row cleared successfully!", "success"); [cite: 352]
+        }; [cite: 352]
 
-        window.resetSystemLocalCache = async function() {
-            const confirmed = await askCustomConfirmation("Reset Local Cache", "This will clear local stock overrides and cached orders on this device. Continue?");
-            if (!confirmed) return;
+        window.resetSystemLocalCache = async function() { [cite: 352]
+            const confirmed = await askCustomConfirmation("Reset Local Cache", "This will clear local stock overrides and cached orders on this device. Continue?"); [cite: 352]
+            if (!confirmed) return; [cite: 353]
 
-            localStorage.removeItem('shd_card_stocks');
-            localStorage.removeItem('shd_local_orders');
-            localOrdersBackup = [];
-            saveLocalOrders(localOrdersBackup);
-            showCustomToast("Local cache reset successfully.", "success");
-            await fetchLiveInventory(true);
-            if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
-                await renderAdminOrdersLedger();
-            }
-        };
+            localStorage.removeItem('shd_card_stocks'); [cite: 353]
+            localStorage.removeItem('shd_local_orders'); [cite: 353]
+            localOrdersBackup = []; [cite: 353]
+            saveLocalOrders(localOrdersBackup); [cite: 353]
+            showCustomToast("Local cache reset successfully.", "success"); [cite: 353]
+            await fetchLiveInventory(true); [cite: 353]
+            if (!document.getElementById('admin-workspace').classList.contains('hidden')) { [cite: 354]
+                await renderAdminOrdersLedger(); [cite: 354]
+            } [cite: 355]
+        }; [cite: 355]
 
-        window.togglePhoto = function(id, view) {
-            const rowObj = items.find(i => i.id === id);
-            if (rowObj) {
-                rowObj.viewState = view;
-                renderGrid();
-            }
-        };
-        window.addToCart = function(id) {
-            const rowObj = items.find(i => i.id === id);
-            if (rowObj && rowObj.stock > cart.filter(cid => cid === id).length) {
-                cart.push(id);
-                updateCartUI();
-                renderGrid();
-            }
-        };
-        window.removeFromCart = function(id) {
-            const index = cart.indexOf(id);
-            if (index > -1) {
-                cart.splice(index, 1);
-                updateCartUI();
-                renderGrid();
-            }
-        };
-        function renderGrid() {
-            const grid = document.getElementById('product-grid');
-            if (!grid) return;
+        window.togglePhoto = function(id, view) { [cite: 355]
+            const rowObj = items.find(i => i.id === id); [cite: 355]
+            if (rowObj) { [cite: 356]
+                rowObj.viewState = view; [cite: 356]
+                renderGrid(); [cite: 357]
+            } [cite: 357]
+        }; [cite: 358]
 
-            const search = document.getElementById('search-input').value.toLowerCase().trim();
-            const rarity = document.getElementById('rarity-select').value;
-            const sortBy = document.getElementById('sort-select').value;
-            let filtered = items.filter(i => {
-                const matchesSection =
-                    (activeListingSection === 'sale' && (i.type === 'sale' || !i.type)) ||
-                    (activeListingSection === 'bidding' && (i.type === 'bidding' || i.type === 'bid'));
+        window.addToCart = function(id) { [cite: 358]
+            const rowObj = items.find(i => i.id === id); [cite: 358]
+            if (rowObj && rowObj.stock > cart.filter(cid => cid === id).length) { [cite: 359]
+                cart.push(id); [cite: 359]
+                updateCartUI(); [cite: 360]
+                renderGrid(); [cite: 360]
+            } [cite: 360]
+        }; [cite: 361]
 
-                const matchesSearch =
-                    String(i.name || '').toLowerCase().includes(search) ||
-                    String(i.set || '').toLowerCase().includes(search);
+        window.removeFromCart = function(id) { [cite: 361]
+            const index = cart.indexOf(id); [cite: 361]
+            if (index > -1) { [cite: 362]
+                cart.splice(index, 1); [cite: 362]
+                updateCartUI(); [cite: 363]
+                renderGrid(); [cite: 363]
+            } [cite: 364]
+        }; [cite: 364]
 
-                const itemRarity = String(i.rarity || '').toUpperCase().trim();
-                const selectedRarity = String(rarity || '').toUpperCase().trim();
-                const matchesRarity = (rarity === 'ALL' || itemRarity === selectedRarity);
+        function renderGrid() { [cite: 364]
+            const grid = document.getElementById('product-grid'); [cite: 364]
+            if (!grid) return; [cite: 365]
 
-                return matchesSection && matchesSearch && matchesRarity;
-            });
-            if (sortBy === 'price-asc') filtered.sort((a, b) => Number(a.price) - Number(b.price));
-            else if (sortBy === 'price-desc') filtered.sort((a, b) => Number(b.price) - Number(a.price));
+            const search = document.getElementById('search-input').value.toLowerCase().trim(); [cite: 365]
+            const rarity = document.getElementById('rarity-select').value; [cite: 365]
+            const sortBy = document.getElementById('sort-select').value; [cite: 365]
+            let filtered = items.filter(i => { [cite: 366]
+                const matchesSection = [cite: 366]
+                    (activeListingSection === 'sale' && (i.type === 'sale' || !i.type)) || [cite: 366]
+                    (activeListingSection === 'bidding' && (i.type === 'bidding' || i.type === 'bid')); [cite: 366]
 
-            document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory card records.`;
-            grid.innerHTML = '';
+                const matchesSearch = [cite: 366]
+                    String(i.name || '').toLowerCase().includes(search) || [cite: 367]
+                    String(i.set || '').toLowerCase().includes(search); [cite: 367]
 
-            filtered.forEach(item => {
-                const soldOut = Number(item.stock) <= 0;
-                const inCartCount = cart.filter(cid => cid === item.id).length;
-                const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg;
-                const safeName = escapeHtml(item.name);
-                const safeSet = escapeHtml(item.set);
-                const safeRarity = escapeHtml(item.rarity);
-                const topBidderName = escapeHtml(item.top_bidder || 'No bids yet');
-                const selectedIncrement = pendingBidSelections[item.id] || "10";
-                const customBidValue = pendingCustomBidInputs[item.id] || "";
+                const itemRarity = String(i.rarity || '').toUpperCase().trim(); [cite: 367]
+                const selectedRarity = String(rarity || '').toUpperCase().trim(); [cite: 367]
+                const matchesRarity = (rarity === 'ALL' || itemRarity === selectedRarity); [cite: 368]
 
-                const div = document.createElement('div');
-                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut && activeListingSection === 'sale' ? 'opacity-40 select-none' : ''}`;
+                return matchesSection && matchesSearch && matchesRarity; [cite: 368]
+            }); [cite: 368]
+            if (sortBy === 'price-asc') filtered.sort((a, b) => Number(a.price) - Number(b.price)); [cite: 369]
+            else if (sortBy === 'price-desc') filtered.sort((a, b) => Number(b.price) - Number(a.price)); [cite: 370]
 
-                let actionMarkup = '';
-                let biddingHeaderMarkup = '';
-                if (activeListingSection === 'sale') {
-                    actionMarkup = soldOut
-                        ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>`
-                        : (inCartCount > 0
-                            ? `
-                            <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
-                                <button type="button" onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button>
-                                <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span>
-                                <button type="button" onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button>
-                            </div>`
-                            : `<button type="button" onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
-                } else {
-                    biddingHeaderMarkup = `
-                        <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
-                            <i data-lucide="crown" class="w-4 h-4"></i> High Bidder: 
-                            <span class="text-white">${topBidderName}</span>
-                        </div>
-                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || ''}">
-                        </div>
-                    `;
-                    const isAuctionEnded = item.bidding_ends_at && new Date(item.bidding_ends_at).getTime() < Date.now();
-                    if (isAuctionEnded) {
-                        actionMarkup = `
-                            <div class="w-full text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg text-xs mt-2 uppercase tracking-wider select-none">
-                                Bidding Closed
-                            </div>
-                        `;
-                    } else {
-                        const bidIncrements = [10, 20, 50, 100, 200, 500];
-                        const selectOptions = bidIncrements.map(val =>
-                            `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>`
-                        ).join('');
-                        actionMarkup = `
-                            <div class="flex flex-col gap-2 mt-2 w-full text-xs">
-                                <div class="flex gap-1.5">
-                                    <select id="bid-select-${item.id}" onchange="pendingBidSelections[${item.id}] = this.value" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none">
-                                        ${selectOptions}
-                                    </select>
-                                    <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
-                                </div>
-                                <div class="flex gap-1.5">
-                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Enter Total Bid (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
-                                    <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
+            document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory card records.`; [cite: 370]
+            grid.innerHTML = ''; [cite: 371]
+
+            filtered.forEach(item => { [cite: 371]
+                const soldOut = Number(item.stock) <= 0; [cite: 371]
+                const inCartCount = cart.filter(cid => cid === item.id).length; [cite: 371]
+                const dynamicImgSrc = item.viewState === 'back' ? item.backImg : item.frontImg; [cite: 371]
+                const safeName = escapeHtml(item.name); [cite: 371]
+                const safeSet = escapeHtml(item.set); [cite: 372]
+                const safeRarity = escapeHtml(item.rarity); [cite: 372]
+                const topBidderName = escapeHtml(item.top_bidder || 'No bids yet'); [cite: 372]
+                const selectedIncrement = pendingBidSelections[item.id] || "10"; [cite: 372]
+                const customBidValue = pendingCustomBidInputs[item.id] || ""; [cite: 372]
+
+                const div = document.createElement('div'); [cite: 373]
+                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut && activeListingSection === 'sale' ? 'opacity-40 select-none' : ''}`; [cite: 373]
+
+                let actionMarkup = ''; [cite: 373]
+                let biddingHeaderMarkup = ''; [cite: 373]
+                if (activeListingSection === 'sale') { [cite: 374]
+                    actionMarkup = soldOut [cite: 374]
+                        ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>` [cite: 375]
+                        : (inCartCount > 0 [cite: 375]
+                            ? ` [cite: 375]
+                            <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden"> [cite: 375]
+                                <button type="button" onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button> [cite: 376]
+                                <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span> [cite: 376]
+                                <button type="button" onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button> [cite: 377]
+                            </div>` [cite: 377]
+                            : `<button type="button" onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`); [cite: 377]
+                } else { [cite: 378]
+                    biddingHeaderMarkup = ` [cite: 378]
+                        <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none"> [cite: 378]
+                            <i data-lucide="crown" class="w-4 h-4"></i> High Bidder: [cite: 378]
+                            <span class="text-white">${topBidderName}</span> [cite: 379]
+                        </div> [cite: 379]
+                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || ''}"> [cite: 379]
+                        </div> [cite: 379]
+                    `; [cite: 380]
+                    const isAuctionEnded = item.bidding_ends_at && new Date(item.bidding_ends_at).getTime() < Date.now(); [cite: 381]
+                    if (isAuctionEnded) { [cite: 381]
+                        actionMarkup = ` [cite: 381]
+                            <div class="w-full text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg text-xs mt-2 uppercase tracking-wider select-none"> [cite: 381]
+                                Bidding Closed [cite: 382]
+                            </div> [cite: 382]
+                        `; [cite: 382]
+                    } else { [cite: 383]
+                        const bidIncrements = [10, 20, 50, 100, 200, 500]; [cite: 383]
+                        const selectOptions = bidIncrements.map(val => [cite: 383]
+                            `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>` [cite: 384]
+                        ).join(''); [cite: 385]
+                        actionMarkup = ` [cite: 385]
+                            <div class="flex flex-col gap-2 mt-2 w-full text-xs"> [cite: 385]
+                                <div class="flex gap-1.5"> [cite: 385]
+                                    <select id="bid-select-${item.id}" onchange="pendingBidSelections[${item.id}] = this.value" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none"> [cite: 386]
+                                        ${selectOptions} [cite: 386]
+                                    </select> [cite: 386]
+                                    <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button> [cite: 387]
+                                </div> [cite: 387]
+                                <div class="flex gap-1.5"> [cite: 388]
+                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Enter Total Bid (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono"> [cite: 388]
+                                    <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button> [cite: 389]
+                                </div> [cite: 389]
+                            </div> [cite: 390]
+                        `; [cite: 390]
+                    } [cite: 390]
+                } [cite: 390]
 
                 div.innerHTML = `
                     <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
                         ${biddingHeaderMarkup}
-                        <img
-                            src="${dynamicImgSrc}"
-                            alt="${safeName}"
-                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';"
-                            onclick="launchZoomModal('${dynamicImgSrc}')"
-                            class="relative z-10 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200"
-                        >
-                        <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 pointer-events-none">
-                            <i data-lucide="zoom-in" class="w-3 h-3"></i>
-                            <span>Zoom</span>
-                        </div>
-                        <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none">
-                            ${activeListingSection === 'sale' ? 'Stock: ' + item.stock : 'Auction'}
-                        </div>
-                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
-                            <button type="button" onclick="togglePhoto(${item.id}, 'front')" class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
-                            <button type="button" onclick="togglePhoto(${item.id}, 'back')" class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button>
-                        </div>
-                        <span class="absolute top-2 right-2 z-20 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow pointer-events-none">${safeRarity}</span>
-                    </div>
-                    <div class="flex flex-col justify-between flex-1">
-                        <div>
-                            <span class="text-[10px] font-mono text-gray-500">${safeSet}</span>
-                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${safeName}</h3>
-                        </div>
-                        <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
-                            <div class="flex justify-between items-center gap-3">
-                                <span class="text-sm font-bold text-gray-100">${activeListingSection === 'sale' ? formatPHP(item.price) : 'Current Bid: ' + formatPHP(item.price)}</span>
-                                ${activeListingSection === 'sale' ? `<div>${actionMarkup}</div>` : ''}
-                            </div>
-                            ${activeListingSection === 'bidding' ? `
-                                <div class="text-[10px] text-gray-400 mt-1">
-                                    Ends at: <span class="text-yellow-400 font-medium">${item.bidding_ends_at ? formatAuctionEnd(item.bidding_ends_at) : 'No end time set'}</span>
-                                </div>
-                                ${actionMarkup}
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(div);
-            });
+                        <img [cite: 390]
+                            src="${dynamicImgSrc}" [cite: 391]
+                            alt="${safeName}" [cite: 391]
+                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';" [cite: 391]
+                            onclick="launchZoomModal('${dynamicImgSrc}')" [cite: 392]
+                            class="relative z-10 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200" [cite: 392]
+                        > [cite: 392]
+                        <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 pointer-events-none"> [cite: 392]
+                            <i data-lucide="zoom-in" class="w-3 h-3"></i> [cite: 393]
+                            <span>Zoom</span> [cite: 393]
+                        </div> [cite: 393]
+                        <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none"> [cite: 394]
+                            ${activeListingSection === 'sale' ? 'Stock: ' + item.stock : 'Auction'} [cite: 394]
+                        </div> [cite: 395]
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl"> [cite: 395]
+                            <button type="button" onclick="togglePhoto(${item.id}, 'front')" class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button> [cite: 395]
+                            <button type="button" onclick="togglePhoto(${item.id}, 'back')" class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button> [cite: 396]
+                        </div> [cite: 396]
+                        <span class="absolute top-2 right-2 z-20 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow pointer-events-none">${safeRarity}</span> [cite: 397]
+                    </div> [cite: 397]
+                    <div class="flex flex-col justify-between flex-1"> [cite: 397]
+                        <div> [cite: 397]
+                            <span class="text-[10px] font-mono text-gray-500">${safeSet}</span> [cite: 398]
+                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${safeName}</h3> [cite: 398]
+                        </div> [cite: 398]
+                        <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50"> [cite: 399]
+                            <div class="flex justify-between items-center gap-3"> [cite: 399]
+                                <span class="text-sm font-bold text-gray-100">${activeListingSection === 'sale' ? formatPHP(item.price) : 'Current Bid: ' + formatPHP(item.price)}</span> [cite: 399]
+                                ${activeListingSection === 'sale' ? `<div>${actionMarkup}</div>` : ''} [cite: 400]
+                            </div> [cite: 401]
+                            ${activeListingSection === 'bidding' ? ` [cite: 401]
+                                <div class="text-[10px] text-gray-400 mt-1"> [cite: 402]
+                                    Ends at: <span class="text-yellow-400 font-medium">${item.bidding_ends_at ? formatAuctionEnd(item.bidding_ends_at) : 'No end time set'}</span> [cite: 402]
+                                </div> [cite: 403]
+                                ${actionMarkup} [cite: 403]
+                            ` : ''} [cite: 403]
+                        </div> [cite: 404]
+                    </div> [cite: 404]
+                `; [cite: 404]
+                grid.appendChild(div); [cite: 405]
+            }); [cite: 405]
 
-            lucide.createIcons();
-        }
+            lucide.createIcons(); [cite: 405]
+        } [cite: 405]
 
-        document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!supabaseClient) {
-                showCustomToast("Supabase client not connected. Falling back to local catalog simulation.", "info");
-                return;
-            }
+        document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => { [cite: 405]
+            e.preventDefault(); [cite: 405]
+            if (!supabaseClient) { [cite: 405]
+                showCustomToast("Supabase client not connected. Falling back to local catalog simulation.", "info"); [cite: 405]
+                return; [cite: 405]
+            } [cite: 405]
 
-            const frontVal = document.getElementById('inv-front').value.trim();
-            const backVal = document.getElementById('inv-back').value.trim();
-            const typeVal = document.getElementById('inv-type').value;
-            const biddingEndsVal = document.getElementById('inv-bidding-ends').value;
-            const normalizedDbType = typeVal === 'bidding' ? 'bidding' : 'sale';
+            const frontVal = document.getElementById('inv-front').value.trim(); [cite: 406]
+            const backVal = document.getElementById('inv-back').value.trim(); [cite: 406]
+            const typeVal = document.getElementById('inv-type').value; [cite: 406]
+            const biddingEndsVal = document.getElementById('inv-bidding-ends').value; [cite: 406]
+            const normalizedDbType = typeVal === 'bidding' ? 'bidding' : 'sale'; [cite: 406]
 
-            const cardPayload = {
-                name: document.getElementById('inv-name').value,
-                set_code: document.getElementById('inv-set').value,
-                rarity: document.getElementById('inv-rarity').value,
-                price: Number(document.getElementById('inv-price').value),
-                stock: Number(document.getElementById('inv-stock').value),
-                front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
-                back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
-                type: normalizedDbType,
-                bidding_ends_at: typeVal === 'bidding' ? (biddingEndsVal ? new Date(biddingEndsVal).toISOString() : null) : null,
-                top_bidder: typeVal === 'bidding' ? 'No bids yet' : null
-            };
-            const { error } = await supabaseClient.from('cards').insert([cardPayload]);
-            if(error) {
-                showCustomToast(`Error: ${error.message}`, 'error');
-            } else {
-                showCustomToast("Successfully uploaded card metadata directly to Supabase cloud!", "success");
-                document.getElementById('admin-inventory-form').reset();
-                toggleAdminBiddingFields('sale');
-                await fetchLiveInventory(true);
-            }
-        });
+            const cardPayload = { [cite: 406]
+                name: document.getElementById('inv-name').value, [cite: 407]
+                set_code: document.getElementById('inv-set').value, [cite: 407]
+                rarity: document.getElementById('inv-rarity').value, [cite: 407]
+                price: Number(document.getElementById('inv-price').value), [cite: 407]
+                stock: Number(document.getElementById('inv-stock').value), [cite: 407]
+                front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400", [cite: 407]
+                back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400", [cite: 408]
+                type: normalizedDbType, [cite: 409]
+                bidding_ends_at: typeVal === 'bidding' ? (biddingEndsVal ? new Date(biddingEndsVal).toISOString() : null) : null, [cite: 409]
+                top_bidder: typeVal === 'bidding' ? 'No bids yet' : null [cite: 410]
+            }; [cite: 412]
+            const { error } = await supabaseClient.from('cards').insert([cardPayload]); [cite: 412]
+            if(error) { [cite: 412]
+                showCustomToast(`Error: ${error.message}`, 'error'); [cite: 412]
+            } else { [cite: 413]
+                showCustomToast("Successfully uploaded card metadata directly to Supabase cloud!", "success"); [cite: 413]
+                document.getElementById('admin-inventory-form').reset(); [cite: 414]
+                toggleAdminBiddingFields('sale'); [cite: 414]
+                await fetchLiveInventory(true); [cite: 414]
+            } [cite: 415]
+        }); [cite: 415]
 
-        setInterval(() => {
-            const countdowns = document.querySelectorAll('[data-timer-expiry]');
-            countdowns.forEach(el => {
-                const expiryTime = el.getAttribute('data-timer-expiry');
-                if (!expiryTime || expiryTime.trim() === '') return;
+        setInterval(() => { [cite: 415]
+            const countdowns = document.querySelectorAll('[data-timer-expiry]'); [cite: 415]
+            countdowns.forEach(el => { [cite: 415]
+                const expiryTime = el.getAttribute('data-timer-expiry'); [cite: 415]
+                if (!expiryTime || expiryTime.trim() === '') return; [cite: 415]
 
-                const expiryDate = new Date(expiryTime);
-                const timeRemaining = expiryDate.getTime() - Date.now();
+                const expiryDate = new Date(expiryTime); [cite: 415]
+                const timeRemaining = expiryDate.getTime() - Date.now(); [cite: 416]
 
-                if (timeRemaining <= 0) {
-                    el.innerHTML = `<span class="text-red-500 font-bold uppercase text-xs">🔴 Ended</span>`;
-                } else {
-                    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-                    const hrs = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const mins = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-                    const secs = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                if (timeRemaining <= 0) { [cite: 416]
+                    el.innerHTML = `<span class="text-red-500 font-bold uppercase text-xs">🔴 Ended</span>`; [cite: 416]
+                } else { [cite: 416]
+                    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24)); [cite: 416]
+                    const hrs = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); [cite: 417]
+                    const mins = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); [cite: 417]
+                    const secs = Math.floor((timeRemaining % (1000 * 60)) / 1000); [cite: 418]
                     
-                    const formatNum = (num) => String(num).padStart(2, '0');
-                    const formattedDate = expiryDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
-                    const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true });
-                    const dayString = days > 0 ? `${days}d ` : '';
+                    const formatNum = (num) => String(num).padStart(2, '0'); [cite: 418]
+                    const formattedDate = expiryDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }); [cite: 419]
+                    const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true }); [cite: 420]
+                    const dayString = days > 0 ? `${days}d ` : ''; [cite: 420]
 
                     el.innerHTML = `
                         <div class="text-yellow-500 font-mono font-bold">⏳ ${dayString}${formatNum(hrs)}h ${formatNum(mins)}m ${formatNum(secs)}s</div>
                         <div class="text-[10px] text-gray-300 font-medium mt-0.5">Ends ${formattedDate} at ${ampm}</div>
-                    `;
-                }
-            });
-        }, 1000);
+                    `; [cite: 421]
+                } [cite: 422]
+            }); [cite: 422]
+        }, 1000); [cite: 422]
 
-        setInterval(async () => {
-            if (supabaseClient) return;
-            if (inventoryPollInFlight) return;
-            inventoryPollInFlight = true;
-            try {
-                await fetchLiveInventory(false);
-            } finally {
-                inventoryPollInFlight = false;
-            }
-        }, 5000);
+        setInterval(async () => { [cite: 423]
+            if (supabaseClient) return; [cite: 423]
+            if (inventoryPollInFlight) return; [cite: 423]
+            inventoryPollInFlight = true; [cite: 423]
+            try { [cite: 423]
+                await fetchLiveInventory(false); [cite: 423]
+            } finally { [cite: 423]
+                inventoryPollInFlight = false; [cite: 424]
+            } [cite: 424]
+        }, 5000); [cite: 424]
 
-        document.getElementById('search-input').addEventListener('input', renderGrid);
-        document.getElementById('rarity-select').addEventListener('change', renderGrid);
-        document.getElementById('sort-select').addEventListener('change', renderGrid);
+        document.getElementById('search-input').addEventListener('input', renderGrid); [cite: 425]
+        document.getElementById('rarity-select').addEventListener('change', renderGrid); [cite: 425]
+        document.getElementById('sort-select').addEventListener('change', renderGrid); [cite: 425]
 
-        if (supabaseClient) {
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                if (event === 'PASSWORD_RECOVERY') {
-                    recoveryMode = true;
-                    openResetPasswordModal();
-                    return;
-                }
+        if (supabaseClient) { [cite: 425]
+            supabaseClient.auth.onAuthStateChange(async (event, session) => { [cite: 425]
+                if (event === 'PASSWORD_RECOVERY') { [cite: 425]
+                    recoveryMode = true; [cite: 425]
+                    openResetPasswordModal(); [cite: 425]
+                    return; [cite: 426]
+                } [cite: 426]
 
-                if (session && session.user) {
-                    currentUserProfile = {
-                        id: session.user.id,
-                        name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-                        facebook_page: session.user.user_metadata?.facebook_page || ''
-                    };
-                    document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
-                    document.getElementById('nav-logout-btn').classList.remove('hidden');
-                    setTimeout(() => { fetchBuyerRealtimeOrders(); }, 50);
-                } else {
-                    currentUserProfile = null;
-                    cart = [];
-                    updateCartUI();
-                    renderGrid();
-                    document.getElementById('auth-btn-text').innerText = "Sign In / Register";
-                    document.getElementById('nav-logout-btn').classList.add('hidden');
-                    document.getElementById('buyer-tracker-box').classList.add('hidden');
-                }
-            });
-        }
+                if (session && session.user) { [cite: 426]
+                    currentUserProfile = { [cite: 426]
+                        id: session.user.id, [cite: 426]
+                        name: session.user.user_metadata?.name || session.user.email.split('@')[0], [cite: 427]
+                        facebook_page: session.user.user_metadata?.facebook_page || '' [cite: 427]
+                    }; [cite: 427]
+                    document.getElementById('auth-btn-text').innerText = currentUserProfile.name; [cite: 427]
+                    document.getElementById('nav-logout-btn').classList.remove('hidden'); [cite: 428]
+                    setTimeout(() => { fetchBuyerRealtimeOrders(); }, 50); [cite: 428]
+                } else { [cite: 428]
+                    currentUserProfile = null; [cite: 428]
+                    cart = []; [cite: 428]
+                    updateCartUI(); [cite: 429]
+                    renderGrid(); [cite: 429]
+                    document.getElementById('auth-btn-text').innerText = "Sign In / Register"; [cite: 429]
+                    document.getElementById('nav-logout-btn').classList.add('hidden'); [cite: 429]
+                    document.getElementById('buyer-tracker-box').classList.add('hidden'); [cite: 429]
+                } [cite: 430]
+            }); [cite: 430]
+        } [cite: 431]
 
-        (async () => {
-            await handlePasswordRecoveryFromUrl();
-            setTimeout(() => { handlePasswordRecoveryFromUrl(); }, 1200);
+        (async () => { [cite: 431]
+            await handlePasswordRecoveryFromUrl(); [cite: 431]
+            setTimeout(() => { handlePasswordRecoveryFromUrl(); }, 1200); [cite: 431]
 
-            const urlHash = window.location.hash;
-            if (urlHash.includes("type=signup") || (urlHash.includes("access_token=") && !urlHash.includes("type=recovery"))) {
-                if (!sessionStorage.getItem('shd_activation_toast_shown')) {
-                    setTimeout(() => {
-                        showCustomToast("🎉 Account Activated Successfully! Welcome to StrawHatDraws TCG.", "success");
-                        sessionStorage.setItem('shd_activation_toast_shown', 'true');
-                        const cleanUrl = window.location.origin + window.location.pathname;
-                        window.history.replaceState({}, document.title, cleanUrl);
-                    }, 1000);
-                }
-            }
+            const urlHash = window.location.hash; [cite: 431]
+            if (urlHash.includes("type=signup") || (urlHash.includes("access_token=") && !urlHash.includes("type=recovery"))) { [cite: 431]
+                if (!sessionStorage.getItem('shd_activation_toast_shown')) { [cite: 431]
+                    setTimeout(() => { [cite: 432]
+                        showCustomToast("🎉 Account Activated Successfully! Welcome to StrawHatDraws TCG.", "success"); [cite: 432]
+                        sessionStorage.setItem('shd_activation_toast_shown', 'true'); [cite: 432]
+                        const cleanUrl = window.location.origin + window.location.pathname; [cite: 432]
+                        window.history.replaceState({}, document.title, cleanUrl); [cite: 432]
+                    }, 1000); [cite: 433]
+                } [cite: 433]
+            } [cite: 433]
 
-            await hydrateCurrentUserFromSession();
-            await fetchLiveInventory(true);
-            if (currentUserProfile) {
-                await fetchBuyerRealtimeOrders();
-            }
-            if (supabaseClient) {
-                supabaseClient
-                    .channel('live-auction-stream')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, (payload) => {
-                        fetchLiveInventory(true);
-                    })
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'Orders' }, (payload) => {
-                        fetchBuyerRealtimeOrders(); 
-                        if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
-                            renderAdminOrdersLedger();
-                        }
-                    })
-                    .subscribe();
-            }
-            lucide.createIcons();
-        })();
+            await hydrateCurrentUserFromSession(); [cite: 433]
+            
+            await fetchLiveInventory(true); [cite: 434]
+            if (currentUserProfile) { [cite: 434]
+                await fetchBuyerRealtimeOrders(); [cite: 434]
+            } [cite: 435]
+            if (supabaseClient) { [cite: 435]
+                supabaseClient [cite: 435]
+                    .channel('live-auction-stream') [cite: 435]
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards' }, (payload) => { [cite: 435]
+                        const targetIndex = items.findIndex(i => i.id === payload.new.id); [cite: 436]
+                        if (targetIndex !== -1) { [cite: 436]
+                            items[targetIndex].price = Number(payload.new.price); [cite: 436]
+                            items[targetIndex].top_bidder = payload.new.top_bidder; [cite: 436]
+                            items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at; [cite: 437]
+                            renderGrid();  [cite: 437]
+                        } [cite: 437]
+                    }) [cite: 438]
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'cards' }, (payload) => { [cite: 438]
+                        fetchLiveInventory(true); [cite: 438]
+                    }) [cite: 438]
+                    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'cards' }, (payload) => { [cite: 438]
+                        fetchLiveInventory(true); [cite: 439]
+                    }) [cite: 440]
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'Orders' }, (payload) => { [cite: 440]
+                        fetchBuyerRealtimeOrders();  [cite: 440]
+                        if (!document.getElementById('admin-workspace').classList.contains('hidden')) { [cite: 440]
+                            renderAdminOrdersLedger(); [cite: 440]
+                        } [cite: 441]
+                    }) [cite: 441]
+                    .subscribe(); [cite: 441]
+            } [cite: 442]
+            lucide.createIcons(); [cite: 442]
+        })(); [cite: 442]
     </script>
 </body>
 </html>
