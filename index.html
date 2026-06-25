@@ -702,6 +702,9 @@
                             }).join('');
                         }
 
+                        // 🔍 Bulletproof timestamp lookup chain: Database -> Local Storage Cache Backup -> System Time Fallback
+                        const finalOrderTimestamp = o.created_at || localOrdersBackup.find(lo => String(lo.id) === String(o.id))?.created_at || new Date().toISOString();
+
                         const card = document.createElement('div');
                         card.className = "p-2.5 bg-black/40 rounded border border-gray-800 space-y-1.5";
                         card.innerHTML = `
@@ -711,7 +714,7 @@
                             </div>
                             <div class="flex justify-between items-center text-[10px]">
                                 <span class="text-gray-500">${escapeHtml(o.customer_name || '')}</span>
-                                <span class="text-gray-400 font-medium bg-white/5 px-1.5 py-0.5 rounded border border-gray-800">${formatOrderDate(o.created_at)}</span>
+                                <span class="text-gray-400 font-medium bg-white/5 px-1.5 py-0.5 rounded border border-gray-800">${formatOrderDate(finalOrderTimestamp)}</span>
                             </div>
                             <div class="space-y-1">${itemsHtml}</div>
                         `;
