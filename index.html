@@ -493,7 +493,7 @@
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;'); // <--  Fixed with safe HTML string entities
+                .replace(/'/g, '&#39;');
         }
 
         function formatPHP(num) {
@@ -1169,7 +1169,7 @@
             if (isCustom) {
                 const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value);
                 if (!customVal || isNaN(customVal) || customVal <= 0) {
-                    showCustomToast("Enter a valid custom bid add-on amount.", "error");
+                    showCustomToast("Enter a valid custom bid amount.", "error");
                     return;
                 }
                 bidAmount = customVal;
@@ -1181,6 +1181,12 @@
                 }
                 bidAmount = Number(card.price) + selectVal;
             }
+        
+            // This block is now perfectly closed and separated!
+            if (bidAmount <= Number(card.price)) {
+                showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
+                return;
+            } 
         
             const bidderName = currentUserProfile.name || "Collector";
             if (supabaseClient) {
@@ -1205,11 +1211,6 @@
                     showCustomToast(err.message || "Bid failed.", "error");
                 }
             } else {
-                if (bidAmount <= Number(card.price)) {
-                    showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
-                    return;
-                }
-        
                 card.price = bidAmount;
                 card.top_bidder = bidderName;
                 pendingCustomBidInputs[cardId] = "";
@@ -1943,11 +1944,12 @@
         }, 1000);
 
         setInterval(async () => {
+            if (supabaseClient) return; // Disables polling when connected to database
+        
             if (inventoryPollInFlight) return;
             inventoryPollInFlight = true;
             try {
                 await fetchLiveInventory(false);
-                if (currentUserProfile) await fetchBuyerRealtimeOrders();
             } finally {
                 inventoryPollInFlight = false;
             }
@@ -2008,6 +2010,28 @@
             await fetchLiveInventory(true);
             if (currentUserProfile) {
                 await fetchBuyerRealtimeOrders();
+            }
+            if (supabaseClient) {
+                supabaseClient
+                    .channel('live-auction-stream')
+                    .on(
+                        'postgres_changes',
+                        { event: '*', schema: 'public', table: 'cards' },
+                        (payload) => {
+                            fetchLiveInventory(true); // Re-renders item grids instantly
+                        }
+                    )
+                    .on(
+                        'postgres_changes',
+                        { event: '*', schema: 'public', table: 'Orders' },
+                        (payload) => {
+                            fetchBuyerRealtimeOrders(); 
+                            if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
+                                renderAdminOrdersLedger();
+                            }
+                        }
+                    )
+                    .subscribe();
             }
             lucide.createIcons();
         })();
