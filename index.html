@@ -1925,22 +1925,28 @@
             const countdowns = document.querySelectorAll('[data-timer-expiry]');
             countdowns.forEach(el => {
                 const expiryTime = el.getAttribute('data-timer-expiry');
-                if (!expiryTime) return;
+                if (!expiryTime || expiryTime.trim() === '') return;
 
                 const expiryDate = new Date(expiryTime);
                 const timeRemaining = expiryDate.getTime() - Date.now();
 
                 if (timeRemaining <= 0) {
-                    el.innerHTML = `<span class="text-red-500 font-bold uppercase">🔴 Ended</span>`;
+                    el.innerHTML = `<span class="text-red-500 font-bold uppercase text-xs">🔴 Ended</span>`;
                 } else {
+                    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
                     const hrs = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const mins = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
                     const secs = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                    
                     const formatNum = (num) => String(num).padStart(2, '0');
+                    const formattedDate = expiryDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
                     const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    
+                    const dayString = days > 0 ? `${days}d ` : '';
+
                     el.innerHTML = `
-                        <div class="text-yellow-500 font-mono font-bold">⏳ ${formatNum(hrs)}h ${formatNum(mins)}m ${formatNum(secs)}s</div>
-                        <div class="text-[10px] text-gray-300 font-medium mt-0.5">Ends ${ampm}</div>
+                        <div class="text-yellow-500 font-mono font-bold">⏳ ${dayString}${formatNum(hrs)}h ${formatNum(mins)}m ${formatNum(secs)}s</div>
+                        <div class="text-[10px] text-gray-300 font-medium mt-0.5">Ends ${formattedDate} at ${ampm}</div>
                     `;
                 }
             });
