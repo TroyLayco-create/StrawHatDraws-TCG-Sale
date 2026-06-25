@@ -1313,45 +1313,48 @@
         }
 
         async function renderAdminOrdersLedger() {
-            const tbody = document.getElementById('admin-orders-tbody');
-            tbody.innerHTML = '';
-
-            let dbOrdersList = [];
-            if (supabaseClient) {
+            const tbody = document.getElementById('admin-orders-tbody'); 
+            if (!tbody) return;
+        
+            let dbOrdersList = []; 
+            if (supabaseClient) { 
                 try {
-                    const { data } = await supabaseClient.from('Orders').select('*').order('created_at', { ascending: false });
-                    if (data) dbOrdersList = data;
+                    const { data } = await supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }); 
+                    if (data) dbOrdersList = data; 
                 } catch(e) {
-                    console.warn("Failed to fetch orders from Supabase:", e);
+                    console.warn("Failed to fetch orders from Supabase:", e); 
                 }
             }
-
-            const seenIds = new Set();
-            const dataset = [];
-
-            dbOrdersList.forEach(o => {
-                if (o && o.id) {
-                    const stringId = String(o.id);
-                    if (!seenIds.has(stringId)) {
-                        seenIds.add(stringId);
-                        dataset.push(o);
+        
+            const seenIds = new Set(); 
+            const dataset = []; 
+        
+            dbOrdersList.forEach(o => { 
+                if (o && o.id) { 
+                    const stringId = String(o.id); 
+                    if (!seenIds.has(stringId)) { 
+                        seenIds.add(stringId); 
+                        dataset.push(o); 
                     }
                 }
-            });
-
-            localOrdersBackup.forEach(o => {
-                if (o && o.id) {
-                    const stringId = String(o.id);
-                    if (!seenIds.has(stringId)) {
-                        seenIds.add(stringId);
-                        dataset.push(o);
+            }); 
+            localOrdersBackup.forEach(o => { 
+                if (o && o.id) { 
+                    const stringId = String(o.id); 
+                    if (!seenIds.has(stringId)) { 
+                        seenIds.add(stringId); 
+                        dataset.push(o); 
                     }
                 }
-            });
-
-            dataset.forEach(ord => {
-                let itemsListHTML = '';
-                let totalOrderPrice = 0;
+            }); 
+        
+            // MOVE THE CLEARING LINE HERE (Right before appending the fresh rows)
+            tbody.innerHTML = ''; 
+        
+            dataset.forEach(ord => { 
+                let itemsListHTML = ''; 
+                let totalOrderPrice = 0; 
+                // ... rest of your existing card row assembly logic continues normally ...
 
                 if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
                     const counts = {};
@@ -1419,16 +1422,7 @@
                     console.warn(`Failed to update status in cloud database: ${err.message}`);
                 }
             }
-
-            const localOrder = localOrdersBackup.find(o => String(o.id) === String(orderId));
-            if (localOrder) {
-                localOrder.order_status = newStatus;
-                saveLocalOrders(localOrdersBackup);
-            }
-
-            await renderAdminOrdersLedger();
-            if (currentUserProfile) await fetchBuyerRealtimeOrders();
-            showCustomToast("Order status updated successfully!", "success");
+            
         };
 
         window.purgeOrderLogRecord = async function(id, buttonEl) {
