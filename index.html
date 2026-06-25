@@ -186,26 +186,18 @@
                         ✨ You are signed in! Click "Place Order" below to quickly confirm and process your items.
                     </div>
 
-                    <div id="checkout-guest-fields" class="space-y-3.5">
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Full Name</label>
-                            <input type="text" id="cust-name" placeholder="Juan dela Cruz" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Email Address</label>
-                            <input type="email" id="cust-email" placeholder="juan@example.com" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1">Facebook Page URL or Profile Handle</label>
-                            <input type="text" id="cust-facebook" placeholder="e.g., https://www.facebook.com/username or handle" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
-                        </div>
-
-                        <div class="border-t border-gray-800 pt-3 mt-2">
-                            <label class="block text-[11px] font-bold uppercase tracking-wider text-red-400 mb-1">🎁 Create Member Account? (Optional)</label>
-                            <p class="text-[10px] text-gray-400 mb-2">Type a password below to securely save your profile details. Leave it empty if you prefer checkout as a pure guest.</p>
-                            <input type="password" id="cust-password" placeholder="Enter password (minimum 6 characters)" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-red-500">
+                    <div id="checkout-guest-fields" class="space-y-3.5 hidden">
+                        <div class="border border-red-500/30 bg-red-950/20 p-4 rounded-lg text-center space-y-3">
+                            <p class="text-xs sm:text-sm text-gray-200 font-medium leading-relaxed">
+                                ⚠️ <strong class="text-red-400">Account Registration Required</strong><br>
+                                Anonymous checkout is disabled. You must create an account and click the verification link sent to your email address before finalizing orders.
+                            </p>
+                            <p class="text-[11px] text-gray-400">
+                                Once registered and confirmed via your inbox link, your shopping catalog cart items will remain fully preserved for instant check out!
+                            </p>
+                            <button type="button" onclick="closeCheckoutModal(); openAuthModal();" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 mx-auto shadow-md">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Sign In / Create Account
+                            </button>
                         </div>
                     </div>
 
@@ -688,25 +680,6 @@
             }
         }
 
-        async function performSimpleFBValidation(fbInput) {
-            let facebookPage = fbInput ? fbInput.trim() : "";
-
-            const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i;
-            const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
-
-            if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) {
-                throw new Error("Please enter a valid live Facebook profile URL or handle link for order notifications.");
-            }
-
-            if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) {
-                facebookPage = `https://www.facebook.com/${facebookPage}`;
-            }
-
-            return {
-                facebook: facebookPage
-            };
-        }
-
         async function hydrateCurrentUserFromSession() {
             if (!supabaseClient) return;
             try {
@@ -1112,18 +1085,16 @@
 
             const loggedInMsg = document.getElementById('checkout-logged-in-msg');
             const guestFields = document.getElementById('checkout-guest-fields');
+            const submitBtn = document.getElementById('checkout-submit-btn');
 
             if (currentUserProfile && currentUserProfile.id !== 'guest') {
                 loggedInMsg.classList.remove('hidden');
                 guestFields.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
             } else {
                 loggedInMsg.classList.add('hidden');
                 guestFields.classList.remove('hidden');
-                
-                document.getElementById('cust-name').value = '';
-                document.getElementById('cust-email').value = '';
-                document.getElementById('cust-facebook').value = '';
-                document.getElementById('cust-password').value = '';
+                submitBtn.classList.add('hidden');
             }
 
             document.getElementById('checkout-modal').style.display = 'flex';
@@ -1151,7 +1122,6 @@
                 let customerEmail = "";
                 let deliveryAddress = "N/A - Facebook Direct Contact";
                 let facebookContact = "";
-                let optPassword = "";
 
                 if (currentUserProfile && currentUserProfile.id !== 'guest') {
                     customerName = currentUserProfile.name || "Registered Member";
@@ -1162,21 +1132,7 @@
                         customerEmail = session?.user?.email || "";
                     }
                 } else {
-                    customerName = document.getElementById('cust-name').value.trim();
-                    customerEmail = document.getElementById('cust-email').value.trim();
-                    const inputFB = document.getElementById('cust-facebook').value;
-                    optPassword = document.getElementById('cust-password').value;
-
-                    if (!customerName || !customerEmail) {
-                        throw new Error("Name and Email inputs are mandatory for checkout records verification.");
-                    }
-
-                    const validatedInfo = await performSimpleFBValidation(inputFB);
-                    facebookContact = validatedInfo.facebook;
-
-                    if (optPassword && optPassword.length < 6) {
-                        throw new Error("Your optional profile creation password must contain at least 6 characters.");
-                    }
+                    throw new Error("Please register and verify your profile before checking out.");
                 }
 
                 const orderPayload = {
@@ -1187,7 +1143,7 @@
                     google_maps_pin: facebookContact,
                     items_ordered: JSON.parse(JSON.stringify([...cart])),
                     order_status: "Pending",
-                    user_id: (currentUserProfile && currentUserProfile.id !== 'guest') ? currentUserProfile.id : null
+                    user_id: currentUserProfile.id
                 };
 
                 let orderWriteSuccessful = false;
@@ -1222,22 +1178,6 @@
                 }
 
                 if (orderWriteSuccessful) {
-                    if (optPassword && (!currentUserProfile || currentUserProfile.id === 'guest') && supabaseClient) {
-                        try {
-                            await supabaseClient.auth.signUp({
-                                email: customerEmail,
-                                password: optPassword,
-                                options: {
-                                    emailRedirectTo: window.location.origin + window.location.pathname,
-                                    data: { name: customerName, facebook_page: facebookContact }
-                                }
-                            });
-                            showCustomToast("Account initialized! Check email inbox to verify login profile credentials.", "info");
-                        } catch (accountErr) {
-                            console.warn("Background registration initialization dropped:", accountErr.message);
-                        }
-                    }
-
                     localOrdersBackup.unshift(orderPayload);
                     saveLocalOrders(localOrdersBackup);
 
