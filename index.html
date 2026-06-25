@@ -418,10 +418,10 @@
 
         function escapeHtml(str) {
             return String(str ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
+                .replace(/&/g, '&')
+                .replace(/</g, '<')
+                .replace(/>/g, '>')
+                .replace(/"/g, '"')
                 .replace(/'/g, '&#39;');
         }
 
@@ -947,7 +947,7 @@
                 }
             } catch(err) {
                 showCustomToast(`Auth Error: ${err.message}`, 'error');
-            } finaly {
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 lucide.createIcons();
@@ -995,7 +995,7 @@
                 window.history.replaceState({}, document.title, cleanUrl);
             } catch (err) {
                 showCustomToast(`Password reset failed: ${err.message}`, "error");
-            } finaly {
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 lucide.createIcons();
@@ -1003,7 +1003,6 @@
         });
 
         window.placeListingBid = async function(cardId, isCustom = false) {
-            // LOCKOUT BLOCK: Strictly restrict live bidding execution to verified member profiles
             if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) {
                 showCustomToast("Only registered accounts can bid! Please sign in or create an account.", "error");
                 openAuthModal();
@@ -1259,7 +1258,7 @@
             } catch (err) {
                 console.error("Checkout transaction dropped:", err);
                 showCustomToast(err.message || "Checkout execution interface error.", 'error');
-            } finaly {
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
                 lucide.createIcons();
@@ -1719,7 +1718,7 @@
             inventoryPollInFlight = true;
             try {
                 await fetchLiveInventory(false);
-            } finaly {
+            } finally {
                 inventoryPollInFlight = false;
             }
         }, 5000);
