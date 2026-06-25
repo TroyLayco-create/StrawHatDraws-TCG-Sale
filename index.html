@@ -1025,15 +1025,16 @@
                     if (error) throw error;
 
                     if (data.user) {
-                        await supabaseClient.from('profiles').insert([{
-                            id: data.user.id,
-                            name,
-                            facebook_page: facebookPage
-                        }]);
                         localStorage.setItem('shd_last_reg_timestamp', Date.now());
                     }
 
-                    showCustomToast("Registration successful!", "success");
+                    // Checking if email confirmation is actively pending (session will return null)
+                    if (data.user && !data.session) {
+                        showCustomToast("Registration initialized! Please check your email inbox to verify your account before signing in.", "info");
+                    } else {
+                        showCustomToast("Registration successful!", "success");
+                    }
+                    
                     closeAuthModal();
                 } else {
                     const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
