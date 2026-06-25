@@ -823,8 +823,8 @@
                     queryMode === 'reset' ||
                     queryType === 'recovery' ||
                     hashType === 'recovery' ||
-                    hasAccessToken ||
-                    hasRefreshToken;
+                    (hasAccessToken && hashType === 'recovery') || // Only trigger if token belongs to recovery
+                    (hasRefreshToken && hashType === 'recovery');
                 if (isRecoveryFlow) {
                     recoveryMode = true;
                     openResetPasswordModal();
