@@ -614,6 +614,19 @@
                         console.warn("Could not load customer orders:", error.message);
                     } else if (data) {
                         dbOrders = data;
+                        
+                        // Sync the database statuses back into local storage for clean persistence
+                        let cacheUpdated = false;
+                        dbOrders.forEach(dbOrder => {
+                            const localIndex = localOrdersBackup.findIndex(o => String(o.id) === String(dbOrder.id));
+                            if (localIndex !== -1 && localOrdersBackup[localIndex].order_status !== dbOrder.order_status) {
+                                localOrdersBackup[localIndex].order_status = dbOrder.order_status;
+                                cacheUpdated = true;
+                            }
+                        });
+                        if (cacheUpdated) {
+                            saveLocalOrders(localOrdersBackup);
+                        }
                     }
                 }
 
@@ -1782,6 +1795,18 @@
                         fetchLiveInventory(true);
                     })
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'Orders' }, (payload) => {
+                        // 1. Intercept the broadcast and update the client's local storage array instantly
+                        if (payload.eventType === 'UPDATE' && payload.new) {
+                            const updatedOrder = payload.new;
+                            const targetIndex = localOrdersBackup.findIndex(o => String(o.id) === String(updatedOrder.id));
+                            
+                            if (targetIndex !== -1) {
+                                localOrdersBackup[targetIndex].order_status = updatedOrder.order_status;
+                                saveLocalOrders(localOrdersBackup);
+                            }
+                        }
+                    
+                        // 2. Trigger standard interface re-renders
                         fetchBuyerRealtimeOrders(); 
                         if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
                             renderAdminOrdersLedger();
