@@ -1740,8 +1740,8 @@
             const sortBy = document.getElementById('sort-select').value;
             let filtered = items.filter(i => {
                 const matchesSection =
-                    (activeListingSection === 'sale' && (i.type === 'sale' || !i.type)) ||
-                    (activeListingSection === 'bidding' && (i.type === 'bidding' || i.type === 'bid'));
+                    (activeListingSection === 'SALE' && (i.type === 'sale' || !i.type)) ||
+                    (activeListingSection === 'BID' && (i.type === 'bidding' || i.type === 'bid'));
 
                 const matchesSearch =
                     String(i.name || '').toLowerCase().includes(search) ||
