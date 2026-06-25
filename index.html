@@ -1734,23 +1734,25 @@
         function renderGrid() {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
-
+        
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const rarity = document.getElementById('rarity-select').value;
             const sortBy = document.getElementById('sort-select').value;
+            
             let filtered = items.filter(i => {
+                // FIXED: Changed 'SALE' to 'sale' and 'BID' to 'bidding'
                 const matchesSection =
-                    (activeListingSection === 'SALE' && (i.type === 'sale' || !i.type)) ||
-                    (activeListingSection === 'BID' && (i.type === 'bidding' || i.type === 'bid'));
-
+                    (activeListingSection === 'sale' && (i.type === 'sale' || !i.type)) ||
+                    (activeListingSection === 'bidding' && (i.type === 'bidding' || i.type === 'bid'));
+        
                 const matchesSearch =
                     String(i.name || '').toLowerCase().includes(search) ||
                     String(i.set || '').toLowerCase().includes(search);
-
+        
                 const itemRarity = String(i.rarity || '').toUpperCase().trim();
                 const selectedRarity = String(rarity || '').toUpperCase().trim();
                 const matchesRarity = (rarity === 'ALL' || itemRarity === selectedRarity);
-
+        
                 return matchesSection && matchesSearch && matchesRarity;
             });
             if (sortBy === 'price-asc') filtered.sort((a, b) => Number(a.price) - Number(b.price));
