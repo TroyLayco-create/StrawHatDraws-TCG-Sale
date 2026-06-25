@@ -1946,11 +1946,27 @@
         }
 
         (async () => {
+            (async () => {
             await handlePasswordRecoveryFromUrl();
 
             setTimeout(() => {
                 handlePasswordRecoveryFromUrl();
             }, 1200);
+
+            // EXTRA PROTECTION: Catch email confirmation landing tokens from Supabase redirect
+            const urlHash = window.location.hash;
+            if (urlHash.includes("type=signup") || (urlHash.includes("access_token=") && !urlHash.includes("type=recovery"))) {
+                if (!sessionStorage.getItem('shd_activation_toast_shown')) {
+                    setTimeout(() => {
+                        showCustomToast("🎉 Account Activated Successfully! Welcome to StrawHatDraws TCG.", "success");
+                        sessionStorage.setItem('shd_activation_toast_shown', 'true');
+                        
+                        // Clean up the messy token data from the URL address bar cleanly
+                        const cleanUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    }, 1000);
+                }
+            }
 
             await hydrateCurrentUserFromSession();
             await fetchLiveInventory(true);
