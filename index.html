@@ -413,10 +413,10 @@
 
         function escapeHtml(str) {
             return String(str ?? '')
-                .replace(/&/g, '&')
-                .replace(/</g, '<')
-                .replace(/>/g, '>')
-                .replace(/"/g, '"')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
         }
 
@@ -1376,7 +1376,7 @@
                 if (statusVal === 'Processed') selectColorClass = 'text-green-400 border-green-500/30';
                 if (statusVal === 'Shipped') selectColorClass = 'text-blue-400 border-blue-500/30';
                 if (statusVal === 'Cancelled') selectColorClass = 'text-red-400 border-red-500/30';
-                const mapsPinUrl = ord.google_maps_pin || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ord.shipping_address || '')}`;
+                const mapsPinUrl = ord.google_maps_pin || `https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(ord.shipping_address || '')}`;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-white/5 border-b border-gray-800 text-top";
