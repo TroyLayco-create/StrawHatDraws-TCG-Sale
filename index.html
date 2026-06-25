@@ -429,6 +429,18 @@
             });
         }
 
+        function formatOrderDate(datetimeStr) {
+            if (!datetimeStr) return "Just now";
+            const dt = new Date(datetimeStr);
+            return dt.toLocaleString('en-PH', {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
         let isRegisterMode = true;
         let currentUserProfile = null;
         let cart = [];
@@ -693,7 +705,10 @@
                                 <span class="font-mono text-gray-400 text-[10px] break-all">${escapeHtml(o.id)}</span>
                                 <span class="font-bold ${statusColor} text-[11px]">${escapeHtml(o.order_status || 'Pending')}</span>
                             </div>
-                            <div class="text-[10px] text-gray-500">${escapeHtml(o.customer_name || '')}</div>
+                            <div class="flex justify-between items-center text-[10px]">
+                                <span class="text-gray-500">${escapeHtml(o.customer_name || '')}</span>
+                                <span class="text-gray-400 font-medium bg-white/5 px-1.5 py-0.5 rounded border border-gray-800">${formatOrderDate(o.created_at)}</span>
+                            </div>
                             <div class="space-y-1">${itemsHtml}</div>
                         `;
                         queueBox.appendChild(card);
@@ -1186,6 +1201,7 @@
                     items_ordered: JSON.parse(JSON.stringify([...cart])),
                     order_status: "Pending",
                     user_id: currentUserProfile.id
+                    created_at: new Date().toISOString()
                 };
                 let orderWriteSuccessful = false;
 
