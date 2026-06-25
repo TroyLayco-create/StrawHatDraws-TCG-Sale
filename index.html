@@ -1172,7 +1172,7 @@
                     showCustomToast("Enter a valid custom bid add-on amount.", "error");
                     return;
                 }
-                bidAmount = Number(card.price) + customVal;
+                bidAmount = customVal;
             } else {
                 const selectVal = Number(document.getElementById(`bid-select-${cardId}`).value);
                 if (!selectVal || isNaN(selectVal) || selectVal <= 0) {
@@ -1817,7 +1817,7 @@
                                     <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
                                 </div>
                                 <div class="flex gap-1.5">
-                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Custom Bid Add-On (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
+                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Enter Total Bid (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
                                     <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
                                 </div>
                             </div>
