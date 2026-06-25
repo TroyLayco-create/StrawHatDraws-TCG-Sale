@@ -154,42 +154,12 @@
                 </p>
                 <div id="auth-profile-fields" class="space-y-3">
                     <div>
-                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Delivery Name</label>
-                        <input type="text" id="auth-name" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">House / Unit #, Bldg</label>
-                            <input type="text" id="auth-house" placeholder="e.g. Rm 204 Bldg B" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Street Name</label>
-                            <input type="text" id="auth-street" placeholder="e.g. 104 Katipunan Ave" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Barangay</label>
-                            <input type="text" id="auth-barangay" placeholder="e.g. Loyola Heights" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">City / Municipality</label>
-                            <input type="text" id="auth-city" placeholder="e.g. Quezon City" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Region / Province</label>
-                            <input type="text" id="auth-region" placeholder="e.g. Metro Manila" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Postal Code</label>
-                            <input type="text" id="auth-postal" placeholder="e.g. 1108" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
-                        </div>
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Full Name</label>
+                        <input type="text" id="auth-name" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Phone Contact Number</label>
-                        <input type="tel" id="auth-phone" placeholder="e.g. 09171234567" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                        <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Facebook Page URL or Handle</label>
+                        <input type="text" id="auth-facebook" required placeholder="e.g., https://www.facebook.com/yourpage" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
                     </div>
                 </div>
                 <button type="submit" id="auth-submit-btn" class="w-full bg-red-600 hover:bg-red-700 font-bold py-2.5 rounded text-white mt-2 tracking-wide uppercase flex items-center justify-center gap-2">Confirm</button>
@@ -830,17 +800,7 @@
                     currentUserProfile = {
                         id: session.user.id,
                         name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-                        address: session.user.user_metadata?.address || "Metro Manila",
-                        phone: session.user.user_metadata?.phone || "None",
-                        google_maps_pin: session.user.user_metadata?.google_maps_pin || '',
-                        structured: {
-                            house: session.user.user_metadata?.structured_house || '',
-                            street: session.user.user_metadata?.structured_street || '',
-                            barangay: session.user.user_metadata?.structured_barangay || '',
-                            city: session.user.user_metadata?.structured_city || '',
-                            region: session.user.user_metadata?.structured_region || '',
-                            postal: session.user.user_metadata?.structured_postal || ''
-                        }
+                        facebook_page: session.user.user_metadata?.facebook_page || ''
                     };
                     document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
                     document.getElementById('nav-logout-btn').classList.remove('hidden');
@@ -997,13 +957,7 @@
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
             const name = document.getElementById('auth-name').value || email.split('@')[0];
-            const house = document.getElementById('auth-house').value;
-            const street = document.getElementById('auth-street').value;
-            const barangay = document.getElementById('auth-barangay').value;
-            const city = document.getElementById('auth-city').value;
-            const region = document.getElementById('auth-region').value;
-            const postal = document.getElementById('auth-postal').value;
-            const phone = document.getElementById('auth-phone').value;
+            let facebookPage = document.getElementById('auth-facebook') ? document.getElementById('auth-facebook').value.trim() : '';
 
             const lastReg = localStorage.getItem('shd_last_reg_timestamp');
             if (isRegisterMode && lastReg && (Date.now() - Number(lastReg) < 30000)) {
@@ -1022,32 +976,34 @@
                     showCustomToast("Please enter a valid structured email address.", "error");
                     return;
                 }
+
+                // FACEBOOK VALIDATION GATEWAY: Checks if input matches a standard FB page URL pattern or standard text username format
+                const fbRegex = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9.]{2,}\/?$/i;
+                const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
+
+                if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) {
+                    showCustomToast("Please enter a valid Facebook Page URL or clear profile handle.", "error");
+                    return;
+                }
+
+                // If user just input a raw text handle, normalize it into a proper destination link format automatically
+                if (simpleHandleRegex.test(facebookPage) && !facebookPage.includes('facebook.com') && !facebookPage.includes('fb.com')) {
+                    facebookPage = `https://www.facebook.com/${facebookPage}`;
+                }
             }
 
             const submitBtn = document.getElementById('auth-submit-btn');
             const originalHTML = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i> Mapping Pin Coordinates...`;
+            submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i> Syncing Secure Credentials...`;
             lucide.createIcons();
-            try {
-                let validatedData = {
-                    phone,
-                    address: `${house}, ${street}, Brgy. ${barangay}, ${city}, ${region}, ${postal}, Philippines`,
-                    mapsPin: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(street + ', ' + city)}`,
-                    structured: { house, street, barangay, city, region, postal }
-                };
-                if (isRegisterMode) {
-                    validatedData = await performStructuredAddressValidation(house, street, barangay, city, region, postal, phone);
-                }
 
+            try {
                 if (!supabaseClient) {
                     currentUserProfile = {
                         id: "guest",
                         name,
-                        address: validatedData.address,
-                        phone: validatedData.phone,
-                        google_maps_pin: validatedData.mapsPin,
-                        structured: validatedData.structured
+                        facebook_page: facebookPage
                     };
                     document.getElementById('auth-btn-text').innerText = name;
                     document.getElementById('nav-logout-btn').classList.remove('hidden');
@@ -1062,15 +1018,7 @@
                         options: {
                             data: {
                                 name,
-                                address: validatedData.address,
-                                phone: validatedData.phone,
-                                google_maps_pin: validatedData.mapsPin,
-                                structured_house: house,
-                                structured_street: street,
-                                structured_barangay: barangay,
-                                structured_city: city,
-                                structured_region: region,
-                                structured_postal: postal
+                                facebook_page: facebookPage
                             }
                         }
                     });
@@ -1080,9 +1028,7 @@
                         await supabaseClient.from('profiles').insert([{
                             id: data.user.id,
                             name,
-                            address: validatedData.address,
-                            phone: validatedData.phone,
-                            google_maps_pin: validatedData.mapsPin
+                            facebook_page: facebookPage
                         }]);
                         localStorage.setItem('shd_last_reg_timestamp', Date.now());
                     }
@@ -1980,17 +1926,7 @@
                     currentUserProfile = {
                         id: session.user.id,
                         name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-                        address: session.user.user_metadata?.address || "Metro Manila",
-                        phone: session.user.user_metadata?.phone || "None",
-                        google_maps_pin: session.user.user_metadata?.google_maps_pin || '',
-                        structured: {
-                            house: session.user.user_metadata?.structured_house || '',
-                            street: session.user.user_metadata?.structured_street || '',
-                            barangay: session.user.user_metadata?.structured_barangay || '',
-                            city: session.user.user_metadata?.structured_city || '',
-                            region: session.user.user_metadata?.structured_region || '',
-                            postal: session.user.user_metadata?.structured_postal || ''
-                        }
+                        facebook_page: session.user.user_metadata?.facebook_page || ''
                     };
                     document.getElementById('auth-btn-text').innerText = currentUserProfile.name;
                     document.getElementById('nav-logout-btn').classList.remove('hidden');
