@@ -635,7 +635,9 @@
                                 // Sync both status and timestamp if they are missing or outdated
                                 if (localOrdersBackup[localIndex].order_status !== dbOrder.order_status || !localOrdersBackup[localIndex].created_at) {
                                     localOrdersBackup[localIndex].order_status = dbOrder.order_status;
-                                    localOrdersBackup[localIndex].created_at = dbOrder.created_at; // <-- Sync the real date
+                                    if (!localOrdersBackup[localIndex].created_at && dbOrder.created_at) {
+                                        localOrdersBackup[localIndex].created_at = dbOrder.created_at;
+                                    }
                                     cacheUpdated = true;
                                 }
                             }
@@ -702,8 +704,8 @@
                             }).join('');
                         }
 
-                        // 🔍 Bulletproof timestamp lookup chain: Database -> Local Storage Cache Backup -> System Time Fallback
-                        const finalOrderTimestamp = o.created_at || localOrdersBackup.find(lo => String(lo.id) === String(o.id))?.created_at || new Date().toISOString();
+                        // 🔍 Bulletproof timestamp lookup chain: Local Storage Cache Backup -> Database -> System Time Fallback
+                        const finalOrderTimestamp = localOrdersBackup.find(lo => String(lo.id) === String(o.id))?.created_at || o.created_at || new Date().toISOString();
 
                         const card = document.createElement('div');
                         card.className = "p-2.5 bg-black/40 rounded border border-gray-800 space-y-1.5";
@@ -1870,7 +1872,10 @@
                             
                             if (targetIndex !== -1) {
                                 localOrdersBackup[targetIndex].order_status = updatedOrder.order_status;
-                                localOrdersBackup[targetIndex].created_at = updatedOrder.created_at; // <-- Keep date intact
+                                // Keep the original local creation date intact; do not overwrite it with the update payload
+                                if (!localOrdersBackup[targetIndex].created_at && updatedOrder.created_at) {
+                                    localOrdersBackup[targetIndex].created_at = updatedOrder.created_at;
+                                }
                                 saveLocalOrders(localOrdersBackup);
                             }
                         }
