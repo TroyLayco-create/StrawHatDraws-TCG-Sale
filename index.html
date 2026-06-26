@@ -147,7 +147,12 @@
                 </div>
                 <div>
                     <label class="block text-[10px] text-gray-400 uppercase font-semibold mb-1">Password</label>
-                    <input type="password" id="auth-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                    <div class="relative">
+                        <input type="password" id="auth-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 pr-10 text-white focus:outline-none focus:border-red-500">
+                        <button type="button" onclick="togglePasswordVisibility('auth-password', this)" class="absolute right-3 top-2 text-gray-400 hover:text-white transition-colors flex items-center h-7">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
                 <p onclick="sendPasswordResetEmail()" class="text-right text-[11px] text-gray-400 hover:text-red-400 cursor-pointer transition-colors">Forgot Password?</p>
                 <div id="auth-profile-fields" class="space-y-3">
@@ -790,7 +795,21 @@
         window.closeAuthModal = function() {
             document.getElementById('auth-modal').style.display = 'none';
         };
-
+        
+        window.togglePasswordVisibility = function(inputId, btnEl) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const iconEl = btnEl.querySelector('[data-lucide]');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (iconEl) iconEl.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                if (iconEl) iconEl.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        };
+        
         window.openResetPasswordModal = function() {
             const modal = document.getElementById('reset-password-modal');
             if (modal) {
