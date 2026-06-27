@@ -1230,7 +1230,8 @@
                         customerEmail = session?.user?.email || "";
                     }
                 } else {
-                    throw new Error("Please register and verify your profile before checking out.");
+                    // Prefix added so the parsing catch block displays this exact message to the user!
+                    throw new Error("AUTH_ERROR: Please register and verify your profile before checking out.");
                 }
 
                 const orderPayload = {
