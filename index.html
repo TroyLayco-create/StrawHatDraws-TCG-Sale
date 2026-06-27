@@ -1164,6 +1164,7 @@
                         card.price = Number(data.price);
                         card.top_bidder = data.top_bidder;
                         card.bidding_ends_at = data.bidding_ends_at;
+                        appendBidToHistory(cardId, data.top_bidder, Number(data.price));
                     }
         
                     pendingCustomBidInputs[cardId] = "";
@@ -2009,6 +2010,7 @@
                             items[targetIndex].price = Number(payload.new.price);
                             items[targetIndex].top_bidder = payload.new.top_bidder;
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
+                            appendBidToHistory(payload.new.id, payload.new.top_bidder || 'No bids yet', Number(payload.new.price));
                             
                             // Enhanced: Pinpoint targeted nodes to preserve input field focus & ongoing user typing
                             const bidderElement = document.querySelector(`[data-bidder-id="${payload.new.id}"]`);
