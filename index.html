@@ -1211,8 +1211,9 @@
                     const desiredQtyInCart = cart.filter(id => id === cartItemId).length;
             
                     if (!freshCardRecord || freshCardRecord.stock < desiredQtyInCart) {
-                        const problematicCardName = freshCardRecord ? freshCardRecord.name : "Selected Card";
-                        throw new Error(`Inventory Conflict: "${problematicCardName}" has sold out or has insufficient quantity available since your session loaded.`);
+                        const problematicCardName = freshCardRecord ? freshCardRecord.name : "An item in your cart";
+                        // Tagged with STOCK_ERROR: so our catch block knows how to format it beautifully
+                        throw new Error(`STOCK_ERROR: Sorry, "${problematicCardName}" just sold out or doesn't have enough stock left to complete your order.`);
                     }
                 }
             
@@ -1255,7 +1256,10 @@
                         p_items_ordered: orderPayload.items_ordered,
                         p_user_id: orderPayload.user_id
                     });
-                    if (error) throw new Error(`Database Secure RPC Failed: ${error.message}`);
+                    if (error) {
+                        // Intercept database/race condition errors with a helpful, friendly message
+                        throw new Error("SERVER_ERROR: We couldn't process your order because another customer just purchased the remaining stock. Please refresh and check your cart.");
+                    }
                     if (data) {
                         orderPayload.id = data.id;
                         orderPayload.order_status = data.order_status || "Pending";
@@ -1288,8 +1292,22 @@
                     if (currentUserProfile) await fetchBuyerRealtimeOrders();
                 }
             } catch (err) {
+                // Keep this for your browser inspector tools so you can still debug behind the scenes
                 console.error("Checkout transaction dropped:", err);
-                showCustomToast(err.message || "Checkout execution interface error.", 'error');
+                
+                // Default friendly message if a completely random error breaks the code
+                let customerFriendlyMessage = "An unexpected error occurred while processing your order. Please try again or contact support.";
+                
+                // Check for our hidden developer tags, strip them out, and show the clean text to the customer
+                if (err.message.startsWith("STOCK_ERROR: ")) {
+                    customerFriendlyMessage = err.message.replace("STOCK_ERROR: ", "");
+                } else if (err.message.startsWith("SERVER_ERROR: ")) {
+                    customerFriendlyMessage = err.message.replace("SERVER_ERROR: ", "");
+                } else if (err.message.startsWith("AUTH_ERROR: ")) {
+                    customerFriendlyMessage = err.message.replace("AUTH_ERROR: ", "");
+                }
+                
+                showCustomToast(customerFriendlyMessage, 'error');
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHTML;
