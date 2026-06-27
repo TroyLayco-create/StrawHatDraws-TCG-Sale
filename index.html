@@ -341,6 +341,36 @@
         <span id="toast-message"></span>
     </div>
 
+    <!-- Transparent Bid History Audit Trail Pop-Up Modal -->
+    <div id="bid-history-modal" style="display: none;" class="fixed inset-0 bg-black/80 backdrop-blur-sm items-center justify-center z-50 p-4">
+        <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button onclick="closeBidHistoryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="mb-4">
+                <h2 id="history-modal-title" class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="history" class="text-yellow-500"></i> Bid Audit Trail</h2>
+                <p class="text-[11px] text-gray-400 mt-0.5">Public verification log displaying ledger timestamps, pricing tiers, and accounts.</p>
+            </div>
+            <div class="overflow-y-auto flex-1 bg-black/30 rounded-lg border border-gray-800 p-3 mb-4 max-h-[45vh]">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-800 text-gray-400 font-semibold select-none">
+                            <th class="pb-2">Collector Account</th>
+                            <th class="pb-2 text-right">Amount Tally</th>
+                            <th class="pb-2 text-right pl-3">Date & Time (PST)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-modal-tbody" class="divide-y divide-gray-800/40 text-gray-300">
+                        <!-- Dynamic bid rows are generated here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeBidHistoryModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded-lg text-xs font-semibold transition-colors">Dismiss View</button>
+                <button id="history-export-btn" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Save to Notepad (.txt)
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="reset-password-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-[120] p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-6 shadow-2xl relative">
             <button onclick="closeResetPasswordModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
@@ -453,6 +483,25 @@
         let lastGuestCheckoutData = null;
         let activeListingSection = 'sale';
         let localOrdersBackup = getLocalOrders();
+        function getBidHistoryLog(cardId) {
+            try {
+                const logs = JSON.parse(localStorage.getItem('shd_bid_history') || '{}');
+                return logs[cardId] || [];
+            } catch(e) { return []; }
+        }
+        
+        function appendBidToHistory(cardId, bidder, amount) {
+            try {
+                const logs = JSON.parse(localStorage.getItem('shd_bid_history') || '{}');
+                if (!logs[cardId]) logs[cardId] = [];
+                logs[cardId].unshift({
+                    bidder: bidder,
+                    amount: amount,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('shd_bid_history', JSON.stringify(logs));
+            } catch(e) {}
+        }
         let pendingBidSelections = {};
         let pendingCustomBidInputs = {};
         let lastInventorySignature = '';
@@ -1125,6 +1174,7 @@
             } else {
                 card.price = bidAmount;
                 card.top_bidder = bidderName;
+                appendBidToHistory(cardId, bidderName, bidAmount);
                 pendingCustomBidInputs[cardId] = "";
                 renderGrid();
                 showCustomToast("Local simulator bid placed successfully!", "success");
@@ -1543,7 +1593,79 @@
             await renderAdminOrdersLedger();
             showCustomToast("Order row cleared successfully!", "success");
         };
-
+        window.openBidHistoryModal = function(cardId) {
+            const card = items.find(i => i.id === cardId);
+            if (!card) return;
+        
+            document.getElementById('history-modal-title').innerHTML = `<i data-lucide="history" class="text-yellow-500"></i> Bid Audit Trail: ${escapeHtml(card.name)}`;
+            
+            const tbody = document.getElementById('history-modal-tbody');
+            tbody.innerHTML = '';
+            
+            const logs = getBidHistoryLog(cardId);
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-500 font-medium">No verified bid records tracked yet.</td></tr>`;
+            } else {
+                logs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-white/5 border-b border-gray-800/40 text-[11px]";
+                    tr.innerHTML = `
+                        <td class="py-2 font-semibold text-white">${escapeHtml(log.bidder)}</td>
+                        <td class="py-2 text-right font-mono text-yellow-500 font-bold">${formatPHP(log.amount)}</td>
+                        <td class="py-2 text-right text-gray-400 pl-3">${formatOrderDate(log.timestamp)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            
+            document.getElementById('history-export-btn').onclick = () => window.extractBidHistoryToNotepad(cardId);
+            document.getElementById('bid-history-modal').style.display = 'flex';
+            lucide.createIcons();
+        };
+        
+        window.closeBidHistoryModal = function() {
+            document.getElementById('bid-history-modal').style.display = 'none';
+        };
+        
+        window.extractBidHistoryToNotepad = function(cardId) {
+            const card = items.find(i => i.id === cardId);
+            if (!card) return;
+            
+            const logs = getBidHistoryLog(cardId);
+            if (logs.length === 0) {
+                showCustomToast("No historical ledger metrics found to process.", "error");
+                return;
+            }
+            
+            let textOutput = `==================================================\n`;
+            textOutput += `STRAWHATDRAWS TCG SALES - LIVE BID AUDIT TRAIL\n`;
+            textOutput += `==================================================\n`;
+            textOutput += `Item Card Name : ${card.name}\n`;
+            textOutput += `Set Reference  : ${card.set} (${card.rarity})\n`;
+            textOutput += `Compiled Date  : ${new Date().toLocaleString('en-PH')}\n`;
+            textOutput += `==================================================\n\n`;
+            textOutput += `VERIFIED CHRONOLOGICAL BID HISTORY LOGS:\n`;
+            textOutput += `--------------------------------------------------\n`;
+            
+            logs.forEach((log, index) => {
+                const sequenceNum = logs.length - index;
+                const entryDate = new Date(log.timestamp).toLocaleString('en-PH');
+                textOutput += `[ENTRY #0${sequenceNum}] Recorded: ${entryDate}\n`;
+                textOutput += `  Collector Name : ${log.bidder}\n`;
+                textOutput += `  Bid Valuation  : PHP ${Number(log.amount).toLocaleString()}\n`;
+                textOutput += `--------------------------------------------------\n`;
+            });
+            
+            const plainTextBlob = new Blob([textOutput], { type: "text/plain;charset=utf-8" });
+            const downloadAnchor = document.createElement("a");
+            downloadAnchor.href = URL.createObjectURL(plainTextBlob);
+            downloadAnchor.download = `BID_AUDIT_TRAIL_${card.name.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+            
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            document.body.removeChild(downloadAnchor);
+            showCustomToast("Notepad log downloaded successfully!", "success");
+        };
         window.resetSystemLocalCache = async function() {
             const confirmed = await askCustomConfirmation("Reset Local Cache", "This will clear local stock overrides and cached orders on this device. Continue?");
             if (!confirmed) return;
@@ -1673,6 +1795,9 @@
                                     <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Enter Total Bid (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
                                     <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
                                 </div>
+                                <button type="button" onclick="openBidHistoryModal(${item.id})" class="mt-1 w-full text-center bg-[#242424] hover:bg-[#2c2c2c] text-gray-400 hover:text-white border border-gray-700/60 rounded py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
+                                    <i data-lucide="history" class="w-3.5 h-3.5 text-yellow-500"></i> Transparent Bid History
+                                </button>
                             </div>
                         `;
                     }
