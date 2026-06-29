@@ -491,16 +491,7 @@
         }
         
         function appendBidToHistory(cardId, bidder, amount) {
-            try {
-                const logs = JSON.parse(localStorage.getItem('shd_bid_history') || '{}');
-                if (!logs[cardId]) logs[cardId] = [];
-                logs[cardId].unshift({
-                    bidder: bidder,
-                    amount: amount,
-                    timestamp: new Date().toISOString()
-                });
-                localStorage.setItem('shd_bid_history', JSON.stringify(logs));
-            } catch(e) {}
+            // Disabled to prevent local storage pollution
         }
         let pendingBidSelections = {};
         let pendingCustomBidInputs = {};
@@ -1616,8 +1607,9 @@
                     if (error) throw error;
                     logs = data || [];
                 } catch (err) {
-                    console.warn("Cloud tracking unavailable, pulling simulator models:", err);
-                    logs = getBidHistoryLog(cardId);
+                    console.warn("Cloud tracking unavailable:", err);
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-red-400 font-bold">Database Connection Error: ${escapeHtml(err.message)}</td></tr>`;
+                    return;
                 }
             } else {
                 logs = getBidHistoryLog(cardId);
