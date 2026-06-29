@@ -1609,7 +1609,7 @@
                 } catch (err) {
                     console.warn("Cloud tracking unavailable:", err);
                     tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-red-400 font-bold">Database Connection Error: ${escapeHtml(err.message)}</td></tr>`;
-                    return;
+                    document.getElementById('bid-history-modal').style.display = 'flex'; lucide.createIcons(); return;
                 }
             } else {
                 logs = getBidHistoryLog(cardId);
