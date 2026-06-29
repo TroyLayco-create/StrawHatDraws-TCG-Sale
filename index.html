@@ -1594,16 +1594,36 @@
             await renderAdminOrdersLedger();
             showCustomToast("Order row cleared successfully!", "success");
         };
-        window.openBidHistoryModal = function(cardId) {
+        window.openBidHistoryModal = async function(cardId) {
             const card = items.find(i => i.id === cardId);
             if (!card) return;
-        
+
             document.getElementById('history-modal-title').innerHTML = `<i data-lucide="history" class="text-yellow-500"></i> Bid Audit Trail: ${escapeHtml(card.name)}`;
             
             const tbody = document.getElementById('history-modal-tbody');
-            tbody.innerHTML = '';
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-gray-500">Loading verified ledger records...</td></tr>';
             
-            const logs = getBidHistoryLog(cardId);
+            let logs = [];
+            if (supabaseClient) {
+                try {
+                    // Pulling directly from your new Philippine-time synchronized Supabase table
+                    const { data, error } = await supabaseClient
+                        .from('bid_history')
+                        .select('*')
+                        .eq('card_id', cardId)
+                        .order('timestamp', { ascending: false });
+                        
+                    if (error) throw error;
+                    logs = data || [];
+                } catch (err) {
+                    console.warn("Cloud tracking unavailable, pulling simulator models:", err);
+                    logs = getBidHistoryLog(cardId);
+                }
+            } else {
+                logs = getBidHistoryLog(cardId);
+            }
+
+            tbody.innerHTML = '';
             if (logs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-500 font-medium">No verified bid records tracked yet.</td></tr>`;
             } else {
@@ -1619,7 +1639,7 @@
                 });
             }
             
-            document.getElementById('history-export-btn').onclick = () => window.extractBidHistoryToNotepad(cardId);
+            document.getElementById('history-export-btn').onclick = () => window.extractBidHistoryToNotepad(cardId, logs);
             document.getElementById('bid-history-modal').style.display = 'flex';
             lucide.createIcons();
         };
@@ -1628,11 +1648,11 @@
             document.getElementById('bid-history-modal').style.display = 'none';
         };
         
-        window.extractBidHistoryToNotepad = function(cardId) {
+        window.extractBidHistoryToNotepad = function(cardId, passedLogs = null) {
             const card = items.find(i => i.id === cardId);
             if (!card) return;
             
-            const logs = getBidHistoryLog(cardId);
+            const logs = passedLogs || getBidHistoryLog(cardId);
             if (logs.length === 0) {
                 showCustomToast("No historical ledger metrics found to process.", "error");
                 return;
