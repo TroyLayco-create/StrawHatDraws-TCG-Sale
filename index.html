@@ -1759,8 +1759,7 @@
                 const topBidderName = escapeHtml(item.top_bidder || 'No bids yet');
                 const selectedIncrement = pendingBidSelections[item.id] || "10";
                 const customBidValue = pendingCustomBidInputs[item.id] || "";
-                const safeImgSrc = dynamicImgSrc.replace(/'/g, "\\'");
-
+                
                 const div = document.createElement('div');
                 div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut && activeListingSection === 'sale' ? 'opacity-40 select-none' : ''}`;
 
@@ -1825,7 +1824,7 @@
                             src="${dynamicImgSrc}"
                             alt="${safeName}"
                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';"
-                            onclick="launchZoomModal('${safeImgSrc}')"
+                            onclick="launchZoomModal(this.src)"
                             class="relative z-10 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200"
                         >
                         <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 pointer-events-none">
