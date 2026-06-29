@@ -1594,10 +1594,13 @@
             const tbody = document.getElementById('history-modal-tbody');
             tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-gray-500">Loading verified ledger records...</td></tr>';
             
+            // Open the window instantly so users see the loading state right away!
+            document.getElementById('bid-history-modal').style.display = 'flex';
+            lucide.createIcons();
+
             let logs = [];
             if (supabaseClient) {
                 try {
-                    // Pulling directly from your new Philippine-time synchronized Supabase table
                     const { data, error } = await supabaseClient
                         .from('bid_history')
                         .select('*')
@@ -1609,7 +1612,7 @@
                 } catch (err) {
                     console.warn("Cloud tracking unavailable:", err);
                     tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-red-400 font-bold">Database Connection Error: ${escapeHtml(err.message)}</td></tr>`;
-                    document.getElementById('bid-history-modal').style.display = 'flex'; lucide.createIcons(); return;
+                    return; // Window is already open, so we can safely exit here
                 }
             } else {
                 logs = getBidHistoryLog(cardId);
@@ -1632,8 +1635,6 @@
             }
             
             document.getElementById('history-export-btn').onclick = () => window.extractBidHistoryToNotepad(cardId, logs);
-            document.getElementById('bid-history-modal').style.display = 'flex';
-            lucide.createIcons();
         };
         
         window.closeBidHistoryModal = function() {
