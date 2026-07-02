@@ -1695,10 +1695,9 @@
             
             const { data, error } = await supabaseClient
                 .from(targetTable)
-                .select('*')
-                .order(sortColumn, { ascending: false });
+                .select('*');
 
-                if (error) throw error;
+            if (error) throw error;
 
             tbody.innerHTML = '';
             if (!data || data.length === 0) {
@@ -1706,7 +1705,33 @@
                 return;
             }
 
-            data.forEach(log => {
+            // 1. Sort all incoming bids by amount descending so the absolute highest bids are processed first
+            const sortedByHighestAmount = [...data].sort((a, b) => Number(b.amount) - Number(a.amount));
+            
+            const uniqueHighBids = [];
+            const seenTrackingKeys = new Set();
+
+            // 2. Filter out lower intermediate bids
+            sortedByHighestAmount.forEach(log => {
+                // Live View: Only 1 row per unique card_id showing who is currently winning
+                // Archive View: Unique by card_id + order_id combination so you can see past wins across different streams/orders
+                const trackingKey = currentAdminBidView === 'live' 
+                    ? String(log.card_id) 
+                    : `${log.card_id}_${log.order_id}`;
+                
+                if (!seenTrackingKeys.has(trackingKey)) {
+                    seenTrackingKeys.add(trackingKey);
+                    uniqueHighBids.push(log);
+                }
+            });
+
+            // 3. Re-sort the unique high bids by time so your most recent auction action stays at the top
+            uniqueHighBids.sort((a, b) => {
+                return new Date(b[sortColumn]).getTime() - new Date(a[sortColumn]).getTime();
+            });
+
+            // 4. Render the filtered high-bid rows into your table layout
+            uniqueHighBids.forEach(log => {
                 // Match the card identity via your catalog memory matrix to read the name string asset
                 const card = items.find(i => i.id == log.card_id);
                 const nameDisplay = card ? `${card.name} (${card.set})` : `Card Registry Index Reference Code #${log.card_id}`;
