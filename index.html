@@ -301,6 +301,24 @@
                 </div>
 
                 <div>
+                    <!-- QUICK BAR OVERRIDE FOR AUCTION-ONLY WINNERS -->
+                    <div class="bg-[#222] border border-gray-800 p-4 rounded-xl mb-5 shadow-xl text-xs">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i data-lucide="zap" class="w-3.5 h-3.5"></i> Manual Auction Invoice Generator
+                                </h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Invoice an auction winner who doesn't have a direct storefront purchase row.</p>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                <input id="manualCustName" type="text" placeholder="Bidder Username" class="bg-[#121212] border border-gray-700 text-xs rounded-lg p-2 w-full text-gray-200 focus:outline-none focus:border-amber-500">
+                                <input id="manualCustEmail" type="email" placeholder="Customer Email" class="bg-[#121212] border border-gray-700 text-xs rounded-lg p-2 w-full text-gray-200 focus:outline-none focus:border-amber-500">
+                                <button type="button" onclick="submitManualAuctionInvoice()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] px-4 py-2 rounded-lg transition-colors whitespace-nowrap shadow-md">
+                                    Send Bid Invoice
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5"><i data-lucide="receipt" class="w-4 h-4 text-red-400"></i> Active Customer Purchase Log Queue</h3>
                     <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
                         <table class="w-full text-left text-xs border-collapse">
@@ -1541,11 +1559,24 @@
                             <option value="Cancelled" ${statusVal === 'Cancelled' ? 'selected' : ''} class="text-red-400 font-bold bg-[#1e1e1e]">❌ Cancelled</option>
                         </select>
                     </td>
-                    <td class="p-3 text-center flex flex-col sm:flex-row items-center justify-center gap-2">
-                        <button onclick="triggerManualInvoice('${escapeHtml(ord.id)}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-2.5 py-1 rounded transition-colors inline-flex items-center gap-1 shadow">
-                            <i data-lucide="mail" class="w-3 h-3"></i> Invoice
-                        </button>
-                        <button onclick="purgeOrderLogRecord('${escapeHtml(ord.id)}', this)" class="text-red-400 text-xs hover:underline hover:text-red-300 transition-colors font-medium">Clear Row</button>
+                    <td class="p-3 text-center">
+                        <div class="flex flex-col sm:flex-row gap-1.5 justify-center items-center mb-1.5">
+                            <!-- 1. Unified Combo Invoice Trigger -->
+                            <button type="button" onclick="processUiInvoice('unified', '${escapeHtml(ord.id)}')" class="px-2 py-1 text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
+                                📬 Combo
+                            </button>
+                            
+                            <!-- 2. Store Sale Only Trigger -->
+                            <button type="button" onclick="processUiInvoice('sale', '${escapeHtml(ord.id)}')" class="px-2 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
+                                🛒 Sale
+                            </button>
+                            
+                            <!-- 3. Bid Only Trigger -->
+                            <button type="button" onclick="processUiInvoice('bid', null, '${escapeHtml(ord.customer_name)}', '${escapeHtml(ord.customer_email || '')}')" class="px-2 py-1 text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
+                                🏆 Bids
+                            </button>
+                        </div>
+                        <button type="button" onclick="purgeOrderLogRecord('${escapeHtml(ord.id)}', this)" class="text-red-400 text-[10px] hover:underline hover:text-red-300 transition-colors font-medium block mx-auto">Clear Row</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1553,6 +1584,49 @@
 
             lucide.createIcons();
         }
+        // Connects your new frontend UI buttons straight to your 3 Supabase RPC Database Email Engines
+        window.processUiInvoice = async function(type, orderId = null, custName = null, custEmail = null) {
+            if (!supabaseClient) {
+                showCustomToast("Local simulator active. Connect Supabase to process cloud emails.", "error");
+                return;
+            }
+            try {
+                let response;
+                if (type === 'unified') {
+                    response = await supabaseClient.rpc('send_unified_invoice_rpc', { p_order_id: orderId });
+                } else if (type === 'sale') {
+                    response = await supabaseClient.rpc('send_sale_only_invoice_rpc', { p_order_id: orderId });
+                } else if (type === 'bid') {
+                    response = await supabaseClient.rpc('send_bid_only_invoice_rpc', { 
+                        p_customer_name: custName, 
+                        p_customer_email: custEmail 
+                    });
+                }
+        
+                if (response?.error) throw response.error;
+                showCustomToast(`✨ Success! ${type.toUpperCase()} invoice statement transmitted.`, "success");
+            } catch (err) {
+                console.error('Invoice system failure:', err);
+                showCustomToast(`❌ Delivery Failed: ${err.message || 'Check database connection configuration'}`, "error");
+            }
+        };
+        
+        // Processes the inputs from your top manual quick bar layout
+        window.submitManualAuctionInvoice = async function() {
+            const nameInput = document.getElementById('manualCustName');
+            const emailInput = document.getElementById('manualCustEmail');
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            
+            if (!name || !email) {
+                showCustomToast('⚠️ Please enter both a Bidder Username and Target Email.', 'error');
+                return;
+            }
+            
+            await window.processUiInvoice('bid', null, name, email);
+            nameInput.value = '';
+            emailInput.value = '';
+        };
 
         window.changeOrderStatus = async function(orderId, newStatus) {
             // 1. Update local storage cache immediately so local/mock orders work
