@@ -1768,14 +1768,15 @@
             lucide.createIcons();
         };
     
-        // Safely copies all bids for a card to your archive tables, drops them from live, and resets card prices to zero
+        // Safely copies all bids for a card to your archive tables, drops them from live, and flags the card as archived
         window.archiveLiveBidsForCard = async function(cardId, buttonEl) {
             if (!supabaseClient) {
                 showCustomToast("Simulator active. Connect Supabase to archive live entries.", "error");
                 return;
             }
     
-            const confirmed = await askCustomConfirmation("Archive Auction Bids", "Are you sure you want to finalize this auction? This will clear the live rows, save the record to the archive table, and reset the card catalog price to ₱0.");
+            // 🌟 FIXED: Updated message to match the new archival behavior
+            const confirmed = await askCustomConfirmation("Archive Auction Bids", "Are you sure you want to finalize this auction? This will remove the card from the live bidding catalog layout and preserve its record in your historical data logs.");
             if (!confirmed) return;
     
             const originalText = buttonEl.innerText;
@@ -1818,18 +1819,18 @@
                     if (deleteErr) throw deleteErr;
                 }
     
-                // 5. Reset the card status defaults in your catalog so it can be reused for your next live stream event loop
+                // 5. 🌟 FIXED: Changes card type to 'archived' so it vanishes from the live catalog views completely
                 const { error: cardResetErr } = await supabaseClient
                     .from('cards')
                     .update({
-                        top_bidder: 'No bids yet',
-                        price: 0
+                        type: 'archived'
                     })
                     .eq('id', cardId);
     
                 if (cardResetErr) throw cardResetErr;
     
-                showCustomToast("✨ Success! Auction entries archived and listing card reset.", "success");
+                // 🌟 FIXED: Updated text to confirm it's tucked away in your archive records
+                showCustomToast("✨ Success! Auction entries archived and card moved to archived records.", "success");
                 
                 // Re-render components live instantly
                 await fetchLiveInventory(true);
