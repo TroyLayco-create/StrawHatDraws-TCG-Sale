@@ -1768,24 +1768,32 @@
             lucide.createIcons();
         };
     
-        // Safely copies all bids for a card to your archive tables, drops them from live, and flags the card as archived
+        // Safely copies bids, moves the card item to a dedicated archived_cards table, and purges it from live view
         window.archiveLiveBidsForCard = async function(cardId, buttonEl) {
             if (!supabaseClient) {
                 showCustomToast("Simulator active. Connect Supabase to archive live entries.", "error");
                 return;
             }
     
-            // 🌟 FIXED: Updated message to match the new archival behavior
-            const confirmed = await askCustomConfirmation("Archive Auction Bids", "Are you sure you want to finalize this auction? This will remove the card from the live bidding catalog layout and preserve its record in your historical data logs.");
+            const confirmed = await askCustomConfirmation("Archive Auction Bids", "Are you sure you want to finalize this auction? This will move this card completely into your separate archived cards table and clear it from active storefront layouts.");
             if (!confirmed) return;
     
             const originalText = buttonEl.innerText;
             buttonEl.disabled = true;
-            buttonEl.innerHTML = `<i data-lucide="loader" class="animate-spin w-3 h-3 inline-block mr-1"></i> Archiving...`;
+            buttonEl.innerHTML = `<i data-lucide="loader" class="animate-spin w-3 h-3 inline-block mr-1"></i> Moving to Archive...`;
             lucide.createIcons();
     
             try {
-                // 1. Fetch all active bidding trail items logged for this explicit card registry code
+                // 1. Fetch the live card properties first before we delete it
+                const { data: cardData, error: cardFetchErr } = await supabaseClient
+                    .from('cards')
+                    .select('*')
+                    .eq('id', cardId)
+                    .single();
+    
+                if (cardFetchErr) throw cardFetchErr;
+    
+                // 2. Fetch all active bidding trail items logged for this card
                 const { data: activeBids, error: fetchErr } = await supabaseClient
                     .from('bid_history')
                     .select('*')
@@ -1794,7 +1802,7 @@
                 if (fetchErr) throw fetchErr;
     
                 if (activeBids && activeBids.length > 0) {
-                    // 2. Format payloads mapping variables cleanly to target data parameters
+                    // 3. Format payload map array structures
                     const archiveRows = activeBids.map(b => ({
                         card_id: b.card_id,
                         bidder: b.bidder,
@@ -1803,14 +1811,14 @@
                         order_id: 'MANUAL_DASHBOARD_CLEAR'
                     }));
     
-                    // 3. Batch insert entries directly into historical records database
+                    // 4. Batch insert entries directly into historical records database
                     const { error: insertErr } = await supabaseClient
                         .from('archived_bid_history')
                         .insert(archiveRows);
     
                     if (insertErr) throw insertErr;
     
-                    // 4. Wipe entries out from active live listing table
+                    // 5. Wipe entries out from active live listing table
                     const { error: deleteErr } = await supabaseClient
                         .from('bid_history')
                         .delete()
@@ -1819,25 +1827,41 @@
                     if (deleteErr) throw deleteErr;
                 }
     
-                // 5. 🌟 FIXED: Changes card type to 'archived' so it vanishes from the live catalog views completely
-                const { error: cardResetErr } = await supabaseClient
+                // 6. Copy the card row data into your separate archived_cards table
+                const { error: cardArchiveInsertErr } = await supabaseClient
+                    .from('archived_cards')
+                    .insert([{
+                        id: cardData.id,
+                        name: cardData.name,
+                        set_code: cardData.set_code,
+                        rarity: cardData.rarity,
+                        price: cardData.price,
+                        stock: cardData.stock,
+                        front_img: cardData.front_img,
+                        back_img: cardData.back_img,
+                        type: cardData.type,
+                        bidding_ends_at: cardData.bidding_ends_at,
+                        top_bidder: cardData.top_bidder
+                    }]);
+    
+                if (cardArchiveInsertErr) throw cardArchiveInsertErr;
+    
+                // 7. Permanently purge the card from the live cards table to trigger real-time UI removal
+                const { error: cardDeleteErr } = await supabaseClient
                     .from('cards')
-                    .update({
-                        type: 'archived'
-                    })
+                    .delete()
                     .eq('id', cardId);
     
-                if (cardResetErr) throw cardResetErr;
+                if (cardDeleteErr) throw cardDeleteErr;
     
-                // 🌟 FIXED: Updated text to confirm it's tucked away in your archive records
-                showCustomToast("✨ Success! Auction entries archived and card moved to archived records.", "success");
+                showCustomToast("✨ Success! Card safely moved to your dedicated archived cards table.", "success");
                 
-                // Re-render components live instantly
+                // Re-render UI views instantly
                 await fetchLiveInventory(true);
                 await window.renderAdminBidsLedger();
     
             } catch (err) {
-                console.error("Archival execution crash:", err);
+                console.error("Archival migration execution crash:", err);
                 showCustomToast(`❌ Action Interrupted: ${err.message || 'Check network connection state'}`, "error");
             } finally {
                 if (buttonEl) {
