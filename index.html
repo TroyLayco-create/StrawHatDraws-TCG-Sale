@@ -1838,6 +1838,8 @@
                 }
             }
         };
+
+        window.changeOrderStatus = async function(orderId, newStatus) {
             // 1. Update local storage cache immediately so local/mock orders work
             const localOrder = localOrdersBackup.find(o => String(o.id) === String(orderId));
             if (localOrder) {
