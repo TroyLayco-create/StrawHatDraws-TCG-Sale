@@ -2402,17 +2402,21 @@
                             const newBidderName = payload.new.top_bidder;
                             const currentCardName = payload.new.name || "Auction Item";
                             
-                            // 🌟 CHECK: Watch if the card type changed (e.g., switched to 'archived')
-                            const typeChanged = items[targetIndex].type !== payload.new.type;
+                            // 🌟 SAFE NORMALIZATION: Cleans text strings to match initial grid parameters
+                            const dbType = (payload.new.type || "sale").toLowerCase().trim();
+                            const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
+                            
+                            // Accurately tracks if the card has truly been updated to 'archived'
+                            const typeChanged = items[targetIndex].type !== normalizedType;
 
                             // Update internal state quietly in the background
                             items[targetIndex].price = Number(payload.new.price);
                             items[targetIndex].top_bidder = payload.new.top_bidder;
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
-                            items[targetIndex].type = payload.new.type; // 🌟 FIXED: Syncs the type property down locally!
+                            items[targetIndex].type = normalizedType; // Saves the clean type definition locally
                             appendBidToHistory(payload.new.id, payload.new.top_bidder || 'No bids yet', Number(payload.new.price));
 
-                            // 🌟 FIXED: If the item was archived, wipe it from active grids and tables immediately
+                            // If the item has been archived, clear it from active layouts immediately
                             if (typeChanged) {
                                 renderGrid();
                                 if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
