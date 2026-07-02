@@ -833,7 +833,7 @@
         async function performSimpleFBValidation(fbInput) {
             let facebookPage = fbInput ? fbInput.trim() : "";
 
-            const fbRegex = /^(https?:\/\/)?(www\.|m\.|mobile\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9._%+-]{2,}\/?$/i;
+            const fbRegex = /^(https?:\/\/)?(www\.|m\.|mobile\.|web\.)?(facebook\.com|fb\.com)\/.+$/i;
             const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
             if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) {
                 throw new Error("Please enter a valid live Facebook profile URL or handle link for order notifications.");
@@ -1038,7 +1038,7 @@
                     return;
                 }
 
-                const fbRegex = /^(https?:\/\/)?(www\.|m\.|mobile\.)?(facebook\.com|fb\.com)\/[a-zA-Z0-9._%+-]{2,}\/?$/i;
+                const fbRegex = /^(https?:\/\/)?(www\.|m\.|mobile\.|web\.)?(facebook\.com|fb\.com)\/.+$/i;
                 const simpleHandleRegex = /^[a-zA-Z0-9.]{2,}$/;
 
                 if (!fbRegex.test(facebookPage) && !simpleHandleRegex.test(facebookPage)) {
