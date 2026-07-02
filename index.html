@@ -2401,12 +2401,23 @@
                             const oldBidderName = items[targetIndex].top_bidder;
                             const newBidderName = payload.new.top_bidder;
                             const currentCardName = payload.new.name || "Auction Item";
+                            
+                            // 🌟 CHECK: Watch if the card type changed (e.g., switched to 'archived')
+                            const typeChanged = items[targetIndex].type !== payload.new.type;
 
                             // Update internal state quietly in the background
                             items[targetIndex].price = Number(payload.new.price);
                             items[targetIndex].top_bidder = payload.new.top_bidder;
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
+                            items[targetIndex].type = payload.new.type; // 🌟 FIXED: Syncs the type property down locally!
                             appendBidToHistory(payload.new.id, payload.new.top_bidder || 'No bids yet', Number(payload.new.price));
+
+                            // 🌟 FIXED: If the item was archived, wipe it from active grids and tables immediately
+                            if (typeChanged) {
+                                renderGrid();
+                                if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
+                                return; // End calculation early since the card is now hidden
+                            }
 
                             // INTERACTIVE NOTICE: Fires instantly on all active mobile & desktop screens
                             if (currentUserProfile && 
