@@ -361,10 +361,11 @@
                             <th class="p-3">Collector Username</th>
                             <th class="p-3">Bid Amount Value</th>
                             <th class="p-3 text-right">Timestamp Ledger Metric</th>
+                            <th class="p-3 text-center">Management Action</th>
                         </tr>
                     </thead>
                     <tbody id="admin-bids-tbody" class="divide-y divide-gray-800/60 text-gray-300 font-medium">
-                        <tr><td colspan="4" class="text-center py-5 text-gray-500 italic">Select a verification channel tracking filter above to fetch entries...</td></tr>
+                        <tr><td colspan="5" class="text-center py-5 text-gray-500 italic">Select a verification channel tracking filter above to fetch entries...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1664,97 +1665,179 @@
         };
         let currentAdminBidView = 'live';
 
-    // Handles shifting styles and views between your active streams and database archives
-    window.toggleAdminBidView = async function(view) {
-        currentAdminBidView = view;
-        const liveBtn = document.getElementById('btn-bid-live');
-        const archiveBtn = document.getElementById('btn-bid-archive');
-        
-        if (view === 'live') {
-            liveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-amber-600 text-white border border-amber-500/20 transition-all";
-            archiveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700/50 hover:text-white transition-all";
-        } else {
-            archiveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-amber-600 text-white border border-amber-500/20 transition-all";
-            liveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700/50 hover:text-white transition-all";
-        }
-        await window.renderAdminBidsLedger();
-    };
-
-    // Queries and draws your transaction log metrics dynamically inside the table grid layout
-    window.renderAdminBidsLedger = async function() {
-        const tbody = document.getElementById('admin-bids-tbody');
-        if (!tbody) return;
-        if (!supabaseClient) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Cloud synchronization disabled. Connect production database.</td></tr>';
-            return;
-        }
-
-        try {
-            const targetTable = currentAdminBidView === 'live' ? 'bid_history' : 'archived_bid_history';
-            const sortColumn = currentAdminBidView === 'live' ? 'timestamp' : 'archived_at';
+        // Handles shifting styles and views between your active streams and database archives
+        window.toggleAdminBidView = async function(view) {
+            currentAdminBidView = view;
+            const liveBtn = document.getElementById('btn-bid-live');
+            const archiveBtn = document.getElementById('btn-bid-archive');
             
-            const { data, error } = await supabaseClient
-                .from(targetTable)
-                .select('*');
-
-            if (error) throw error;
-
-            tbody.innerHTML = '';
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-gray-500 font-normal italic">No historical tracking lines logged for this category context.</td></tr>`;
+            if (view === 'live') {
+                liveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-amber-600 text-white border border-amber-500/20 transition-all";
+                archiveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700/50 hover:text-white transition-all";
+            } else {
+                archiveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-amber-600 text-white border border-amber-500/20 transition-all";
+                liveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700/50 hover:text-white transition-all";
+            }
+            await window.renderAdminBidsLedger();
+        };
+    
+        // Queries, deduplicates to highest-bid-only, and renders your transaction metrics
+        window.renderAdminBidsLedger = async function() {
+            const tbody = document.getElementById('admin-bids-tbody');
+            if (!tbody) return;
+            if (!supabaseClient) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Cloud synchronization disabled. Connect production database.</td></tr>';
                 return;
             }
-
-            // 1. Sort all incoming bids by amount descending so the absolute highest bids are processed first
-            const sortedByHighestAmount = [...data].sort((a, b) => Number(b.amount) - Number(a.amount));
-            
-            const uniqueHighBids = [];
-            const seenTrackingKeys = new Set();
-
-            // 2. Filter out lower intermediate bids
-            sortedByHighestAmount.forEach(log => {
-                // Live View: Only 1 row per unique card_id showing who is currently winning
-                // Archive View: Unique by card_id + order_id combination so you can see past wins across different streams/orders
-                const trackingKey = currentAdminBidView === 'live' 
-                    ? String(log.card_id) 
-                    : `${log.card_id}_${log.order_id}`;
+    
+            try {
+                const targetTable = currentAdminBidView === 'live' ? 'bid_history' : 'archived_bid_history';
+                const sortColumn = currentAdminBidView === 'live' ? 'timestamp' : 'archived_at';
                 
-                if (!seenTrackingKeys.has(trackingKey)) {
-                    seenTrackingKeys.add(trackingKey);
-                    uniqueHighBids.push(log);
+                const { data, error } = await supabaseClient
+                    .from(targetTable)
+                    .select('*');
+    
+                if (error) throw error;
+    
+                tbody.innerHTML = '';
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-gray-500 font-normal italic">No historical tracking lines logged for this category context.</td></tr>`;
+                    return;
                 }
-            });
-
-            // 3. Re-sort the unique high bids by time so your most recent auction action stays at the top
-            uniqueHighBids.sort((a, b) => {
-                return new Date(b[sortColumn]).getTime() - new Date(a[sortColumn]).getTime();
-            });
-
-            // 4. Render the filtered high-bid rows into your table layout
-            uniqueHighBids.forEach(log => {
-                // Match the card identity via your catalog memory matrix to read the name string asset
-                const card = items.find(i => i.id == log.card_id);
-                const nameDisplay = card ? `${card.name} (${card.set})` : `Card Registry Index Reference Code #${log.card_id}`;
-                const timeStr = log.timestamp || log.archived_at || new Date().toISOString();
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-white/5 border-b border-gray-800/60 text-top";
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-white truncate max-w-[200px]">${escapeHtml(nameDisplay)}</td>
-                    <td class="p-3 text-gray-300 font-mono text-[11px]">${escapeHtml(log.bidder)}</td>
-                    <td class="p-3 font-mono text-amber-400 font-bold">${formatPHP(log.amount)}</td>
-                    <td class="p-3 text-right text-gray-400 font-medium bg-white/[0.01]">${formatOrderDate(timeStr)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } catch (err) {
-            console.error("Failed to compile admin bids trail visual grid:", err);
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-400 font-bold">Error reading cloud data: ${escapeHtml(err.message)}</td></tr>`;
-        }
-        lucide.createIcons();
-    };
-
-        window.changeOrderStatus = async function(orderId, newStatus) {
+    
+                // Group logs by card_id to calculate and extract ONLY the absolute maximum/highest bid value entry
+                const highBidsMap = {};
+                data.forEach(log => {
+                    const trackingKey = currentAdminBidView === 'live' ? String(log.card_id) : `${log.card_id}_${log.order_id || 'manual'}`;
+                    if (!highBidsMap[trackingKey] || Number(log.amount) > Number(highBidsMap[trackingKey].amount)) {
+                        highBidsMap[trackingKey] = log;
+                    }
+                });
+    
+                // Flatten data map back to array format and sort chronologically by date/time metrics descending
+                const uniqueHighBids = Object.values(highBidsMap);
+                uniqueHighBids.sort((a, b) => new Date(b[sortColumn]).getTime() - new Date(a[sortColumn]).getTime());
+    
+                uniqueHighBids.forEach(log => {
+                    const card = items.find(i => i.id == log.card_id);
+                    const nameDisplay = card ? `${card.name} (${card.set})` : `Card Reference Code #${log.card_id}`;
+                    const timeStr = log.timestamp || log.archived_at || new Date().toISOString();
+    
+                    // Generate dynamic transactional removal action tools based on active panel context view
+                    let actionCellHTML = '';
+                    if (currentAdminBidView === 'live') {
+                        actionCellHTML = `
+                            <td class="p-3 text-center">
+                                <button type="button" onclick="archiveLiveBidsForCard(${log.card_id}, this)" class="bg-amber-600/20 hover:bg-amber-600 border border-amber-500/30 hover:text-white text-amber-400 text-[10px] font-black px-2.5 py-1 rounded transition-all shadow-sm uppercase tracking-wider">
+                                    📦 Archive & Reset
+                                </button>
+                            </td>
+                        `;
+                    } else {
+                        actionCellHTML = `
+                            <td class="p-3 text-center text-gray-500 font-mono text-[10px] select-none">
+                                Archived Ledger
+                            </td>
+                        `;
+                    }
+    
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-white/5 border-b border-gray-800/60 text-top";
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-white truncate max-w-[200px]">${escapeHtml(nameDisplay)}</td>
+                        <td class="p-3 text-gray-300 font-mono text-[11px]">${escapeHtml(log.bidder)}</td>
+                        <td class="p-3 font-mono text-amber-400 font-bold">${formatPHP(log.amount)}</td>
+                        <td class="p-3 text-right text-gray-400 font-medium bg-white/[0.01]">${formatOrderDate(timeStr)}</td>
+                        ${actionCellHTML}
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Failed to compile admin bids trail visual grid:", err);
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-red-400 font-bold">Error reading cloud data: ${escapeHtml(err.message)}</td></tr>`;
+            }
+            lucide.createIcons();
+        };
+    
+        // Safely copies all bids for a card to your archive tables, drops them from live, and resets card prices to zero
+        window.archiveLiveBidsForCard = async function(cardId, buttonEl) {
+            if (!supabaseClient) {
+                showCustomToast("Simulator active. Connect Supabase to archive live entries.", "error");
+                return;
+            }
+    
+            const confirmed = await askCustomConfirmation("Archive Auction Bids", "Are you sure you want to finalize this auction? This will clear the live rows, save the record to the archive table, and reset the card catalog price to ₱0.");
+            if (!confirmed) return;
+    
+            const originalText = buttonEl.innerText;
+            buttonEl.disabled = true;
+            buttonEl.innerHTML = `<i data-lucide="loader" class="animate-spin w-3 h-3 inline-block mr-1"></i> Archiving...`;
+            lucide.createIcons();
+    
+            try {
+                // 1. Fetch all active bidding trail items logged for this explicit card registry code
+                const { data: activeBids, error: fetchErr } = await supabaseClient
+                    .from('bid_history')
+                    .select('*')
+                    .eq('card_id', cardId);
+    
+                if (fetchErr) throw fetchErr;
+    
+                if (activeBids && activeBids.length > 0) {
+                    // 2. Format payloads mapping variables cleanly to target data parameters
+                    const archiveRows = activeBids.map(b => ({
+                        card_id: b.card_id,
+                        bidder: b.bidder,
+                        amount: b.amount,
+                        timestamp: b.timestamp,
+                        order_id: 'MANUAL_DASHBOARD_CLEAR'
+                    }));
+    
+                    // 3. Batch insert entries directly into historical records database
+                    const { error: insertErr } = await supabaseClient
+                        .from('archived_bid_history')
+                        .insert(archiveRows);
+    
+                    if (insertErr) throw insertErr;
+    
+                    // 4. Wipe entries out from active live listing table
+                    const { error: deleteErr } = await supabaseClient
+                        .from('bid_history')
+                        .delete()
+                        .eq('card_id', cardId);
+    
+                    if (deleteErr) throw deleteErr;
+                }
+    
+                // 5. Reset the card status defaults in your catalog so it can be reused for your next live stream event loop
+                const { error: cardResetErr } = await supabaseClient
+                    .from('cards')
+                    .update({
+                        top_bidder: 'No bids yet',
+                        price: 0
+                    })
+                    .eq('id', cardId);
+    
+                if (cardResetErr) throw cardResetErr;
+    
+                showCustomToast("✨ Success! Auction entries archived and listing card reset.", "success");
+                
+                // Re-render components live instantly
+                await fetchLiveInventory(true);
+                await window.renderAdminBidsLedger();
+    
+            } catch (err) {
+                console.error("Archival execution crash:", err);
+                showCustomToast(`❌ Action Interrupted: ${err.message || 'Check network connection state'}`, "error");
+            } finally {
+                if (buttonEl) {
+                    buttonEl.disabled = false;
+                    buttonEl.innerText = originalText;
+                    lucide.createIcons();
+                }
+            }
+        };
             // 1. Update local storage cache immediately so local/mock orders work
             const localOrder = localOrdersBackup.find(o => String(o.id) === String(orderId));
             if (localOrder) {
