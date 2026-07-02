@@ -1691,12 +1691,10 @@
             }
     
             try {
-                const targetTable = currentAdminBidView === 'live' ? 'bid_history' : 'archived_bid_history';
-                const sortColumn = currentAdminBidView === 'live' ? 'timestamp' : 'archived_at';
-                
-                const { data, error } = await supabaseClient
-                    .from(targetTable)
-                    .select('*');
+                // 🔄 Requests the data directly from our secure backend RPC join mapper
+                const { data, error } = await supabaseClient.rpc('get_admin_bids_ledger_rpc', {
+                    p_view_type: currentAdminBidView
+                });
     
                 if (error) throw error;
     
@@ -1706,7 +1704,9 @@
                     return;
                 }
     
-                // Group logs by card_id to calculate and extract ONLY the absolute maximum/highest bid value entry
+                // 🌟 FIXED: Points cleanly to 'bid_timestamp' instead of the restricted 'timestamp' keyword
+                const sortColumn = currentAdminBidView === 'live' ? 'bid_timestamp' : 'archived_at';
+                
                 const highBidsMap = {};
                 data.forEach(log => {
                     const trackingKey = currentAdminBidView === 'live' ? String(log.card_id) : `${log.card_id}_${log.order_id || 'manual'}`;
@@ -1715,16 +1715,21 @@
                     }
                 });
     
-                // Flatten data map back to array format and sort chronologically by date/time metrics descending
                 const uniqueHighBids = Object.values(highBidsMap);
                 uniqueHighBids.sort((a, b) => new Date(b[sortColumn]).getTime() - new Date(a[sortColumn]).getTime());
     
                 uniqueHighBids.forEach(log => {
                     const card = items.find(i => i.id == log.card_id);
                     const nameDisplay = card ? `${card.name} (${card.set})` : `Card Reference Code #${log.card_id}`;
-                    const timeStr = log.timestamp || log.archived_at || new Date().toISOString();
+                    
+                    // 🌟 FIXED: Tracks your custom 'bid_timestamp' property without throwing database faults
+                    const timeStr = log.bid_timestamp || log.archived_at || new Date().toISOString();
+                    
+                    // 📧 Shows the email address nicely under the username
+                    const emailDisplay = log.email 
+                        ? `<div class="text-[10px] text-gray-500 font-normal mt-0.5">${escapeHtml(log.email)}</div>` 
+                        : `<div class="text-[10px] text-gray-600 font-normal italic mt-0.5">No email linked</div>`;
     
-                    // Generate dynamic transactional removal action tools based on active panel context view
                     let actionCellHTML = '';
                     if (currentAdminBidView === 'live') {
                         actionCellHTML = `
@@ -1746,7 +1751,10 @@
                     tr.className = "hover:bg-white/5 border-b border-gray-800/60 text-top";
                     tr.innerHTML = `
                         <td class="p-3 font-semibold text-white truncate max-w-[200px]">${escapeHtml(nameDisplay)}</td>
-                        <td class="p-3 text-gray-300 font-mono text-[11px]">${escapeHtml(log.bidder)}</td>
+                        <td class="p-3 text-gray-300 font-mono text-[11px]">
+                            <div class="font-bold text-white">${escapeHtml(log.bidder)}</div>
+                            ${emailDisplay}
+                        </td>
                         <td class="p-3 font-mono text-amber-400 font-bold">${formatPHP(log.amount)}</td>
                         <td class="p-3 text-right text-gray-400 font-medium bg-white/[0.01]">${formatOrderDate(timeStr)}</td>
                         ${actionCellHTML}
