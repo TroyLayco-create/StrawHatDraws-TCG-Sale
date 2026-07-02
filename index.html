@@ -2155,9 +2155,9 @@
                     if (conflictMetrics) {
                         // Injects a high-visibility, zero-height absolute ribbon across the upper image segment
                         imageConflictOverlay = `
-                            <div class="absolute inset-x-0 top-24 z-30 bg-gradient-to-r from-red-600 to-red-700 border-y border-red-400 text-white font-black px-2 py-1.5 text-[10px] text-center uppercase tracking-widest shadow-xl animate-pulse flex items-center justify-center gap-1 pointer-events-none select-none">
+                            <div data-conflict-id="${item.id}" class="absolute inset-x-0 top-24 z-30 bg-gradient-to-r from-red-600 to-red-700 border-y border-red-400 text-white font-black px-2 py-1.5 text-[10px] text-center uppercase tracking-widest shadow-xl animate-pulse flex items-center justify-center gap-1 pointer-events-none select-none">
                                 <i data-lucide="zap" class="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 shrink-0"></i>
-                                <span>Outbid! Enter ≥ ${formatPHP(conflictMetrics.truePrice + 10)}</span>
+                                <span data-conflict-text-id="${item.id}">Outbid! Enter ≥ ${formatPHP(conflictMetrics.truePrice + 10)}</span>
                             </div>
                         `;
                         // Activates high-visibility animated red glowing highlights around input elements
@@ -2425,12 +2425,36 @@
                             items[targetIndex].type = normalizedType; // Saves the clean type definition locally
                             appendBidToHistory(payload.new.id, payload.new.top_bidder || 'No bids yet', Number(payload.new.price));
 
-                            // 🌟 FIXED: Automatically un-sticks the outbid notice if you take the lead or a new bid outdates the notification numbers
-                            if (currentUserProfile && (payload.new.top_bidder === currentUserProfile.name || Number(payload.new.price) > items[targetIndex].price)) {
+                            // 🌟 LIVE REAL-TIME CALCULATION: Instantly update or drop the outbid warning banner
+                            if (currentUserProfile && payload.new.top_bidder === currentUserProfile.name) {
+                                // Clear the notice completely if the active user successfully takes the lead
                                 delete activeBiddingErrorTrackingLedger[payload.new.id];
+                                const conflictElement = document.querySelector(`[data-conflict-id="${payload.new.id}"]`);
+                                if (conflictElement) conflictElement.remove();
+                                
+                                const inputElement = document.getElementById(`custom-bid-${payload.new.id}`);
+                                if (inputElement) {
+                                    inputElement.placeholder = "Enter Total Bid (₱)";
+                                    inputElement.className = "bg-[#2a2a2a] border border-gray-700 focus:border-red-500 rounded p-1.5 text-white flex-1 focus:outline-none font-mono transition-all";
+                                }
+                                const selectEl = document.getElementById(`bid-select-${payload.new.id}`);
+                                if (selectEl) {
+                                    selectEl.className = "bg-[#2a2a2a] border border-gray-700 focus:border-red-500 rounded p-1.5 text-white flex-1 focus:outline-none transition-all";
+                                }
+                            } else if (activeBiddingErrorTrackingLedger[payload.new.id]) {
+                                // Dynamically bump the targeted string parameters if concurrent bids arrive
+                                activeBiddingErrorTrackingLedger[payload.new.id].truePrice = Number(payload.new.price);
+                                activeBiddingErrorTrackingLedger[payload.new.id].trueBidder = payload.new.top_bidder;
+                                
+                                const conflictTextNode = document.querySelector(`[data-conflict-text-id="${payload.new.id}"]`);
+                                if (conflictTextNode) {
+                                    conflictTextNode.innerText = `Outbid! Enter ≥ ${formatPHP(Number(payload.new.price) + 10)}`;
+                                }
+                                const inputElement = document.getElementById(`custom-bid-${payload.new.id}`);
+                                if (inputElement) {
+                                    inputElement.placeholder = 'Required ≥ ' + (Number(payload.new.price) + 10);
+                                }
                             }
-
-                            // If the item has been archived, clear it from active layouts immediately
 
                             // If the item has been archived, clear it from active layouts immediately
                             if (typeChanged) {
