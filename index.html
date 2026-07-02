@@ -2132,6 +2132,9 @@
 
                 let actionMarkup = '';
                 let biddingHeaderMarkup = '';
+                let imageConflictOverlay = '';
+                let inputHighlightClass = 'border-gray-700 focus:border-red-500';
+
                 if (activeListingSection === 'sale') {
                     actionMarkup = soldOut
                         ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>`
@@ -2144,6 +2147,20 @@
                             </div>`
                             : `<button type="button" onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
                 } else {
+                    // 🌟 CHECK: Detect race condition outbid metrics for this unique card entry
+                    const conflictMetrics = activeBiddingErrorTrackingLedger[item.id];
+                    if (conflictMetrics) {
+                        // Injects a high-visibility, zero-height absolute ribbon across the upper image segment
+                        imageConflictOverlay = `
+                            <div class="absolute inset-x-0 top-24 z-30 bg-gradient-to-r from-red-600 to-red-700 border-y border-red-400 text-white font-black px-2 py-1.5 text-[10px] text-center uppercase tracking-widest shadow-xl animate-pulse flex items-center justify-center gap-1 pointer-events-none select-none">
+                                <i data-lucide="zap" class="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 shrink-0"></i>
+                                <span>Outbid! Enter ≥ ${formatPHP(conflictMetrics.truePrice + 10)}</span>
+                            </div>
+                        `;
+                        // Activates high-visibility animated red glowing highlights around input elements
+                        inputHighlightClass = 'border-red-500 ring-2 ring-red-500/40 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.5)] bg-red-950/10';
+                    }
+
                     biddingHeaderMarkup = `
                         <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
                             <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder:
@@ -2160,56 +2177,20 @@
                             </div>
                         `;
                     } else {
-                        // Check if a race condition collision state was tracked for this card
-                        const conflictMetrics = activeBiddingErrorTrackingLedger[item.id];
-                        let visualConflictAlertBlock = '';
-
-                        if (conflictMetrics) {
-                            visualConflictAlertBlock = `
-                                <div class="w-full bg-gradient-to-b from-red-950 to-[#1a0f0f] border-2 border-red-500 rounded-xl p-3 sm:p-4 my-2 shadow-xl animate-pulse">
-                                    
-                                    <div class="text-red-400 font-extrabold tracking-wider text-[11px] sm:text-xs uppercase flex items-center justify-center gap-1.5 mb-3">
-                                        <i data-lucide="zap" class="w-3.5 h-3.5 text-yellow-400 shrink-0 animate-bounce"></i>
-                                        <span>Price Refreshed During Bid!</span>
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-2 gap-2 text-center mb-3">
-                                        <div class="bg-black/40 p-2 rounded-lg border border-gray-800">
-                                            <span class="block text-[9px] uppercase tracking-wider text-gray-400 font-medium">Your Intent</span>
-                                            <span class="text-xs sm:text-sm font-mono font-bold text-gray-400 line-through">${formatPHP(conflictMetrics.attemptedBid)}</span>
-                                        </div>
-                                        <div class="bg-yellow-400/5 p-2 rounded-lg border border-yellow-500/30">
-                                            <span class="block text-[9px] uppercase tracking-wider text-yellow-400 font-semibold">Live High Bid</span>
-                                            <span class="text-xs sm:text-sm font-mono font-bold text-yellow-400">${formatPHP(conflictMetrics.truePrice)}</span>
-                                        </div>
-                                    </div>
-
-                                    <p class="text-gray-300 text-[11px] sm:text-xs text-center leading-relaxed">
-                                        Outbid by <span class="text-white font-bold underline decoration-red-500 break-all">${escapeHtml(conflictMetrics.trueBidder)}</span> before your transaction processed.
-                                    </p>
-                                    
-                                    <div class="text-[10px] text-center text-gray-400 font-normal mt-2.5 bg-black/20 py-1 rounded-md border border-gray-800">
-                                        💡 Enter <span class="text-green-400 font-mono font-bold">${formatPHP(conflictMetrics.truePrice + 10)}</span> or more to take the lead!
-                                    </div>
-                                </div>
-                            `;
-                        }
-
-                        const bidIncrements = [10, 20, 50, 100, 200, 500];
+                        const bidIncrements = [20, 50, 100, 200, 500];
                         const selectOptions = bidIncrements.map(val =>
                             `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>`
                         ).join('');
                         actionMarkup = `
                             <div class="flex flex-col gap-2 mt-2 w-full text-xs">
-                                ${visualConflictAlertBlock}
                                 <div class="flex gap-1.5">
-                                    <select id="bid-select-${item.id}" onchange="pendingBidSelections[${item.id}] = this.value" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none">
+                                    <select id="bid-select-${item.id}" onchange="pendingBidSelections[item.id] = this.value" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 focus:outline-none transition-all">
                                         ${selectOptions}
                                     </select>
                                     <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
                                 </div>
                                 <div class="flex gap-1.5">
-                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[${item.id}] = this.value" placeholder="Enter Total Bid (₱)" class="bg-[#2a2a2a] border border-gray-700 rounded p-1.5 text-white flex-1 focus:outline-none focus:border-red-500 font-mono">
+                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[item.id] = this.value" placeholder="${conflictMetrics ? 'Required ≥ ' + (conflictMetrics.truePrice + 10) : 'Enter Total Bid (₱)'}" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 focus:outline-none font-mono transition-all">
                                     <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
                                 </div>
                                 <button type="button" onclick="openBidHistoryModal(${item.id})" class="mt-1 w-full text-center bg-[#242424] hover:bg-[#2c2c2c] text-gray-400 hover:text-white border border-gray-700/60 rounded py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
@@ -2223,6 +2204,7 @@
                 div.innerHTML = `
                     <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
                         ${biddingHeaderMarkup}
+                        ${imageConflictOverlay}
                         <img
                             src="${dynamicImgSrc}"
                             alt="${safeName}"
