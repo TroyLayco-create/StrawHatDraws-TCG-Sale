@@ -336,6 +336,39 @@
                         </table>
                     </div>
                 </div>
+                <div class="mt-8 pt-6 border-t border-gray-800">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5 select-none">
+                        <i data-lucide="gavel" class="w-4 h-4 text-amber-500"></i> Master Bidding Audit Ledger
+                    </h3>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Real-time inspection engine tracking live placement activity and archived event history data logs.</p>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button type="button" onclick="toggleAdminBidView('live')" id="btn-bid-live" class="flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-amber-600 text-white border border-amber-500/20 transition-all">
+                        ⚡ Live Bids
+                    </button>
+                    <button type="button" onclick="toggleAdminBidView('archive')" id="btn-bid-archive" class="flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700/50 hover:text-white transition-all">
+                        📦 Archived Bids
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto rounded-lg border border-gray-800 bg-black/20">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-gray-900 border-b border-gray-800 text-gray-400 font-semibold select-none">
+                            <th class="p-3">Card Target Definition</th>
+                            <th class="p-3">Collector Username</th>
+                            <th class="p-3">Bid Amount Value</th>
+                            <th class="p-3 text-right">Timestamp Ledger Metric</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-bids-tbody" class="divide-y divide-gray-800/60 text-gray-300 font-medium">
+                        <tr><td colspan="4" class="text-center py-5 text-gray-500 italic">Select a verification channel tracking filter above to fetch entries...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
             </div>
         </div>
     </div>
@@ -1453,6 +1486,7 @@
                 document.getElementById('admin-auth-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
                 await renderAdminOrdersLedger();
+                await window.renderAdminBidsLedger();
                 return;
             }
 
@@ -1463,6 +1497,7 @@
                 document.getElementById('admin-auth-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
                 await renderAdminOrdersLedger();
+                await window.renderAdminBidsLedger();
             } catch(err) {
                 showCustomToast(`Access Denied: ${err.message}`, 'error');
             }
@@ -1627,6 +1662,72 @@
             nameInput.value = '';
             emailInput.value = '';
         };
+        let currentAdminBidView = 'live';
+
+    // Handles shifting styles and views between your active streams and database archives
+    window.toggleAdminBidView = async function(view) {
+        currentAdminBidView = view;
+        const liveBtn = document.getElementById('btn-bid-live');
+        const archiveBtn = document.getElementById('btn-bid-archive');
+        
+        if (view === 'live') {
+            liveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-amber-600 text-white border border-amber-500/20 transition-all";
+            archiveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700/50 hover:text-white transition-all";
+        } else {
+            archiveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-amber-600 text-white border border-amber-500/20 transition-all";
+            liveBtn.className = "flex-1 sm:flex-none px-3 py-1.5 text-[10px] font-black rounded uppercase tracking-wider bg-gray-800 text-gray-400 border border-gray-700/50 hover:text-white transition-all";
+        }
+        await window.renderAdminBidsLedger();
+    };
+
+    // Queries and draws your transaction log metrics dynamically inside the table grid layout
+    window.renderAdminBidsLedger = async function() {
+        const tbody = document.getElementById('admin-bids-tbody');
+        if (!tbody) return;
+        if (!supabaseClient) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Cloud synchronization disabled. Connect production database.</td></tr>';
+            return;
+        }
+
+        try {
+            const targetTable = currentAdminBidView === 'live' ? 'bid_history' : 'archived_bid_history';
+            const sortColumn = currentAdminBidView === 'live' ? 'timestamp' : 'archived_at';
+            
+            const { data, error } = await supabaseClient
+                .from(targetTable)
+                .select('*')
+                .order(sortColumn, { ascending: false });
+
+                if (error) throw error;
+
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-gray-500 font-normal italic">No historical tracking lines logged for this category context.</td></tr>`;
+                return;
+            }
+
+            data.forEach(log => {
+                // Match the card identity via your catalog memory matrix to read the name string asset
+                const card = items.find(i => i.id == log.card_id);
+                const nameDisplay = card ? `${card.name} (${card.set})` : `Card Registry Index Reference Code #${log.card_id}`;
+                const timeStr = log.timestamp || log.archived_at || new Date().toISOString();
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-white/5 border-b border-gray-800/60 text-top";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white truncate max-w-[200px]">${escapeHtml(nameDisplay)}</td>
+                    <td class="p-3 text-gray-300 font-mono text-[11px]">${escapeHtml(log.bidder)}</td>
+                    <td class="p-3 font-mono text-amber-400 font-bold">${formatPHP(log.amount)}</td>
+                    <td class="p-3 text-right text-gray-400 font-medium bg-white/[0.01]">${formatOrderDate(timeStr)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("Failed to compile admin bids trail visual grid:", err);
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-400 font-bold">Error reading cloud data: ${escapeHtml(err.message)}</td></tr>`;
+        }
+        lucide.createIcons();
+    };
 
         window.changeOrderStatus = async function(orderId, newStatus) {
             // 1. Update local storage cache immediately so local/mock orders work
@@ -2237,6 +2338,7 @@
                         fetchBuyerRealtimeOrders(); 
                         if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
                             renderAdminOrdersLedger();
+                            if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
                         }
                     })
                     .subscribe();
