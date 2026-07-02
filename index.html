@@ -1209,6 +1209,9 @@
                         card.top_bidder = data.top_bidder;
                         card.bidding_ends_at = data.bidding_ends_at;
                         appendBidToHistory(cardId, data.top_bidder, Number(data.price));
+                        
+                        // 🌟 FIXED: Instantly removes the outbid notice overlay upon local success
+                        delete activeBiddingErrorTrackingLedger[cardId];
                     }
         
                     pendingCustomBidInputs[cardId] = "";
@@ -2179,7 +2182,7 @@
                     } else {
                         const bidIncrements = [20, 50, 100, 200, 500];
                         const selectOptions = bidIncrements.map(val =>
-                            `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''}>+₱${val}</option>`
+                            `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''} class="text-gray-100 bg-[#2a2a2a] font-mono font-bold">+₱${val}</option>`
                         ).join('');
                         actionMarkup = `
                             <div class="flex flex-col gap-2 mt-2 w-full text-xs">
@@ -2421,6 +2424,13 @@
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
                             items[targetIndex].type = normalizedType; // Saves the clean type definition locally
                             appendBidToHistory(payload.new.id, payload.new.top_bidder || 'No bids yet', Number(payload.new.price));
+
+                            // 🌟 FIXED: Automatically un-sticks the outbid notice if you take the lead or a new bid outdates the notification numbers
+                            if (currentUserProfile && (payload.new.top_bidder === currentUserProfile.name || Number(payload.new.price) > items[targetIndex].price)) {
+                                delete activeBiddingErrorTrackingLedger[payload.new.id];
+                            }
+
+                            // If the item has been archived, clear it from active layouts immediately
 
                             // If the item has been archived, clear it from active layouts immediately
                             if (typeChanged) {
