@@ -840,13 +840,19 @@
                         let itemsHtml = '';
                         if (Array.isArray(o.items_ordered)) {
                             const counts = {};
-                            o.items_ordered.forEach(id => {
+                            const savedData = {};
+                        
+                            o.items_ordered.forEach(item => {
+                                const id = typeof item === 'object' ? item.id : item;
                                 counts[id] = (counts[id] || 0) + 1;
+                                if (typeof item === 'object') savedData[id] = item;
                             });
-
+                        
                             itemsHtml = Object.keys(counts).map(id => {
-                                const card = items.find(i => i.id == id);
-                                return `<div class="text-[10px] text-gray-300">${counts[id]}x ${escapeHtml(card ? card.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(card ? card.set : 'UNKNOWN')})</span></div>`;
+                                const liveCard = items.find(i => i.id == id);
+                                const nameToUse = liveCard ? liveCard.name : (savedData[id] ? savedData[id].name : 'Unknown Card');
+                                const setToUse = liveCard ? liveCard.set : (savedData[id] ? savedData[id].set : 'UNKNOWN');
+                                return `<div class="text-[10px] text-gray-300">${counts[id]}x ${escapeHtml(nameToUse)} <span class="text-gray-500">(${escapeHtml(setToUse)})</span></div>`;
                             }).join('');
                         }
 
@@ -1405,7 +1411,15 @@
                     shipping_address: deliveryAddress,
                     phone_number: facebookContact,
                     google_maps_pin: facebookContact,
-                    items_ordered: JSON.parse(JSON.stringify([...cart])),
+                    items_ordered: cart.map(id => {
+                        const cardData = items.find(i => i.id === id);
+                        return {
+                            id: id,
+                            name: cardData ? cardData.name : "Unknown",
+                            set: cardData ? cardData.set : "Unknown",
+                            price: cardData ? cardData.price : 0
+                        };
+                    }),
                     order_status: "Pending",
                     user_id: currentUserProfile.id,
                     created_at: new Date().toISOString()
@@ -1600,16 +1614,25 @@
 
                 if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
                     const counts = {};
+                    const savedData = {}; // Cache to hold the rich JSON data
                     itemsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">';
-
-                    ord.items_ordered.forEach(id => {
+                
+                    ord.items_ordered.forEach(item => {
+                        // Safely reads both your old number IDs and your new JSON objects!
+                        const id = typeof item === 'object' ? item.id : item;
                         counts[id] = (counts[id] || 0) + 1;
+                        if (typeof item === 'object') savedData[id] = item;
                     });
-
+                
                     Object.keys(counts).forEach(id => {
                         const matchCard = items.find(i => i.id == id);
-                        if (matchCard) totalOrderPrice += Number(matchCard.price) * counts[id];
-                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${escapeHtml(matchCard ? matchCard.name : 'Unknown Card')} <span class="text-gray-500">(${escapeHtml(matchCard ? matchCard.set : 'UNKNOWN')})</span></div>`;
+                        // Use live card data if available, otherwise safely fallback to the saved receipt
+                        const priceToUse = matchCard ? Number(matchCard.price) : (savedData[id] ? Number(savedData[id].price) : 0);
+                        const nameToUse = matchCard ? matchCard.name : (savedData[id] ? savedData[id].name : 'Unknown Card');
+                        const setToUse = matchCard ? matchCard.set : (savedData[id] ? savedData[id].set : 'UNKNOWN');
+                        
+                        totalOrderPrice += priceToUse * counts[id];
+                        itemsListHTML += `<div class="text-[11px] text-red-400 font-medium">${counts[id]}x ${escapeHtml(nameToUse)} <span class="text-gray-500">(${escapeHtml(setToUse)})</span></div>`;
                     });
                     itemsListHTML += '</div>';
                 }
