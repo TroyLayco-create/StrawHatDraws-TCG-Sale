@@ -337,7 +337,21 @@
                         </table>
                     </div>
                 </div>
-                <div class="mt-8 pt-6 border-t border-gray-800">
+                <!-- THE ADMIN LOGIN FORM -->
+                <div id="admin-login-section" class="mt-8 pt-6 border-t border-gray-800 flex flex-col items-center justify-center">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5 mb-4 select-none">
+                        <i data-lucide="lock" class="w-4 h-4 text-amber-500"></i> Master Admin Login
+                    </h3>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <input type="email" id="admin-email" placeholder="Admin Email" class="bg-black/20 border border-gray-800 text-gray-300 text-xs rounded px-3 py-1.5 focus:outline-none focus:border-gray-500">
+                        <input type="password" id="admin-password" placeholder="Password" class="bg-black/20 border border-gray-800 text-gray-300 text-xs rounded px-3 py-1.5 focus:outline-none focus:border-gray-500">
+                        <button onclick="adminLogin()" class="flex-1 sm:flex-none px-4 py-1.5 text-[10px] text-black bg-amber-500 hover:bg-amber-600 font-black rounded uppercase tracking-wide transition-colors">
+                            Log In
+                        </button>
+                    </div>
+                    <p id="login-error" class="text-red-500 text-[11px] mt-3 hidden">Login failed. Check your credentials.</p>
+                </div>
+                <div id="master-bidding-ledger" class="mt-8 pt-6 border-t border-gray-800" style="display: none;">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                 <div>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5 select-none">
