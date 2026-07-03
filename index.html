@@ -1984,21 +1984,43 @@
                 }, 4000);
                 return;
             }
-
+        
             if (supabaseClient) {
                 try {
-                    const { error } = await supabaseClient.from('Orders').delete().eq('id', id);
-                    if (error) throw error;
+                    // 1. Fetch the full order data
+                    const { data: orderData, error: fetchErr } = await supabaseClient
+                        .from('Orders')
+                        .select('*')
+                        .eq('id', id)
+                        .single();
+                    if (fetchErr) throw fetchErr;
+        
+                    // 2. Safely copy the order into the new archived_orders table
+                    const { error: archiveErr } = await supabaseClient
+                        .from('archived_orders')
+                        .insert([orderData]);
+                    if (archiveErr) throw archiveErr;
+        
+                    // 3. Delete the order from the live queue
+                    const { error: deleteErr } = await supabaseClient
+                        .from('Orders')
+                        .delete()
+                        .eq('id', id);
+                    if (deleteErr) throw deleteErr;
+        
+                    showCustomToast("Order row safely archived and cleared!", "success");
+        
                 } catch(err) {
-                    console.warn(`Failed to delete order record: ${err.message}`);
+                    console.error(`Failed to archive or delete order record: ${err.message}`);
+                    showCustomToast(`Archive failed: ${err.message}`, "error");
+                    return; // Stop the script so it does not clear the local cache if the DB failed
                 }
             }
-
+        
+            // Clear from local memory and refresh the dashboard visually
             localOrdersBackup = localOrdersBackup.filter(o => String(o.id) !== String(id));
             saveLocalOrders(localOrdersBackup);
-
             await renderAdminOrdersLedger();
-            showCustomToast("Order row cleared successfully!", "success");
         };
 
         window.triggerManualInvoice = async function(orderId) {
