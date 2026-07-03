@@ -22,7 +22,7 @@ async function run() {
                 stock: 1,
                 set_code: 'TBD', // <--- ADD THIS
                 rarity: 'C',     // <--- ADD THIS
-                front_img: `https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_REPO/main/listings/${file}`
+                front_img: `https://raw.githubusercontent.com/TroyLayco-create/StrawHatDraws-TCG-Sale/main/listings/${file}`
             }]);
             
             if (error) {
