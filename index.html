@@ -81,7 +81,7 @@
     </div>
 
     <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <aside class="lg:col-span-1 bg-[#1e1e1e] p-4 sm:p-5 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 h-fit sticky top-20">
+        <aside class="lg:col-span-1 bg-[#1e1e1e] p-4 sm:p-5 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-5 h-fit sticky top-20">
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
                 <select id="sort-select" onchange="renderGrid()" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-red-500">
@@ -110,6 +110,67 @@
                 </select>
             </div>
 
+            <!-- ITEM 1: FEATURED CARDS WIDGET[cite: 1] -->
+            <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-3 shadow-inner">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-gray-200 text-xs font-bold tracking-wide uppercase">Featured Items</h4>
+                </div>
+                
+                <div id="featuredItemsContainer" class="space-y-2.5">
+                    <div class="text-gray-500 text-[11px] italic text-center py-4">Loading featured drops...</div>
+                </div>
+            </div>
+
+            <!-- ITEM 2: NATIVE LIVE TRUST & INTEGRITY LEDGER -->
+            <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-3 shadow-inner overflow-hidden">
+                <div>
+                    <h4 class="text-gray-200 text-xs font-bold mb-0.5">Vouch Thread Record</h4>
+                </div>
+                
+                <div class="relative max-h-28 overflow-hidden mask-gradient">
+                    <div id="vouchScrollContainer" class="flex flex-col transition-transform duration-75 ease-linear">
+                        <div class="text-gray-500 text-[11px] italic text-center py-4">Connecting to trust ledger...</div>
+                    </div>
+                </div>
+
+                <div class="pt-1">
+                    <a href="https://www.facebook.com/share/p/1BWNtMWjrV/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    class="flex items-center justify-center space-x-1.5 bg-[#1f1f1f] hover:bg-[#262626] border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-gray-200 text-[10px] font-bold py-1.5 px-3 rounded transition-colors w-full tracking-wide uppercase">
+                        <span>Vouch Thread Link</span>
+                        <span class="text-red-400 text-[11]">→</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ITEM 3: DYNAMIC OFFICIAL BANDAI ROADMAP -->
+            <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-3 shadow-inner">
+                <div class="flex items-center text-amber-500 space-x-2">
+                    <!-- Lucide megaphone icon equivalent / standard text emoji styling -->
+                    <span class="text-gray-200 text-xs font-bold tracking-wide uppercase flex items-center gap-1.5">
+                        📢 News and Updates
+                    </span>
+                </div>
+                
+                <!-- Dynamic Timeline Elements Target Injection Layer -->
+                <div id="bandaiRoadmapContainer" class="space-y-3">
+                    <div class="text-gray-500 text-[11px] italic text-center py-2">Loading upcoming release roadmap...</div>
+                </div>
+            </div>
+
+            <!-- ITEM 4: DYNAMIC HELP WIDGET CALLOUT CONTAINER -->
+            <div id="helpBoxWrapper" class="bg-[#161616] border border-dashed border-red-900/40 rounded-lg p-4 text-center space-y-3 hidden">
+                <div class="text-xl">🤖</div>
+                <div class="space-y-1">
+                    <h4 id="helpBoxTitle" class="text-gray-100 text-[15px] font-bold tracking-wide">...</h4>
+                    <p id="helpBoxDescription" class="text-gray-400 text-[12px] leading-relaxed max-w-[200px] mx-auto">...</p>
+                </div>
+                <button id="helpBoxButton" class="w-full bg-transparent hover:bg-red-950/20 border border-red-500 hover:border-red-400 text-red-400 font-bold uppercase tracking-wider text-[12px] py-2 rounded-md transition-colors">
+                    ...
+                </button>
+            </div>
+            
             <div id="buyer-tracker-box" class="hidden border border-red-500/20 bg-red-950/10 p-3.5 rounded-lg space-y-2.5 text-xs sm:col-span-2 lg:col-span-1">
                 <h4 class="font-bold uppercase tracking-wider text-red-400 flex items-center gap-1.5">
                     <i class="w-3.5 h-3.5" data-lucide="package"></i> Your Order History
@@ -135,6 +196,27 @@
             </button>
         </div>
     </footer>
+
+    <!-- INTERACTIVE FLOATING FAQ CHATBOT WINDOW GRID[cite: 1] -->
+    <div id="quickChatBotWidget" class="fixed bottom-6 right-6 w-80 bg-[#1a1a1a] border border-gray-800 rounded-xl shadow-2xl hidden flex-col overflow-hidden z-[100] font-sans">
+        <div class="bg-red-600 p-3.5 flex justify-between items-center shadow-md select-none">
+            <div class="flex items-center gap-2">
+                <span class="text-base">🤖</span>
+                <span class="text-white text-xs font-bold tracking-wide">StrawHat Helper Desk</span>
+            </div>
+            <button onclick="toggleCryptoBot()" class="text-white text-lg font-bold opacity-80 hover:opacity-100 transition-opacity focus:outline-none">&times;</button>
+        </div>
+        <div id="botResponseLog" class="p-4 h-48 overflow-y-auto flex flex-col gap-2.5 bg-[#121212] border-b border-gray-800">
+            <div class="bg-[#1e1e1e] border border-gray-800 text-gray-300 p-2.5 rounded-lg text-xs max-w-[85%] leading-relaxed shadow-sm">
+                Ahoy! Welcome to the desk. Pick a quick question down below to get instant answers straight from our operations ledger:
+            </div>
+        </div>
+        <div class="p-3 bg-[#1a1a1a] flex flex-col gap-1.5 select-none">
+            <button type="button" onclick="triggerBotReply('how_to_pay')" class="bg-[#222] hover:bg-[#2a2a2a] border border-gray-800 text-gray-300 text-left p-2 rounded-lg text-[11px] font-medium transition-colors w-full focus:outline-none">💰 How do I finalize payment parameters?</button>
+            <button type="button" onclick="triggerBotReply('auction_rules')" class="bg-[#222] hover:bg-[#2a2a2a] border border-gray-800 text-gray-300 text-left p-2 rounded-lg text-[11px] font-medium transition-colors w-full focus:outline-none">🏆 How do live bidding wins execute?</button>
+            <button type="button" onclick="triggerBotReply('shipping_notice')" class="bg-[#222] hover:bg-[#2a2a2a] border border-gray-800 text-gray-300 text-left p-2 rounded-lg text-[11px] font-medium transition-colors w-full focus:outline-none">📦 When does my card dispatch ship out?</button>
+        </div>
+    </div>
 
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden justify-center items-start sm:items-center overflow-y-auto z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
@@ -546,6 +628,51 @@
                 .replace(/'/g, '&#39;');
         }
 
+        // --- NEW CHATBOT TOGGLE LOGIC[cite: 1] ---
+        window.toggleCryptoBot = function() {
+            const chatBox = document.getElementById('quickChatBotWidget');
+            if (!chatBox) return;
+            if (chatBox.style.display === 'none' || chatBox.style.display === '') {
+                chatBox.style.display = 'flex';
+            } else {
+                chatBox.style.display = 'none';
+            }
+        };
+
+        // --- NEW CHATBOT INTELLIGENT KNOWLEDGE ROUTING[cite: 1] ---
+        window.triggerBotReply = function(actionKey) {
+            const log = document.getElementById('botResponseLog');
+            if (!log) return;
+            let userQuestion = "";
+            let botAnswer = "";
+
+            if (actionKey === 'how_to_pay') {
+                userQuestion = "How do I finalize payment parameters?";
+                botAnswer = "Once checkout matches your target items, \"Troy Layco\" will immediately trace your billing file and reach out directly over Facebook Messenger to exchange direct payment channels safely.";
+            } else if (actionKey === 'auction_rules') {
+                userQuestion = "How do live bidding wins execute?";
+                botAnswer = "If you hold the top bid position when the configured clock terminates, your target account claims the win. You can use the unified combo option invoice panel to combine it with direct store sales items.";
+            } else if (actionKey === 'shipping_notice') {
+                userQuestion = "When does my card dispatch ship out?";
+                botAnswer = "Once direct transaction credentials complete verification, items update to 'Processed' during packing routines, followed immediately by courier handoffs with tracking codes dispatched straight to your email inbox.";
+            }
+
+            log.innerHTML += `
+                <div class="bg-red-600 text-white p-2.5 rounded-lg text-xs self-end max-w-[85%] mt-1 shadow-sm leading-relaxed">
+                    ${userQuestion}
+                </div>
+            `;
+
+            setTimeout(() => {
+                log.innerHTML += `
+                    <div class="bg-[#1e1e1e] border border-gray-800 text-gray-300 p-2.5 rounded-lg text-xs self-start max-w-[85%] mt-1 shadow-sm leading-relaxed">
+                        ${botAnswer}
+                    </div>
+                `;
+                log.scrollTop = log.scrollHeight;
+            }, 300);
+        };
+
         function formatPHP(num) {
             return `₱${Number(num || 0).toLocaleString()}`;
         }
@@ -618,7 +745,6 @@
                 toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-red-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300";
             } else {
                 iconSpan.innerHTML = '<i data-lucide="info" class="w-4 h-4 text-blue-500"></i>';
-                //  FIXED: Changed to translate-y-0 and opacity-100 so it displays normally!
                 toast.className = "fixed bottom-5 right-5 z-[100] max-w-sm bg-gray-950 border border-blue-500/30 text-gray-200 text-xs px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300";
             }
 
@@ -773,12 +899,10 @@
                     } else if (data) {
                         dbOrders = data;
                         
-                        // Sync the database statuses back into local storage for clean persistence
                         let cacheUpdated = false;
                         dbOrders.forEach(dbOrder => {
                             const localIndex = localOrdersBackup.findIndex(o => String(o.id) === String(dbOrder.id));
                             if (localIndex !== -1) {
-                                // Sync both status and timestamp if they are missing or outdated
                                 if (localOrdersBackup[localIndex].order_status !== dbOrder.order_status || !localOrdersBackup[localIndex].created_at) {
                                     localOrdersBackup[localIndex].order_status = dbOrder.order_status;
                                     if (!localOrdersBackup[localIndex].created_at && dbOrder.created_at) {
@@ -856,7 +980,6 @@
                             }).join('');
                         }
 
-                        // 🔍 Bulletproof timestamp lookup chain: Local Storage Cache Backup -> Database -> System Time Fallback
                         const finalOrderTimestamp = localOrdersBackup.find(lo => String(lo.id) === String(o.id))?.created_at || o.created_at || new Date().toISOString();
 
                         const card = document.createElement('div');
@@ -1076,7 +1199,7 @@
             const lastReg = localStorage.getItem('shd_last_reg_timestamp');
             if (isRegisterMode && lastReg && (Date.now() - Number(lastReg) < 30000)) {
                 const secondsLeft = Math.ceil((30000 - (Date.now() - Number(lastReg))) / 1000);
-                showCustomToast(`Anti-Spam active. Please wait ${secondsLeft}s before submitting another registration form.`, "error");
+                showCustomToast(`Anti-Spam active. Please wait ${secondsLeft}s before submitting another registration form Simon.`, "error");
                 return;
             }
 
@@ -1263,14 +1386,12 @@
                         card.bidding_ends_at = data.bidding_ends_at;
                         appendBidToHistory(cardId, data.top_bidder, Number(data.price));
                         
-                        // 🌟 FIXED: Instantly removes the outbid notice overlay upon local success
                         delete activeBiddingErrorTrackingLedger[cardId];
                     }
         
                     pendingCustomBidInputs[cardId] = "";
                     showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success");
                 } catch(err) {
-                    // Pull down fresh real-time numbers from your Supabase cards table immediately
                     const { data: freshCloudCard } = await supabaseClient
                         .from('cards')
                         .select('price, top_bidder')
@@ -1281,7 +1402,6 @@
                         card.price = Number(freshCloudCard.price);
                         card.top_bidder = freshCloudCard.top_bidder;
                         
-                        // Map out the intent metrics comparison array structure
                         activeBiddingErrorTrackingLedger[cardId] = {
                             truePrice: Number(freshCloudCard.price),
                             trueBidder: freshCloudCard.top_bidder,
@@ -1376,14 +1496,12 @@
             try {
                 await fetchLiveInventory(false);
             
-                // Enhanced: Validate fresh inventory quantities against requested cart amounts
                 for (const cartItemId of cart) {
                     const freshCardRecord = items.find(i => i.id === cartItemId);
                     const desiredQtyInCart = cart.filter(id => id === cartItemId).length;
             
                     if (!freshCardRecord || freshCardRecord.stock < desiredQtyInCart) {
                         const problematicCardName = freshCardRecord ? freshCardRecord.name : "An item in your cart";
-                        // Tagged with STOCK_ERROR: so our catch block knows how to format it beautifully
                         throw new Error(`STOCK_ERROR: Sorry, "${problematicCardName}" just sold out or doesn't have enough stock left to complete your order.`);
                     }
                 }
@@ -1401,7 +1519,6 @@
                         customerEmail = session?.user?.email || "";
                     }
                 } else {
-                    // Prefix added so the parsing catch block displays this exact message to the user!
                     throw new Error("AUTH_ERROR: Please register and verify your profile before checking out.");
                 }
 
@@ -1410,7 +1527,7 @@
                     customer_email: customerEmail || null,
                     shipping_address: deliveryAddress,
                     phone_number: facebookContact,
-                    google_maps_pin: facebookContact,
+                    google_maps_pin: "N/A",
                     items_ordered: cart.map(id => {
                         const cardData = items.find(i => i.id === id);
                         return {
@@ -1437,7 +1554,6 @@
                         p_user_id: orderPayload.user_id
                     });
                     if (error) {
-                        // Intercept database/race condition errors with a helpful, friendly message
                         throw new Error("SERVER_ERROR: We couldn't process your order because another customer just purchased the remaining stock. Please refresh and check your cart.");
                     }
                     if (data) {
@@ -1447,7 +1563,7 @@
                     }
                 } else {
                     cart.forEach(id => {
-                        const targetCard = items.find(i => i.id === id);
+                        const targetCard = items.find(i => id === id);
                         if (targetCard && targetCard.stock > 0) {
                             targetCard.stock--;
                             saveLocalStock(id, targetCard.stock);
@@ -1472,13 +1588,10 @@
                     if (currentUserProfile) await fetchBuyerRealtimeOrders();
                 }
             } catch (err) {
-                // Keep this for your browser inspector tools so you can still debug behind the scenes
                 console.error("Checkout transaction dropped:", err);
                 
-                // Default friendly message if a completely random error breaks the code
                 let customerFriendlyMessage = "An unexpected error occurred while processing your order. Please try again or contact support.";
                 
-                // Check for our hidden developer tags, strip them out, and show the clean text to the customer
                 if (err.message.startsWith("STOCK_ERROR: ")) {
                     customerFriendlyMessage = err.message.replace("STOCK_ERROR: ", "");
                 } else if (err.message.startsWith("SERVER_ERROR: ")) {
@@ -1604,21 +1717,18 @@
                 }
             }); 
         
-            // MOVE THE CLEARING LINE HERE (Right before appending the fresh rows)
             tbody.innerHTML = ''; 
         
             dataset.forEach(ord => { 
                 let itemsListHTML = ''; 
                 let totalOrderPrice = 0; 
-                // ... rest of your existing card row assembly logic continues normally ...
 
                 if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
                     const counts = {};
-                    const savedData = {}; // Cache to hold the rich JSON data
+                    const savedData = {}; 
                     itemsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">';
                 
                     ord.items_ordered.forEach(item => {
-                        // Safely reads both your old number IDs and your new JSON objects!
                         const id = typeof item === 'object' ? item.id : item;
                         counts[id] = (counts[id] || 0) + 1;
                         if (typeof item === 'object') savedData[id] = item;
@@ -1626,7 +1736,6 @@
                 
                     Object.keys(counts).forEach(id => {
                         const matchCard = items.find(i => i.id == id);
-                        // Use live card data if available, otherwise safely fallback to the saved receipt
                         const priceToUse = matchCard ? Number(matchCard.price) : (savedData[id] ? Number(savedData[id].price) : 0);
                         const nameToUse = matchCard ? matchCard.name : (savedData[id] ? savedData[id].name : 'Unknown Card');
                         const setToUse = matchCard ? matchCard.set : (savedData[id] ? savedData[id].set : 'UNKNOWN');
@@ -1643,7 +1752,7 @@
                 if (statusVal === 'Shipped') selectColorClass = 'text-blue-400 border-blue-500/30';
                 if (statusVal === 'Cancelled') selectColorClass = 'text-red-400 border-red-500/30';
                 
-                const mapsPinUrl = ord.google_maps_pin || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ord.shipping_address || '')}`;
+                const mapsPinUrl = ord.google_maps_pin || `http://googleusercontent.com/maps.google.com/${encodeURIComponent(ord.shipping_address || '')}`;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-white/5 border-b border-gray-800 text-top";
@@ -1670,17 +1779,12 @@
                     </td>
                     <td class="p-3 text-center">
                         <div class="flex flex-col sm:flex-row gap-1.5 justify-center items-center mb-1.5">
-                            <!-- 1. Unified Combo Invoice Trigger -->
                             <button type="button" onclick="processUiInvoice('unified', '${escapeHtml(ord.id)}')" class="px-2 py-1 text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
                                 📬 Combo
                             </button>
-                            
-                            <!-- 2. Store Sale Only Trigger -->
                             <button type="button" onclick="processUiInvoice('sale', '${escapeHtml(ord.id)}')" class="px-2 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
                                 🛒 Sale
                             </button>
-                            
-                            <!-- 3. Bid Only Trigger -->
                             <button type="button" onclick="processUiInvoice('bid', null, '${escapeHtml(ord.customer_name)}', '${escapeHtml(ord.customer_email || '')}')" class="px-2 py-1 text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
                                 🏆 Bids
                             </button>
@@ -1693,7 +1797,7 @@
 
             lucide.createIcons();
         }
-        // Connects your new frontend UI buttons straight to your 3 Supabase RPC Database Email Engines
+
         window.processUiInvoice = async function(type, orderId = null, custName = null, custEmail = null) {
             if (!supabaseClient) {
                 showCustomToast("Local simulator active. Connect Supabase to process cloud emails.", "error");
@@ -1720,7 +1824,6 @@
             }
         };
         
-        // Processes the inputs from your top manual quick bar layout
         window.submitManualAuctionInvoice = async function() {
             const nameInput = document.getElementById('manualCustName');
             const emailInput = document.getElementById('manualCustEmail');
@@ -1738,7 +1841,6 @@
         };
         let currentAdminBidView = 'live';
 
-        // Handles shifting styles and views between your active streams and database archives
         window.toggleAdminBidView = async function(view) {
             currentAdminBidView = view;
             const liveBtn = document.getElementById('btn-bid-live');
@@ -1754,7 +1856,6 @@
             await window.renderAdminBidsLedger();
         };
     
-        // Queries, deduplicates to highest-bid-only, and renders your transaction metrics
         window.renderAdminBidsLedger = async function() {
             const tbody = document.getElementById('admin-bids-tbody');
             if (!tbody) return;
@@ -1764,7 +1865,6 @@
             }
     
             try {
-                // 🔄 Requests the data directly from our secure backend RPC join mapper
                 const { data, error } = await supabaseClient.rpc('get_admin_bids_ledger_rpc', {
                     p_view_type: currentAdminBidView
                 });
@@ -1777,7 +1877,6 @@
                     return;
                 }
     
-                // 🌟 FIXED: Points cleanly to 'bid_timestamp' instead of the restricted 'timestamp' keyword
                 const sortColumn = currentAdminBidView === 'live' ? 'bid_timestamp' : 'archived_at';
                 
                 const highBidsMap = {};
@@ -1795,10 +1894,8 @@
                     const card = items.find(i => i.id == log.card_id);
                     const nameDisplay = card ? `${card.name} (${card.set})` : `Card Reference Code #${log.card_id}`;
                     
-                    // 🌟 FIXED: Tracks your custom 'bid_timestamp' property without throwing database faults
                     const timeStr = log.bid_timestamp || log.archived_at || new Date().toISOString();
                     
-                    // 📧 Shows the email address nicely under the username
                     const emailDisplay = log.email 
                         ? `<div class="text-[10px] text-gray-500 font-normal mt-0.5">${escapeHtml(log.email)}</div>` 
                         : `<div class="text-[10px] text-gray-600 font-normal italic mt-0.5">No email linked</div>`;
@@ -1841,7 +1938,6 @@
             lucide.createIcons();
         };
     
-        // Safely copies bids, moves the card item to a dedicated archived_cards table, and purges it from live view
         window.archiveLiveBidsForCard = async function(cardId, buttonEl) {
             if (!supabaseClient) {
                 showCustomToast("Simulator active. Connect Supabase to archive live entries.", "error");
@@ -1857,7 +1953,6 @@
             lucide.createIcons();
     
             try {
-                // 1. Fetch the live card properties first before we delete it
                 const { data: cardData, error: cardFetchErr } = await supabaseClient
                     .from('cards')
                     .select('*')
@@ -1866,7 +1961,6 @@
     
                 if (cardFetchErr) throw cardFetchErr;
     
-                // 2. Fetch all active bidding trail items logged for this card
                 const { data: activeBids, error: fetchErr } = await supabaseClient
                     .from('bid_history')
                     .select('*')
@@ -1875,7 +1969,6 @@
                 if (fetchErr) throw fetchErr;
     
                 if (activeBids && activeBids.length > 0) {
-                    // 3. Format payload map array structures
                     const archiveRows = activeBids.map(b => ({
                         card_id: b.card_id,
                         bidder: b.bidder,
@@ -1884,14 +1977,12 @@
                         order_id: 'MANUAL_DASHBOARD_CLEAR'
                     }));
     
-                    // 4. Batch insert entries directly into historical records database
                     const { error: insertErr } = await supabaseClient
                         .from('archived_bid_history')
                         .insert(archiveRows);
     
                     if (insertErr) throw insertErr;
     
-                    // 5. Wipe entries out from active live listing table
                     const { error: deleteErr } = await supabaseClient
                         .from('bid_history')
                         .delete()
@@ -1900,7 +1991,6 @@
                     if (deleteErr) throw deleteErr;
                 }
     
-                // 6. Copy the card row data into your separate archived_cards table
                 const { error: cardArchiveInsertErr } = await supabaseClient
                     .from('archived_cards')
                     .insert([{
@@ -1919,7 +2009,6 @@
     
                 if (cardArchiveInsertErr) throw cardArchiveInsertErr;
     
-                // 7. Permanently purge the card from the live cards table to trigger real-time UI removal
                 const { error: cardDeleteErr } = await supabaseClient
                     .from('cards')
                     .delete()
@@ -1929,7 +2018,6 @@
     
                 showCustomToast("✨ Success! Card safely moved to your dedicated archived cards table.", "success");
                 
-                // Re-render UI views instantly
                 await fetchLiveInventory(true);
                 await window.renderAdminBidsLedger();
     
@@ -1946,14 +2034,12 @@
         };
 
         window.changeOrderStatus = async function(orderId, newStatus) {
-            // 1. Update local storage cache immediately so local/mock orders work
             const localOrder = localOrdersBackup.find(o => String(o.id) === String(orderId));
             if (localOrder) {
                 localOrder.order_status = newStatus;
                 saveLocalOrders(localOrdersBackup);
             }
         
-            // 2. Push change to the cloud if Supabase is connected
             if (supabaseClient) {
                 try {
                     const { error } = await supabaseClient.from('Orders').update({ order_status: newStatus }).eq('id', orderId);
@@ -1962,8 +2048,6 @@
                     console.warn(`Failed to update status in cloud database: ${err.message}`);
                 }
             } else {
-                // 3. Fallback: If running without a database, manually refresh the UI 
-                // since no real-time stream exists to do it for us
                 renderAdminOrdersLedger();
             }
             
@@ -1987,7 +2071,6 @@
         
             if (supabaseClient) {
                 try {
-                    // 1. Fetch the full order data
                     const { data: orderData, error: fetchErr } = await supabaseClient
                         .from('Orders')
                         .select('*')
@@ -1995,13 +2078,11 @@
                         .single();
                     if (fetchErr) throw fetchErr;
         
-                    // 2. Safely copy the order into the new archived_orders table
                     const { error: archiveErr } = await supabaseClient
                         .from('archived_orders')
                         .insert([orderData]);
                     if (archiveErr) throw archiveErr;
         
-                    // 3. Delete the order from the live queue
                     const { error: deleteErr } = await supabaseClient
                         .from('Orders')
                         .delete()
@@ -2013,11 +2094,10 @@
                 } catch(err) {
                     console.error(`Failed to archive or delete order record: ${err.message}`);
                     showCustomToast(`Archive failed: ${err.message}`, "error");
-                    return; // Stop the script so it does not clear the local cache if the DB failed
+                    return; 
                 }
             }
         
-            // Clear from local memory and refresh the dashboard visually
             localOrdersBackup = localOrdersBackup.filter(o => String(o.id) !== String(id));
             saveLocalOrders(localOrdersBackup);
             await renderAdminOrdersLedger();
@@ -2035,7 +2115,6 @@
             showCustomToast("Processing invoice request...", "info");
 
             try {
-                // Calls a safe database function securely right from your browser console
                 const { data, error } = await supabaseClient.rpc('send_invoice_email_rpc', {
                     p_order_id: orderId
                 });
@@ -2047,6 +2126,7 @@
                 showCustomToast(`Failed to send invoice: ${err.message}`, "error");
             }
         };
+        
         window.openBidHistoryModal = async function(cardId) {
             const card = items.find(i => i.id === cardId);
             if (!card) return;
@@ -2056,7 +2136,6 @@
             const tbody = document.getElementById('history-modal-tbody');
             tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-gray-500">Loading verified ledger records...</td></tr>';
             
-            // Open the window instantly so users see the loading state right away!
             document.getElementById('bid-history-modal').style.display = 'flex';
             lucide.createIcons();
 
@@ -2074,7 +2153,7 @@
                 } catch (err) {
                     console.warn("Cloud tracking unavailable:", err);
                     tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-red-400 font-bold">Database Connection Error: ${escapeHtml(err.message)}</td></tr>`;
-                    return; // Window is already open, so we can safely exit here
+                    return; 
                 }
             } else {
                 logs = getBidHistoryLog(cardId);
@@ -2142,6 +2221,7 @@
             document.body.removeChild(downloadAnchor);
             showCustomToast("Notepad log downloaded successfully!", "success");
         };
+        
         window.resetSystemLocalCache = async function() {
             const confirmed = await askCustomConfirmation("Reset Local Cache", "This will clear local stock overrides and cached orders on this device. Continue?");
             if (!confirmed) return;
@@ -2242,17 +2322,14 @@
                             </div>`
                             : `<button type="button" onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
                 } else {
-                    // 🌟 CHECK: Detect race condition outbid metrics for this unique card entry
                     const conflictMetrics = activeBiddingErrorTrackingLedger[item.id];
                     if (conflictMetrics) {
-                        // Injects a high-visibility, zero-height absolute ribbon across the upper image segment
                         imageConflictOverlay = `
                             <div data-conflict-id="${item.id}" class="absolute inset-x-0 top-24 z-30 bg-gradient-to-r from-red-600 to-red-700 border-y border-red-400 text-white font-black px-2 py-1.5 text-[10px] text-center uppercase tracking-widest shadow-xl animate-pulse flex items-center justify-center gap-1 pointer-events-none select-none">
                                 <i data-lucide="zap" class="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 shrink-0"></i>
                                 <span data-conflict-text-id="${item.id}">Outbid! Enter ≥ ${formatPHP(conflictMetrics.truePrice + 10)}</span>
                             </div>
                         `;
-                        // Activates high-visibility animated red glowing highlights around input elements
                         inputHighlightClass = 'border-red-500 ring-2 ring-red-500/40 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.5)] bg-red-950/10';
                     }
 
@@ -2413,14 +2490,12 @@
                     `;
                 }
         
-                // Enhanced: Guard condition protecting the browser context from layout thrashing if text hasn't changed
                 if (el.innerHTML !== incomingMarkupOutput) {
                     el.innerHTML = incomingMarkupOutput;
                 }
             });
         }, 1000);
 
-        // Enhanced: Safe recursive loop design to prevent stacking concurrent network calls
             async function runSafeInventoryPollingLoop() {
                 if (supabaseClient) return;
                 if (inventoryPollInFlight) return;
@@ -2432,12 +2507,10 @@
                     console.warn("Inventory fallback poll issue encountered:", pollErr);
                 } finally {
                     inventoryPollInFlight = false;
-                    // Schedule the next poll cycle only AFTER the current one completely completes
                     setTimeout(runSafeInventoryPollingLoop, 5000);
                 }
             }
             
-            // Instantiate the recursive interval replacement loop hook
             if (!supabaseClient) {
                 setTimeout(runSafeInventoryPollingLoop, 5000);
             }
@@ -2503,23 +2576,18 @@
                             const newBidderName = payload.new.top_bidder;
                             const currentCardName = payload.new.name || "Auction Item";
                             
-                            // 🌟 SAFE NORMALIZATION: Cleans text strings to match initial grid parameters
                             const dbType = (payload.new.type || "sale").toLowerCase().trim();
                             const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
                             
-                            // Accurately tracks if the card has truly been updated to 'archived'
                             const typeChanged = items[targetIndex].type !== normalizedType;
 
-                            // Update internal state quietly in the background
                             items[targetIndex].price = Number(payload.new.price);
                             items[targetIndex].top_bidder = payload.new.top_bidder;
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
-                            items[targetIndex].type = normalizedType; // Saves the clean type definition locally
+                            items[targetIndex].type = normalizedType; 
                             appendBidToHistory(payload.new.id, payload.new.top_bidder || 'No bids yet', Number(payload.new.price));
 
-                            // 🌟 LIVE REAL-TIME CALCULATION: Instantly update or drop the outbid warning banner
                             if (currentUserProfile && payload.new.top_bidder === currentUserProfile.name) {
-                                // Clear the notice completely if the active user successfully takes the lead
                                 delete activeBiddingErrorTrackingLedger[payload.new.id];
                                 const conflictElement = document.querySelector(`[data-conflict-id="${payload.new.id}"]`);
                                 if (conflictElement) conflictElement.remove();
@@ -2534,7 +2602,6 @@
                                     selectEl.className = "bg-[#2a2a2a] border border-gray-700 focus:border-red-500 rounded p-1.5 text-white flex-1 focus:outline-none transition-all";
                                 }
                             } else if (activeBiddingErrorTrackingLedger[payload.new.id]) {
-                                // Dynamically bump the targeted string parameters if concurrent bids arrive
                                 activeBiddingErrorTrackingLedger[payload.new.id].truePrice = Number(payload.new.price);
                                 activeBiddingErrorTrackingLedger[payload.new.id].trueBidder = payload.new.top_bidder;
                                 
@@ -2548,14 +2615,12 @@
                                 }
                             }
 
-                            // If the item has been archived, clear it from active layouts immediately
                             if (typeChanged) {
                                 renderGrid();
                                 if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
-                                return; // End calculation early since the card is now hidden
+                                return; 
                             }
 
-                            // INTERACTIVE NOTICE: Fires instantly on all active mobile & desktop screens
                             if (currentUserProfile && 
                                 currentUserProfile.name === oldBidderName && 
                                 currentUserProfile.name !== newBidderName) {
@@ -2566,7 +2631,6 @@
                                 renderGrid();
                             }
                             
-                            // Enhanced: Pinpoint targeted nodes to preserve input field focus & ongoing user typing
                             const bidderElement = document.querySelector(`[data-bidder-id="${payload.new.id}"]`);
                             const priceElement = document.querySelector(`[data-price-id="${payload.new.id}"]`);
                             
@@ -2585,14 +2649,12 @@
                         fetchLiveInventory(true);
                     })
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'Orders' }, (payload) => {
-                        // 1. Intercept the broadcast and update the client's local storage array instantly
                         if (payload.eventType === 'UPDATE' && payload.new) {
                              const updatedOrder = payload.new;
                             const targetIndex = localOrdersBackup.findIndex(o => String(o.id) === String(updatedOrder.id));
                             
                             if (targetIndex !== -1) {
                                 localOrdersBackup[targetIndex].order_status = updatedOrder.order_status;
-                                // Keep the original local creation date intact; do not overwrite it with the update payload
                                 if (!localOrdersBackup[targetIndex].created_at && updatedOrder.created_at) {
                                     localOrdersBackup[targetIndex].created_at = updatedOrder.created_at;
                                 }
@@ -2600,7 +2662,6 @@
                             }
                         }
                     
-                        // 2. Trigger standard interface re-renders
                         fetchBuyerRealtimeOrders(); 
                         if (!document.getElementById('admin-workspace').classList.contains('hidden')) {
                             renderAdminOrdersLedger();
@@ -2609,8 +2670,421 @@
                     })
                     .subscribe();
             }
-            lucide.createIcons();
-        })();
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // --- 1. DYNAMIC SUPABASE FEATURED ITEMS CONTROLLER (SMART-DETECT) ---
+            (async function initializeFeaturedItems() {
+                const container = document.getElementById('featuredItemsContainer');
+                if (!container) return;
+
+                let client = null;
+                if (typeof supabaseClient !== 'undefined' && typeof supabaseClient.from === 'function') {
+                    client = supabaseClient;
+                } else if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') {
+                    client = supabase;
+                } else if (typeof _supabase !== 'undefined' && typeof _supabase.from === 'function') {
+                    client = _supabase;
+                } else if (typeof db !== 'undefined' && typeof db.from === 'function') {
+                    client = db;
+                } else if (typeof window.supabaseClient !== 'undefined' && typeof window.supabaseClient.from === 'function') {
+                    client = window.supabaseClient;
+                } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.from === 'function') {
+                    client = window.supabase;
+                }
+
+                if (!client) {
+                    container.innerHTML = `<div class="text-red-400 text-[10px] text-center py-2">Connection setup missed.</div>`;
+                    return;
+                }
+
+                try {
+                    const { data, error } = await client
+                        .from('featured_items')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(5);
+
+                    if (error) throw error;
+
+                    if (!data || data.length === 0) {
+                        container.innerHTML = `<div class="text-gray-500 text-[11px] italic text-center py-2">No featured items currently listed.</div>`;
+                        return;
+                    }
+
+                    let htmlContent = '';
+                    data.forEach(item => {
+                        const safeName = String(item.name).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        const safeCode = String(item.card_code).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        const formattedPrice = Number(item.price).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+                        
+                        htmlContent += `
+                            <div class="flex items-center space-x-3 bg-[#1f1f1f] border border-gray-800 p-2 rounded hover:border-gray-700 transition-colors">
+                                <img src="${item.image_url}" alt="${safeName}" class="w-10 h-14 object-cover rounded bg-[#161616] border border-gray-800 shrink-0" onerror="this.src='https://via.placeholder.com/150'">
+                                <div class="flex-1 min-w-0 space-y-0.5">
+                                    <h5 class="text-gray-200 text-[14px] font-bold truncate leading-tight">${safeName}</h5>
+                                    <div class="flex items-center space-x-2 text-[12px]">
+                                        <span class="text-gray-500 font-mono">${safeCode}</span>
+                                        <span class="text-gray-600">|</span>
+                                        <span class="${item.quantity > 0 ? 'text-emerald-400' : 'text-red-400'} font-medium">Stock: ${item.quantity}</span>
+                                    </div>
+                                    <div class="text-red-400 text-[14px] font-extrabold pt-0.5">${formattedPrice}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = htmlContent;
+
+                } catch (err) {
+                    console.error("Featured items dashboard render error:", err.message);
+                    container.innerHTML = `<div class="text-red-400 text-[10px] text-center py-2">Failed to load items.</div>`;
+                }
+            })();
+
+            // --- 2. DYNAMIC SUPABASE BANDAI ROADMAP CONTROLLER (CLICKABLE HEADLINES) ---
+            (async function initializeBandaiRoadmap() {
+                const container = document.getElementById('bandaiRoadmapContainer');
+                if (!container) return;
+
+                let client = null;
+                if (typeof supabaseClient !== 'undefined' && typeof supabaseClient.from === 'function') {
+                    client = supabaseClient;
+                } else if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') {
+                    client = supabase;
+                } else if (typeof _supabase !== 'undefined' && typeof _supabase.from === 'function') {
+                    client = _supabase;
+                } else if (typeof db !== 'undefined' && typeof db.from === 'function') {
+                    client = db;
+                } else if (typeof window.supabaseClient !== 'undefined' && typeof window.supabaseClient.from === 'function') {
+                    client = window.supabaseClient;
+                } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.from === 'function') {
+                    client = window.supabase;
+                }
+
+                if (!client) {
+                    container.innerHTML = `<div class="text-red-400 text-[10px] text-center py-2">Connection setup missed.</div>`;
+                    return;
+                }
+
+                try {
+                    const { data, error } = await client
+                        .from('bandai_roadmap')
+                        .select('*')
+                        .order('sort_order', { ascending: true });
+
+                    if (error) throw error;
+
+                    if (!data || data.length === 0) {
+                        container.innerHTML = `<div class="text-gray-500 text-[11px] italic text-center py-2">No release milestones currently mapped.</div>`;
+                        return;
+                    }
+
+                    let htmlContent = '';
+                    data.forEach(milestone => {
+                        const safeTitle = String(milestone.title).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        const safeDesc = String(milestone.description).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        const borderClass = milestone.accent_color ? String(milestone.accent_color).trim() : 'border-red-500';
+                        
+                        const rawUrl = milestone.source_url ? String(milestone.source_url).trim() : '';
+                        const fallbackUrl = rawUrl ? rawUrl : '#';
+                        const pointerClass = rawUrl ? 'cursor-pointer' : 'cursor-default';
+
+                        htmlContent += `
+                            <div class="pl-2.5 border-l-2 ${borderClass} space-y-0.5">
+                                <a href="${fallbackUrl}" 
+                                   target="${rawUrl ? '_blank' : '_self'}" 
+                                   rel="noopener noreferrer" 
+                                   class="group block ${pointerClass} no-underline">
+                                    <h5 class="text-gray-200 text-[14px] font-bold tracking-wide group-hover:text-amber-400 transition-colors flex items-center gap-1">
+                                        <span>${safeTitle}</span>
+                                        ${rawUrl ? '<span class="text-gray-600 text-[11px] group-hover:text-amber-500 opacity-40 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>' : ''}
+                                    </h5>
+                                    <p class="text-gray-400 text-[12px] leading-relaxed group-hover:text-gray-300 transition-colors">${safeDesc}</p>
+                                </a>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = htmlContent;
+
+                } catch (err) {
+                    console.error("Bandai roadmap cloud render error:", err.message);
+                    container.innerHTML = `<div class="text-red-400 text-[10px] text-center py-2">Failed to load roadmap data.</div>`;
+                }
+            })();
+
+            // --- 3. DYNAMIC SUPABASE STREAMING VOUCH MARQUEE ENGINE (PERFECT CSS LOOP) ---
+            (async function initializeCloudVouchMarquee() {
+                const scroller = document.getElementById('vouchScrollContainer');
+                if (!scroller) return;
+
+                scroller.className = "flex flex-col shrink-0";
+
+                let dataset = [
+                    { author_name: "JP Camance", rating: 5, vouch_text: "Legit Seller and offering items in pristine condition. Check out his website and easy registration process." }
+                ];
+
+                let client = null;
+                if (typeof supabaseClient !== 'undefined' && typeof supabaseClient.from === 'function') {
+                    client = supabaseClient;
+                } else if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') {
+                    client = supabase;
+                } else if (typeof _supabase !== 'undefined' && typeof _supabase.from === 'function') {
+                    client = _supabase;
+                } else if (typeof db !== 'undefined' && typeof db.from === 'function') {
+                    client = db;
+                } else if (typeof window.supabaseClient !== 'undefined' && typeof window.supabaseClient.from === 'function') {
+                    client = window.supabaseClient;
+                } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.from === 'function') {
+                    client = window.supabase;
+                }
+
+                if (client) {
+                    try {
+                        const { data, error } = await client
+                            .from('vouches')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+                        
+                        if (error) throw error;
+                        if (data && data.length > 0) {
+                            dataset = data;
+                        }
+                    } catch (err) {
+                        console.warn("Cloud trust stream error:", err.message);
+                    }
+                }
+
+                let compiledHTML = '';
+                dataset.forEach(v => {
+                    const stars = '⭐'.repeat(v.rating || 5);
+                    const safeName = String(v.author_name).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    const safeText = String(v.vouch_text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    
+                    compiledHTML += `
+                        <div class="bg-[#1f1f1f] border border-gray-800 p-2 rounded text-[14px] leading-normal shrink-0 mb-2">
+                            <div class="flex justify-between font-bold text-red-400 mb-0.5">
+                                <span class="text-[14px]">@${safeName}</span>
+                                <span class="text-amber-500">${stars}</span>
+                            </div>
+                            <p class="text-gray-300 text-[13px]">${safeText}</p>
+                        </div>
+                    `;
+                });
+
+                scroller.innerHTML = compiledHTML + compiledHTML;
+
+                if (!document.getElementById('marquee-core-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'marquee-core-styles';
+                    style.innerHTML = `
+                        @keyframes marqueeScrollUp {
+                            0% { transform: translateY(0); }
+                            100% { transform: translateY(-50%); }
+                        }
+                        .run-marquee-vertical {
+                            animation: marqueeScrollUp 15s linear infinite;
+                        }
+                        .marquee-hover-zone:hover .run-marquee-vertical,
+                        .marquee-hover-zone:active .run-marquee-vertical {
+                            animation-play-state: paused;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                scroller.classList.add('run-marquee-vertical');
+                scroller.parentElement.classList.add('marquee-hover-zone');
+            })();
+
+            // --- DYNAMIC SUPABASE CHATBOT & FAQ SYSTEM CONTROLLER (CONVERSATIONAL VIEW) ---
+            (async function initializeChatbotSystem() {
+                const wrapper = document.getElementById('helpBoxWrapper');
+                const titleEl = document.getElementById('helpBoxTitle');
+                const descEl = document.getElementById('helpBoxDescription');
+                const btnEl = document.getElementById('helpBoxButton');
+                
+                const modal = document.getElementById('chatbotModal');
+                const closeBtn = document.getElementById('closeChatbot');
+                const qaContent = document.getElementById('chatbotQAContent');
+
+                if (!wrapper || !titleEl || !descEl || !btnEl || !modal || !closeBtn || !qaContent) return;
+
+                let client = null;
+                if (typeof supabaseClient !== 'undefined' && typeof supabaseClient.from === 'function') {
+                    client = supabaseClient;
+                } else if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') {
+                    client = supabase;
+                } else if (typeof _supabase !== 'undefined' && typeof _supabase.from === 'function') {
+                    client = _supabase;
+                } else if (typeof db !== 'undefined' && typeof db.from === 'function') {
+                    client = db;
+                } else if (typeof window.supabaseClient !== 'undefined' && typeof window.supabaseClient.from === 'function') {
+                    client = window.supabaseClient;
+                } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.from === 'function') {
+                    client = window.supabase;
+                }
+
+                if (!client) return;
+
+                // 1. Fetch and Synchronize Outer Sidebar Card Layout
+                try {
+                    const { data: boxData, error: boxError } = await client
+                        .from('help_box')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+
+                    if (boxError) throw boxError;
+
+                    if (boxData && boxData.length > 0) {
+                        const config = boxData[0];
+                        if (!config.is_visible) {
+                            wrapper.classList.add('hidden');
+                        } else {
+                            titleEl.textContent = String(config.title);
+                            descEl.textContent = String(config.description);
+                            btnEl.textContent = String(config.button_text);
+                            wrapper.classList.remove('hidden');
+                        }
+                    } else {
+                        wrapper.classList.remove('hidden');
+                    }
+                } catch (err) {
+                    console.warn("Using default layout backup for help box banner:", err.message);
+                    wrapper.classList.remove('hidden');
+                }
+
+                // 2. Drive Chat Interactive Conversation Mode on Launch Click
+                btnEl.addEventListener('click', async () => {
+                    modal.classList.remove('hidden');
+                    qaContent.innerHTML = `<div class="text-gray-500 italic text-center py-4">Connecting securely...</div>`;
+
+                    try {
+                        const { data: questions, error: qError } = await client
+                            .from('help_questions')
+                            .select('*')
+                            .order('sort_order', { ascending: true });
+
+                        if (qError) throw qError;
+
+                        // Restructure inner text grid with scaled up, highly readable font classes
+                        qaContent.innerHTML = `
+                            <div class="flex flex-col h-full justify-between space-y-3 min-h-0">
+                                <div id="chatHistoryLog" class="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar scroll-smooth max-h-[290px]">
+                                    <div class="flex items-start gap-2 max-w-[88%]">
+                                        <span class="text-base shrink-0 mt-0.5">🤖</span>
+                                        <div class="bg-[#1f1f1f] border border-gray-800 text-gray-300 p-2.5 rounded-lg rounded-tl-none leading-relaxed font-medium text-[13px]">
+                                            Mabuhay! I am your store companion. Select any question below.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-2.5 border-t border-gray-800/80 shrink-0 space-y-1.5 bg-[#131313]">
+                                    <div class="text-gray-500 font-bold text-[10px] tracking-wider uppercase pl-0.5">Frequently Asked Options</div>
+                                    <div id="chatPillsContainer" class="flex flex-col gap-1.5 max-h-[110px] overflow-y-auto custom-scrollbar pr-0.5"></div>
+                                </div>
+                            </div>
+                        `;
+
+                        const historyLog = document.getElementById('chatHistoryLog');
+                        const pillsContainer = document.getElementById('chatPillsContainer');
+
+                        if (!questions || questions.length === 0) {
+                            pillsContainer.innerHTML = `<div class="text-gray-600 italic text-[10px] py-1">No options mapped.</div>`;
+                            return;
+                        }
+
+                        // Render clickable reply options (Bumped from text-[10px] to text-[12.5px])
+                        let pillsHtml = '';
+                        questions.forEach((item, index) => {
+                            pillsHtml += `
+                                <button class="chat-faq-pill w-full text-left bg-[#1a1a1a] hover:bg-red-950/20 border border-gray-800/60 hover:border-red-900/40 text-gray-300 hover:text-red-400 px-3 py-2 rounded transition-all duration-150 font-medium text-[12.5px] flex items-center justify-between group shrink-0" data-index="${index}">
+                                    <span class="truncate pr-2">${item.question}</span>
+                                    <span class="text-gray-600 group-hover:text-red-400 text-[9px] transition-transform group-hover:translate-x-0.5">➔</span>
+                                </button>
+                            `;
+                        });
+                        pillsContainer.innerHTML = pillsHtml;
+
+                        // Assign message thread tracking click triggers
+                        pillsContainer.querySelectorAll('.chat-faq-pill').forEach(button => {
+                            button.addEventListener('click', () => {
+                                const targetIndex = button.getAttribute('data-index');
+                                const selectedData = questions[targetIndex];
+
+                                const sanitizedQ = String(selectedData.question).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                                const sanitizedA = String(selectedData.answer).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                                // User question bubble (Scaled up text-[13px])
+                                historyLog.innerHTML += `
+                                    <div class="flex justify-end w-full">
+                                        <div class="bg-red-950/30 border border-red-900/40 text-red-400 p-2.5 rounded-lg rounded-tr-none max-w-[85%] leading-relaxed font-medium text-[13px]">
+                                            ${sanitizedQ}
+                                        </div>
+                                    </div>
+                                `;
+                                historyLog.scrollTop = historyLog.scrollHeight;
+
+                                // Bot response bubble (Scaled up text-[13px])
+                                setTimeout(() => {
+                                    historyLog.innerHTML += `
+                                        <div class="flex items-start gap-2 max-w-[88%]">
+                                            <span class="text-base shrink-0 mt-0.5">🤖</span>
+                                            <div class="bg-[#1f1f1f] border border-gray-800 text-gray-200 p-2.5 rounded-lg rounded-tl-none leading-relaxed font-medium text-[13px]">
+                                                ${sanitizedA}
+                                            </div>
+                                        </div>
+                                    `;
+                                    historyLog.scrollTop = historyLog.scrollHeight;
+                                }, 300);
+                            });
+                        });
+
+                    } catch (err) {
+                        console.error("Bot layout simulation stream halted:", err.message);
+                        qaContent.innerHTML = `<div class="text-red-400 text-center py-4">Failed to assemble conversation interface.</div>`;
+                    }
+                });
+
+                // Close Modal triggers
+                closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.classList.add('hidden');
+                });
+            })();
+
+        })(); // <--- Main application closing bracket block wall
+
     </script>
+
+<!-- DYNAMIC INTERACTIVE CHATBOT POPUP MODAL -->
+<div id="chatbotModal" class="fixed bottom-4 right-4 w-[330px] sm:w-[360px] h-[480px] bg-[#161616] border border-gray-800 rounded-xl shadow-2xl z-[9999] flex flex-col hidden overflow-hidden animate-fade-in transition-all duration-200">
+    
+    <div class="p-3 border-b border-gray-800 flex justify-between items-center bg-[#1a1a1a]">
+        <div class="flex items-center space-x-2.5">
+            <div class="relative">
+                <span class="text-xl">🤖</span>
+                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#1a1a1a] rounded-full"></span>
+            </div>
+            <div>
+                <h3 class="text-gray-200 text-[11px] font-bold uppercase tracking-wider leading-none">StrawHat Helper Desk</h3>
+                <span class="text-[9px] text-emerald-400 font-medium">Automated • Online</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-1">
+            <button id="closeChatbot" class="text-gray-500 hover:text-red-400 text-xs font-bold p-1.5 rounded-lg hover:bg-red-950/20 transition-colors">
+                ✕
+            </button>
+        </div>
+    </div>
+
+    <div id="chatbotQAContent" class="flex-1 p-3 overflow-y-auto bg-[#131313] text-[13px] flex flex-col justify-between">
+        <p class="text-gray-500 italic text-center py-4">Booting dialogue matrix...</p>
+    </div>
+</div>
+
 </body>
 </html>
