@@ -159,14 +159,26 @@
                 </div>
             </div>
 
+            <!-- ITEM 3.5: VIDEO PULLS CONTENT HUB -->
+            <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-3 shadow-inner">
+                <h4 class="text-gray-200 text-xs font-bold tracking-wide uppercase flex items-center gap-1.5">
+                    <i data-lucide="video" class="w-4 h-4 text-red-500"></i> Video Pulls
+                </h4>
+                <p class="text-[12px] text-gray-400 leading-relaxed">
+                    Watch our latest box and pack rips, card hits, fails and highlights!
+                </p>
+                <a href="https://www.tiktok.com/@strawhatdraws05?_r=1&_t=ZS-97l2oBL7Q1t" target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-semibold text-xs py-2 rounded-lg transition-colors shadow uppercase tracking-wider">
+                    Watch Videos
+                </a>
+            </div>
+
             <!-- ITEM 4: DYNAMIC HELP WIDGET CALLOUT CONTAINER -->
-            <div id="helpBoxWrapper" class="bg-[#161616] border border-dashed border-red-900/40 rounded-lg p-4 text-center space-y-3 hidden">
-                <div class="text-xl">🤖</div>
-                <div class="space-y-1">
+            <div id="helpBoxWrapper" class="bg-[#161616] border border-dashed border-red-900/40 rounded-lg p-3 text-center space-y-2 hidden">
+                <div class="space-y-0.5">
                     <h4 id="helpBoxTitle" class="text-gray-100 text-[15px] font-bold tracking-wide">...</h4>
                     <p id="helpBoxDescription" class="text-gray-400 text-[12px] leading-relaxed max-w-[200px] mx-auto">...</p>
                 </div>
-                <button id="helpBoxButton" class="w-full bg-transparent hover:bg-red-950/20 border border-red-500 hover:border-red-400 text-red-400 font-bold uppercase tracking-wider text-[12px] py-2 rounded-md transition-colors">
+                <button id="helpBoxButton" class="w-full bg-transparent hover:bg-red-950/20 border border-red-500 hover:border-red-400 text-red-400 font-bold uppercase tracking-wider text-[12px] py-1.5 rounded-md transition-colors">
                     ...
                 </button>
             </div>
@@ -2977,7 +2989,7 @@
                                     <div class="flex items-start gap-2 max-w-[88%]">
                                         <span class="text-base shrink-0 mt-0.5">🤖</span>
                                         <div class="bg-[#1f1f1f] border border-gray-800 text-gray-300 p-2.5 rounded-lg rounded-tl-none leading-relaxed font-medium text-[13px]">
-                                            Mabuhay! I am your store companion. Select any question below.
+                                            Hello! I am your store companion. Select any question below.
                                         </div>
                                     </div>
                                 </div>
@@ -2997,13 +3009,14 @@
                             return;
                         }
 
+                        // 🟩 PASTE YOUR NEW UPDATED BLOCK HERE:
                         // Render clickable reply options (Bumped from text-[10px] to text-[12.5px])
                         let pillsHtml = '';
                         questions.forEach((item, index) => {
                             pillsHtml += `
-                                <button class="chat-faq-pill w-full text-left bg-[#1a1a1a] hover:bg-red-950/20 border border-gray-800/60 hover:border-red-900/40 text-gray-300 hover:text-red-400 px-3 py-2 rounded transition-all duration-150 font-medium text-[12.5px] flex items-center justify-between group shrink-0" data-index="${index}">
-                                    <span class="truncate pr-2">${item.question}</span>
-                                    <span class="text-gray-600 group-hover:text-red-400 text-[9px] transition-transform group-hover:translate-x-0.5">➔</span>
+                                <button class="chat-faq-pill w-full text-left bg-[#1a1a1a] hover:bg-red-950/20 border border-gray-800/60 hover:border-red-900/40 text-gray-300 hover:text-red-400 px-3 py-2.5 rounded transition-all duration-150 font-medium text-[12.5px] flex items-start justify-between group shrink-0" data-index="${index}">
+                                    <span class="whitespace-normal leading-relaxed pr-2">${item.question}</span>
+                                    <span class="text-gray-600 group-hover:text-red-400 text-[9px] transition-transform group-hover:translate-x-0.5 mt-1.5 shrink-0">➔</span>
                                 </button>
                             `;
                         });
