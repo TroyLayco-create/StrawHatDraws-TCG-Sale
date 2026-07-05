@@ -377,6 +377,12 @@
                             <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Initial Stock Level</label>
                             <input type="number" id="inv-stock" required placeholder="5" value="1" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                         </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Card Condition</label>
+                            <select id="inv-condition" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white focus:outline-none focus:border-red-500">
+                                <option value="" class="bg-[#1e1e1e]">Loading options from cloud...</option>
+                            </select>
+                        </div>
                         <div id="inv-bidding-ends-container" class="hidden">
                             <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Auction Expiry Datetime</label>
                             <input type="datetime-local" id="inv-bidding-ends" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
@@ -615,6 +621,33 @@
             }
         };
         // ---------------------------------
+    
+        async function populateAdminConditionsDropdown() {
+            const selectEl = document.getElementById('inv-condition');
+            if (!selectEl || !supabaseClient) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('card_conditions')
+                    .select('name')
+                    .order('id', { ascending: true });
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    selectEl.innerHTML = data.map(item => 
+                        `<option value="${escapeHtml(item.name)}" class="bg-[#1e1e1e]">${escapeHtml(item.name)}</option>`
+                    ).join('');
+                }
+            } catch (err) {
+                console.error("Failed to sync structural database conditions:", err.message);
+                // Resilient fallback options if cloud state fluctuates
+                selectEl.innerHTML = `
+                    <option value="Near Mint" class="bg-[#1e1e1e]">Near Mint</option>
+                    <option value="Visualy Clean" class="bg-[#1e1e1e]">Visualy Clean</option>
+                `;
+            }
+        }
     
         function getLocalOrders() {
             try {
@@ -877,6 +910,7 @@
                                 name: c.name || "Unnamed Card",
                                 set: c.set_code || c.set || "OP-UNKNOWN",
                                 rarity: c.rarity || "N/A",
+                                condition: c.condition || "Near Mint",
                                 price: Number(c.price || 0),
                                 type: normalizedType,
                                 top_bidder: c.top_bidder || null,
@@ -1710,6 +1744,7 @@
                 document.getElementById('admin-workspace').classList.remove('hidden');
                 await renderAdminOrdersLedger();
                 await window.renderAdminBidsLedger();
+                await populateAdminConditionsDropdown();
             } catch(err) {
                 showCustomToast(`Access Denied: ${err.message}`, 'error');
             }
@@ -2038,7 +2073,8 @@
                         back_img: cardData.back_img,
                         type: cardData.type,
                         bidding_ends_at: cardData.bidding_ends_at,
-                        top_bidder: cardData.top_bidder
+                        top_bidder: cardData.top_bidder,
+                        condition: cardData.condition
                     }]);
     
                 if (cardArchiveInsertErr) throw cardArchiveInsertErr;
@@ -2332,6 +2368,7 @@
                 const safeName = escapeHtml(item.name);
                 const safeSet = escapeHtml(item.set);
                 const safeRarity = escapeHtml(item.rarity);
+                const safeCondition = escapeHtml(item.condition || 'Near Mint');
                 const topBidderName = escapeHtml(item.top_bidder || 'No bids yet');
                 const selectedIncrement = pendingBidSelections[item.id] || "10";
                 const customBidValue = pendingCustomBidInputs[item.id] || "";
@@ -2433,8 +2470,11 @@
                     </div>
                     <div class="flex flex-col justify-between flex-1">
                         <div>
-                            <span class="text-[10px] font-mono text-gray-500">${safeSet}</span>
-                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400">${safeName}</h3>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-mono text-gray-500">${safeSet}</span>
+                                <span class="text-[10px] font-bold tracking-wide uppercase text-amber-400 bg-amber-950/40 border border-amber-900/30 px-1.5 py-0.5 rounded">${safeCondition}</span>
+                            </div>
+                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400 mt-1">${safeName}</h3>
                         </div>
                         <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
                             <div class="flex justify-between items-center gap-3">
@@ -2477,6 +2517,7 @@
                 rarity: document.getElementById('inv-rarity').value,
                 price: Number(document.getElementById('inv-price').value),
                 stock: Number(document.getElementById('inv-stock').value),
+                condition: document.getElementById('inv-condition').value,
                 front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                 back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                 type: normalizedDbType,
