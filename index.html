@@ -571,31 +571,45 @@
         }
     
         // --- PASTE THIS NEW BLOCK HERE ---
+        // 🔒 CHANGE THIS TO YOUR EXACT ADMIN EMAIL ADDRESS
+        const ALLOWED_ADMIN_EMAIL = "atdlayco@gmail.com";
+
         window.adminLogin = async function() {
-            const email = document.getElementById('admin-email').value;
+            const email = document.getElementById('admin-email').value.trim();
             const password = document.getElementById('admin-password').value;
-    
+
             if (!supabaseClient) {
-                 showCustomToast("Supabase client not connected.", "error");
-                 return;
+                showCustomToast("Database security connection error.", "error");
+                return;
             }
-    
+
+            if (email.toLowerCase() !== ALLOWED_ADMIN_EMAIL.toLowerCase()) {
+                document.getElementById('login-error').style.display = 'block';
+                showCustomToast("Access Denied: Unauthorized admin credentials.", "error");
+                return;
+            }
+
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
-    
+
                 if (error) throw error;
-    
-                // Success! Hide login form, show the dashboard
+
+                if (data?.user?.email?.toLowerCase() !== ALLOWED_ADMIN_EMAIL.toLowerCase()) {
+                    await supabaseClient.auth.signOut(); 
+                    document.getElementById('login-error').style.display = 'block';
+                    showCustomToast("Access Denied: Insufficient permissions.", "error");
+                    return;
+                }
+
                 document.getElementById('admin-login-section').style.display = 'none';
                 document.getElementById('master-bidding-ledger').style.display = 'block';
                 document.getElementById('login-error').style.display = 'none';
                 showCustomToast("Master Admin Authenticated!", "success");
                 
             } catch (err) {
-                // Show error message if wrong password
                 console.error("Login Error:", err.message);
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -1669,20 +1683,28 @@
         };
 
         async function verifyAdminAuth() {
-            const email = document.getElementById('admin-email-input').value;
+            const email = document.getElementById('admin-email-input').value.trim();
             const password = document.getElementById('admin-pass-input').value;
 
             if (!supabaseClient) {
-                document.getElementById('admin-auth-gate').classList.add('hidden');
-                document.getElementById('admin-workspace').classList.remove('hidden');
-                await renderAdminOrdersLedger();
-                await window.renderAdminBidsLedger();
+                showCustomToast("Security Breach: Secure connection required.", "error");
+                return;
+            }
+
+            if (email.toLowerCase() !== ALLOWED_ADMIN_EMAIL.toLowerCase()) {
+                showCustomToast("Access Denied: Unauthorized administrator account.", "error");
                 return;
             }
 
             try {
-                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
+
+                if (data?.user?.email?.toLowerCase() !== ALLOWED_ADMIN_EMAIL.toLowerCase()) {
+                    await supabaseClient.auth.signOut();
+                    showCustomToast("Access Denied: Insufficient permissions.", "error");
+                    return;
+                }
 
                 document.getElementById('admin-auth-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
