@@ -732,14 +732,26 @@
             }, 300);
         };
 
+        function safeParseBiddingTime(dateStr) {
+            if (!dateStr) return new Date(0);
+            // If it already explicitly states a timezone (ends with Z or has an offset), parse normally
+            if (dateStr.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(dateStr)) {
+                return new Date(dateStr);
+            }
+            // Otherwise, normalize it and explicitly anchor it to Philippine Time (+08:00)
+            const normalizedStr = dateStr.trim().replace(' ', 'T');
+            return new Date(normalizedStr.includes('T') ? normalizedStr + '+08:00' : normalizedStr + 'T00:00:00+08:00');
+        }
+
         function formatPHP(num) {
             return `₱${Number(num || 0).toLocaleString()}`;
         }
 
         function formatAuctionEnd(datetimeStr) {
             if (!datetimeStr) return "No end time";
-            const dt = new Date(datetimeStr);
+            const dt = safeParseBiddingTime(datetimeStr);
             return dt.toLocaleString('en-PH', {
+                timeZone: 'Asia/Manila', // Forces out-of-country browsers to display the text in PHT
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
@@ -1403,7 +1415,7 @@
             const card = items.find(i => i.id === cardId);
             if (!card) return;
         
-            if (card.bidding_ends_at && new Date(card.bidding_ends_at).getTime() < Date.now()) {
+            if (card.bidding_ends_at && safeParseBiddingTime(card.bidding_ends_at).getTime() < Date.now()) {
                 showCustomToast("This auction bidding window has already closed!", "error");
                 return;
             }
@@ -2412,7 +2424,7 @@
                         <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || ''}">
                         </div>
                     `;
-                    const isAuctionEnded = item.bidding_ends_at && new Date(item.bidding_ends_at).getTime() < Date.now();
+                    const isAuctionEnded = item.bidding_ends_at && safeParseBiddingTime(item.bidding_ends_at).getTime() < Date.now();
                     if (isAuctionEnded) {
                         actionMarkup = `
                             <div class="flex gap-1.5 mt-2 w-full text-xs">
@@ -2545,12 +2557,13 @@
             countdowns.forEach(el => {
                 const expiryTime = el.getAttribute('data-timer-expiry');
                 if (!expiryTime || expiryTime.trim() === '') return;
-        
-                const expiryDate = new Date(expiryTime);
+
+                // SWAP TO SAFE PARSER HERE
+                const expiryDate = safeParseBiddingTime(expiryTime);
                 const timeRemaining = expiryDate.getTime() - Date.now();
-        
+
                 let incomingMarkupOutput = '';
-        
+
                 if (timeRemaining <= 0) {
                     incomingMarkupOutput = `<span class="text-red-500 font-bold uppercase text-xs">🔴 Ended</span>`;
                 } else {
@@ -2560,16 +2573,18 @@
                     const secs = Math.floor((timeRemaining % (1000 * 60)) / 1000);
                     
                     const formatNum = (num) => String(num).padStart(2, '0');
-                    const formattedDate = expiryDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
-                    const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    
+                    // ADD timeZone: 'Asia/Manila' TO THESE TWO LINES BELOW
+                    const formattedDate = expiryDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', timeZone: 'Asia/Manila' });
+                    const ampm = expiryDate.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Manila' });
                     const dayString = days > 0 ? `${days}d ` : '';
-        
+
                     incomingMarkupOutput = `
                         <div class="text-yellow-500 font-mono font-bold">⏳ ${dayString}${formatNum(hrs)}h ${formatNum(mins)}m ${formatNum(secs)}s</div>
                         <div class="text-[10px] text-gray-300 font-medium mt-0.5">Ends ${formattedDate} at ${ampm}</div>
                     `;
                 }
-        
+
                 if (el.innerHTML !== incomingMarkupOutput) {
                     el.innerHTML = incomingMarkupOutput;
                 }
