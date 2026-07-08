@@ -2415,8 +2415,13 @@
                     const isAuctionEnded = item.bidding_ends_at && new Date(item.bidding_ends_at).getTime() < Date.now();
                     if (isAuctionEnded) {
                         actionMarkup = `
-                            <div class="w-full text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg text-xs mt-2 uppercase tracking-wider select-none">
-                                Bidding Closed
+                            <div class="flex gap-1.5 mt-2 w-full text-xs">
+                                <div class="flex-1 text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg uppercase tracking-wider select-none flex items-center justify-center">
+                                    Bidding Closed
+                                </div>
+                                <button type="button" onclick="openBidHistoryModal(${item.id})" class="flex-1 text-center bg-[#242424] hover:bg-[#2c2c2c] text-gray-400 hover:text-white border border-gray-700/60 rounded-lg py-2.5 text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
+                                    <i data-lucide="history" class="w-3.5 h-3.5 text-yellow-500"></i> Bid History
+                                </button>
                             </div>
                         `;
                     } else {
