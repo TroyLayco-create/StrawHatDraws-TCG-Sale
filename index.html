@@ -30,58 +30,99 @@
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
 
-    <nav class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-50 px-4 py-3 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
-            <div class="flex items-center justify-between w-full md:w-auto gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="bg-red-600 p-2 rounded-lg text-white font-black tracking-tighter">SHD</div>
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                        StrawHatDraws <span class="text-red-500 font-light text-sm tracking-wider uppercase border border-red-500/30 px-1.5 py-0.5 rounded ml-1">TCG Sales</span>
-                    </h1>
-                </div>
-            </div>
-            
-            <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input type="text" id="search-input" readonly onfocus="this.removeAttribute('readonly');" autocomplete="off" name="card_search_query" oninput="renderGrid()" placeholder="Search by name or set code..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg pl-9 pr-4 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-red-500 transition-colors">
-                    <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-gray-400"></i>
+    <!-- Unified Header Wrapper (Sticky on Desktop, Collapsible on Mobile) -->
+    <header class="lg:sticky lg:top-0 lg:z-50 w-full block max-lg:contents shadow-md">
+        <nav class="bg-[#1e1e1e] border-b border-gray-800 px-4 py-3">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
+                <div class="flex items-center justify-between w-full md:w-auto gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-red-600 p-2 rounded-lg text-white font-black tracking-tighter">SHD</div>
+                        <h1 class="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                            StrawHatDraws <span class="text-red-500 font-light text-sm tracking-wider uppercase border border-red-500/30 px-1.5 py-0.5 rounded ml-1">TCG Sales</span>
+                        </h1>
+                    </div>
                 </div>
                 
-                <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
-                    <div class="flex items-center gap-2 flex-1 sm:flex-none" id="nav-auth-wrapper">
-                        <button onclick="openAuthModal()" id="auth-status-btn" class="w-full sm:w-auto justify-center bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
-                            <i data-lucide="user" class="w-3.5 h-3.5"></i>
-                            <span id="auth-btn-text">Sign In / Register</span>
-                        </button>
-                        <button onclick="executeSecureLogout()" id="nav-logout-btn" class="hidden bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/30 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
-                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                            <span>Sign Out</span>
+                <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <input type="text" id="search-input" readonly onfocus="this.removeAttribute('readonly');" autocomplete="off" name="card_search_query" oninput="renderGrid()" placeholder="Search by name or set code..." class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg pl-9 pr-4 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-red-500 transition-colors">
+                        <i data-lucide="search" class="absolute left-3 top-2 w-4 h-4 text-gray-400"></i>
+                    </div>
+                    
+                    <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                        <div class="flex items-center gap-2 flex-1 sm:flex-none" id="nav-auth-wrapper">
+                            <button onclick="openAuthModal()" id="auth-status-btn" class="w-full sm:w-auto justify-center bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                                <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                                <span id="auth-btn-text">Sign In / Register</span>
+                            </button>
+                            <button onclick="executeSecureLogout()" id="nav-logout-btn" class="hidden bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/30 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+
+                        <button onclick="openCheckoutModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                            <span>Checkout</span>
+                            <span id="cart-count" class="bg-black/30 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">0</span>
                         </button>
                     </div>
+                </div>
+            </div>
+        </nav>
 
-                    <button onclick="openCheckoutModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow">
-                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-                        <span>Checkout</span>
-                        <span id="cart-count" class="bg-black/30 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">0</span>
+        <!-- This sub-bar stays sticky at top-0 on mobile viewports -->
+        <div class="bg-[#181818] border-b border-gray-800 sticky top-0 lg:static z-50 shadow-md lg:shadow-none">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 py-2 lg:py-0">
+                <!-- Tabs Left Side -->
+                <div class="flex gap-2 sm:gap-4 shrink-0 overflow-x-auto whitespace-nowrap custom-scrollbar">
+                    <button onclick="changeListingSection('sale')" id="tab-section-sale" class="py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i> Buy Now (Sale)
                     </button>
+                    <button onclick="changeListingSection('bidding')" id="tab-section-bidding" class="py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all">
+                        <i data-lucide="gavel" class="w-4 h-4"></i> Live Auction (Bidding)
+                    </button>
+                </div>
+
+                <!-- Anti-Snipe Text Right Side (Mobile-Optimized Compact Ticker) -->
+                <div id="nav-anti-snipe-notice" class="hidden items-center gap-2 lg:gap-3 text-[10px] sm:text-xs lg:text-sm text-red-500 font-black tracking-wider uppercase bg-red-950/20 p-1 sm:p-2 rounded-md lg:rounded-lg border border-red-500/10 overflow-hidden w-full flex-1 min-w-0 my-1 lg:my-0">
+                    <style>
+                        @keyframes seamless-marquee {
+                            0% { transform: translateX(0); }
+                            100% { transform: translateX(-50%); }
+                        }
+                        .animate-marquee-seamless {
+                            display: inline-flex;
+                            white-space: nowrap;
+                            gap: 2rem;
+                            animation: seamless-marquee 30s linear infinite;
+                            will-change: transform;
+                        }
+                        .animate-marquee-seamless:hover {
+                            animation-play-state: paused;
+                        }
+                    </style>
+                    
+                    <!-- 🏴‍☠️ Styled System Logo Badge -->
+                    <div class="flex items-center gap-1 bg-amber-500 text-black px-1.5 py-0.5 rounded text-[10px] font-black shrink-0 tracking-tighter select-none shadow shadow-amber-600/50 z-10">
+                        <span>👑</span>
+                        <span>ANTI-SNIPING RULE</span>
+                    </div>
+                    
+                    <div class="flex-1 overflow-hidden relative h-5 flex items-center">
+                        <div class="animate-marquee-seamless font-black cursor-pointer">
+                            <span>YOU CANNOT BID IN THE LAST 5 MINUTES ON A SPECIFIC ITEM UNLESS YOU HAVE PLACED A BID ON THAT ITEM EARLIER. SNIPE BIDS WILL NOT BE ACCEPTED BY THE SYSTEM.</span>
+                            <span aria-hidden="true">YOU CANNOT BID IN THE LAST 5 MINUTES ON A SPECIFIC ITEM UNLESS YOU HAVE PLACED A BID ON THAT ITEM EARLIER. SNIPE BIDS WILL NOT BE ACCEPTED BY THE SYSTEM</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
-
-    <div class="bg-[#181818] border-b border-gray-800 overflow-x-auto whitespace-nowrap">
-        <div class="max-w-7xl mx-auto px-4 flex gap-2 sm:gap-4">
-            <button onclick="changeListingSection('sale')" id="tab-section-sale" class="py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all">
-                <i data-lucide="shopping-bag" class="w-4 h-4"></i> Buy Now (Sale)
-            </button>
-            <button onclick="changeListingSection('bidding')" id="tab-section-bidding" class="py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all">
-                <i data-lucide="gavel" class="w-4 h-4"></i> Live Auction (Bidding)
-            </button>
-        </div>
-    </div>
+    </header>
 
     <div class="max-w-7xl w-full mx-auto p-4 flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <aside class="lg:col-span-1 bg-[#1e1e1e] p-4 sm:p-5 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-5 h-fit lg:sticky lg:top-20">
+        <!-- Sidebar filters updated to sticky offset top-32 to clear the fixed dual header height -->
+        <aside class="lg:col-span-1 bg-[#1e1e1e] p-4 sm:p-5 rounded-xl border border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-5 h-fit lg:sticky lg:top-32">
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2">Sort By</h3>
                 <select id="sort-select" onchange="renderGrid()" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-red-500">
@@ -196,7 +237,7 @@
                 <span id="results-count">Loading cards from inventory database...</span>
                 <span>Currency: <strong class="text-red-400">PHP (₱)</strong></span>
             </div>
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4"></div>
         </main>
     </div>
 
@@ -208,28 +249,7 @@
             </button>
         </div>
     </footer>
-
-    <!-- INTERACTIVE FLOATING FAQ CHATBOT WINDOW GRID[cite: 1] -->
-    <div id="quickChatBotWidget" class="fixed bottom-6 right-6 w-80 bg-[#1a1a1a] border border-gray-800 rounded-xl shadow-2xl hidden flex-col overflow-hidden z-[100] font-sans">
-        <div class="bg-red-600 p-3.5 flex justify-between items-center shadow-md select-none">
-            <div class="flex items-center gap-2">
-                <span class="text-base">🤖</span>
-                <span class="text-white text-xs font-bold tracking-wide">StrawHat Helper Desk</span>
-            </div>
-            <button onclick="toggleCryptoBot()" class="text-white text-lg font-bold opacity-80 hover:opacity-100 transition-opacity focus:outline-none">&times;</button>
-        </div>
-        <div id="botResponseLog" class="p-4 h-48 overflow-y-auto flex flex-col gap-2.5 bg-[#121212] border-b border-gray-800">
-            <div class="bg-[#1e1e1e] border border-gray-800 text-gray-300 p-2.5 rounded-lg text-xs max-w-[85%] leading-relaxed shadow-sm">
-                Ahoy! Welcome to the desk. Pick a quick question down below to get instant answers straight from our operations ledger:
-            </div>
-        </div>
-        <div class="p-3 bg-[#1a1a1a] flex flex-col gap-1.5 select-none">
-            <button type="button" onclick="triggerBotReply('how_to_pay')" class="bg-[#222] hover:bg-[#2a2a2a] border border-gray-800 text-gray-300 text-left p-2 rounded-lg text-[11px] font-medium transition-colors w-full focus:outline-none">💰 How do I finalize payment parameters?</button>
-            <button type="button" onclick="triggerBotReply('auction_rules')" class="bg-[#222] hover:bg-[#2a2a2a] border border-gray-800 text-gray-300 text-left p-2 rounded-lg text-[11px] font-medium transition-colors w-full focus:outline-none">🏆 How do live bidding wins execute?</button>
-            <button type="button" onclick="triggerBotReply('shipping_notice')" class="bg-[#222] hover:bg-[#2a2a2a] border border-gray-800 text-gray-300 text-left p-2 rounded-lg text-[11px] font-medium transition-colors w-full focus:outline-none">📦 When does my card dispatch ship out?</button>
-        </div>
-    </div>
-
+    
     <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden justify-center items-start sm:items-center overflow-y-auto z-50 p-4">
         <div class="bg-[#1e1e1e] border border-gray-800 rounded-xl max-w-md w-full p-4 sm:p-6 shadow-2xl relative max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -874,13 +894,16 @@
             activeListingSection = section;
             const saleTab = document.getElementById('tab-section-sale');
             const biddingTab = document.getElementById('tab-section-bidding');
+            const navNotice = document.getElementById('nav-anti-snipe-notice');
 
             if (section === 'sale') {
                 saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
                 biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
+                if (navNotice) navNotice.style.display = 'none';
             } else {
                 biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
                 saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
+                if (navNotice) navNotice.style.display = 'flex';
             }
             renderGrid();
         }
@@ -1415,10 +1438,49 @@
             const card = items.find(i => i.id === cardId);
             if (!card) return;
         
-            if (card.bidding_ends_at && safeParseBiddingTime(card.bidding_ends_at).getTime() < Date.now()) {
+            // --- 🔒 TIMEZONE-SAFE ANTI-SNIPE GATEKEEPER MECHANISM ---
+            const fiveMinutesInMs = 5 * 60 * 1000;
+            
+            // 1. Force the database end time to parse with a fixed Philippine GMT+8 timezone offset
+            const biddingEndTimePST = safeParseBiddingTime(card.bidding_ends_at).getTime();
+            
+            // 2. Get the current global absolute UTC time and apply the exact Philippine offset (+8 hours)
+            const currentGlobalUtc = Date.now();
+            const currentPstTime = currentGlobalUtc + (new Date().getTimezoneOffset() * 60000) + (8 * 3600000);
+            
+            // 3. Calculate time remaining purely based on Manila time
+            const timeRemainingPST = biddingEndTimePST - currentPstTime;
+
+            if (card.bidding_ends_at && timeRemainingPST < 0) {
                 showCustomToast("This auction bidding window has already closed!", "error");
                 return;
             }
+
+            if (card.bidding_ends_at && timeRemainingPST > 0 && timeRemainingPST <= fiveMinutesInMs) {
+                if (supabaseClient) {
+                    try {
+                        // Scan the public history ledger to check if this specific user bid previously
+                        const { data: historicalBids, error: historyErr } = await supabaseClient
+                            .from('bid_history')
+                            .select('id')
+                            .eq('card_id', cardId)
+                            .eq('bidder', currentUserProfile.name)
+                            .limit(1);
+
+                        if (historyErr) throw historyErr;
+
+                        if (!historicalBids || historicalBids.length === 0) {
+                            showCustomToast("Anti-Snipe Guard: You cannot bid in the final 5 minutes unless you have placed a qualification bid on this item earlier!", "error");
+                            return;
+                        }
+                    } catch (err) {
+                        console.error("Gatekeeper verification error:", err);
+                        showCustomToast("Security gatekeeper verification error. Try again.", "error");
+                        return;
+                    }
+                }
+            }
+            // --- END OF GATEKEEPER CHECK ---
         
             let bidAmount = 0;
             if (isCustom) {
@@ -2370,7 +2432,7 @@
             if (sortBy === 'price-asc') filtered.sort((a, b) => Number(a.price) - Number(b.price));
             else if (sortBy === 'price-desc') filtered.sort((a, b) => Number(b.price) - Number(a.price));
 
-            document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory card records.`;
+            document.getElementById('results-count').innerText = `Showing ${filtered.length} active inventory.`;
             grid.innerHTML = '';
 
             filtered.forEach(item => {
@@ -2386,7 +2448,7 @@
                 const customBidValue = pendingCustomBidInputs[item.id] || "";
                 
                 const div = document.createElement('div');
-                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-3 flex flex-col group relative ${soldOut && activeListingSection === 'sale' ? 'opacity-40 select-none' : ''}`;
+                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-2 sm:p-3 flex flex-col group relative ${soldOut && activeListingSection === 'sale' ? 'opacity-40 select-none' : ''}`;
 
                 let actionMarkup = '';
                 let biddingHeaderMarkup = '';
@@ -2417,7 +2479,7 @@
                     }
 
                     biddingHeaderMarkup = `
-                        <div class="absolute top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
+                        <div class="absolute top-2 sm:top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
                             <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder:
                             <span class="text-white" data-bidder-id="${item.id}">${topBidderName}</span>
                         </div>
@@ -2443,17 +2505,30 @@
                         ).join('');
                         actionMarkup = `
                             <div class="flex flex-col gap-2 mt-2 w-full text-xs">
-                                <div class="flex gap-1.5">
-                                    <select id="bid-select-${item.id}" onchange="pendingBidSelections[item.id] = this.value" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 focus:outline-none transition-all">
-                                        ${selectOptions}
-                                    </select>
-                                    <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors">Bid</button>
+                                <!-- Side-by-side grid on mobile, stacks vertically (flex-col) on tablet/desktop (sm and up) -->
+                                <div class="grid grid-cols-2 sm:flex sm:flex-col gap-2 w-full">
+                                    
+                                    <!-- Preset Increment Layout Piece -->
+                                    <div class="flex gap-1.5 w-full">
+                                        <select id="bid-select-${item.id}" onchange="pendingBidSelections[item.id] = this.value" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 min-w-0 focus:outline-none transition-all font-mono font-bold text-xs">
+                                            ${selectOptions}
+                                        </select>
+                                        <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors shrink-0">Bid</button>
+                                    </div>
+                                    
+                                    <!-- Custom Bid Entry Layout Piece -->
+                                    <div class="flex gap-1.5 w-full">
+                                        <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[item.id] = this.value" placeholder="${conflictMetrics ? '≥ ' + (conflictMetrics.truePrice + 10) : 'Total Bid'}" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 min-w-0 focus:outline-none font-mono transition-all text-xs">
+                                        <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[10px] sm:text-xs transition-colors whitespace-nowrap shrink-0">
+                                            <!-- Responsive helper toggles label lengths automatically -->
+                                            <span class="sm:hidden">Custom</span>
+                                            <span class="hidden sm:inline">Custom Bid</span>
+                                        </button>
+                                    </div>
+                                    
                                 </div>
-                                <div class="flex gap-1.5">
-                                    <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[item.id] = this.value" placeholder="${conflictMetrics ? 'Required ≥ ' + (conflictMetrics.truePrice + 10) : 'Enter Total Bid (₱)'}" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 focus:outline-none font-mono transition-all">
-                                    <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[11px] transition-colors whitespace-nowrap">Custom Bid</button>
-                                </div>
-                                <button type="button" onclick="openBidHistoryModal(${item.id})" class="mt-1 w-full text-center bg-[#242424] hover:bg-[#2c2c2c] text-gray-400 hover:text-white border border-gray-700/60 rounded py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
+
+                                <button type="button" onclick="openBidHistoryModal(${item.id})" class="mt-0.5 w-full text-center bg-[#242424] hover:bg-[#2c2c2c] text-gray-400 hover:text-white border border-gray-700/60 rounded py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
                                     <i data-lucide="history" class="w-3.5 h-3.5 text-yellow-500"></i> Transparent Bid History
                                 </button>
                             </div>
@@ -2472,11 +2547,11 @@
                             onclick="launchZoomModal(this.src)"
                             class="relative z-10 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200"
                         >
-                        <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] flex items-center gap-1 pointer-events-none">
+                        <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] hidden sm:flex items-center gap-1 pointer-events-none">
                             <i data-lucide="zoom-in" class="w-3 h-3"></i>
                             <span>Zoom</span>
                         </div>
-                        <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none">
+                        <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none ${activeListingSection === 'bidding' ? 'hidden sm:block' : ''}">
                             ${activeListingSection === 'sale' ? 'Stock: ' + item.stock : 'Auction'}
                         </div>
                         <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
@@ -2485,27 +2560,42 @@
                         </div>
                         <span class="absolute top-2 right-2 z-20 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow pointer-events-none">${safeRarity}</span>
                     </div>
-                    <div class="flex flex-col justify-between flex-1">
-                        <div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] font-mono text-gray-500">${safeSet}</span>
+                    <div class="flex flex-col justify-between flex-1 w-full">
+                        <!-- Grid layout active ONLY during Bidding Section on mobile devices -->
+                        <div class="${activeListingSection === 'bidding' ? 'grid grid-cols-2 sm:block' : 'block'} w-full items-baseline">
+                            
+                            <!-- Header Info Line (Set and Condition) -->
+                            <div class="${activeListingSection === 'bidding' ? 'col-span-2' : ''} flex justify-between items-center w-full mb-1">
+                                <!-- Boosted font size, weight, and color visibility for the card set code -->
+                                <span class="text-xs font-mono font-bold text-gray-400 tracking-wide">${safeSet}</span>
                                 <span class="text-[10px] font-bold tracking-wide uppercase text-amber-400 bg-amber-950/40 border border-amber-900/30 px-1.5 py-0.5 rounded">${safeCondition}</span>
                             </div>
-                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400 mt-1">${safeName}</h3>
-                        </div>
-                        <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
-                            <div class="flex justify-between items-center gap-3">
-                                <span class="text-sm font-bold text-gray-100" data-price-id="${item.id}">
-                                    ${activeListingSection === 'sale' ? formatPHP(item.price) : 'Current Bid: ' + formatPHP(item.price)}
-                                </span>
-                                ${activeListingSection === 'sale' ? `<div>${actionMarkup}</div>` : ''}
-                            </div>
+                            
+                            <!-- Card Name Heading -->
+                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400 ${activeListingSection === 'bidding' ? 'col-start-1 row-start-2' : ''} min-w-0 pr-2">${safeName}</h3>
+                            
+                            <!-- Live Auction Price Display Element -->
                             ${activeListingSection === 'bidding' ? `
-                                <div class="text-[10px] text-gray-400 mt-1">
-                                    Ends at: <span class="text-yellow-400 font-medium">${item.bidding_ends_at ? formatAuctionEnd(item.bidding_ends_at) : 'No end time set'}</span>
+                                <div class="col-start-2 row-start-2 text-right sm:text-left sm:mt-2 sm:pt-2 sm:border-t sm:border-gray-800/50">
+                                    <span class="text-xs sm:text-sm font-bold text-gray-100 inline-block" data-price-id="${item.id}">
+                                        Current Bid: ${formatPHP(item.price)}
+                                    </span>
                                 </div>
-                                ${actionMarkup}
                             ` : ''}
+                        </div>
+                        
+                        <!-- Lower Core Interactive Controls Section -->
+                        <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50 ${activeListingSection === 'bidding' ? 'sm:border-t-0 sm:pt-0 sm:mt-0' : ''}">
+                            ${activeListingSection === 'sale' ? `
+                                <div class="flex justify-between items-center gap-3">
+                                    <span class="text-sm font-bold text-gray-100" data-price-id="${item.id}">
+                                        ${formatPHP(item.price)}
+                                    </span>
+                                    <div>${actionMarkup}</div>
+                                </div>
+                            ` : `
+                                ${actionMarkup}
+                            `}
                         </div>
                     </div>
                 `;
