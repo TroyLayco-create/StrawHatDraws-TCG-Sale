@@ -2499,7 +2499,7 @@
                             </div>
                         `;
                     } else {
-                        const bidIncrements = [20, 50, 100, 200, 500];
+                        const bidIncrements = [10, 20, 50, 100, 200, 500];
                         const selectOptions = bidIncrements.map(val =>
                             `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''} class="text-gray-100 bg-[#2a2a2a] font-mono font-bold">+₱${val}</option>`
                         ).join('');
