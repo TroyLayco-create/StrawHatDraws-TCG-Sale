@@ -2109,6 +2109,26 @@
             }
             await window.renderAdminBidsLedger();
         };
+
+        window.updateBidStatus = async function(bidderKey, newStatus) {
+            if (!supabaseClient) return;
+            try {
+                const { error } = await supabaseClient.from('admin_bid_statuses').upsert({
+                    bidder_key: bidderKey,
+                    status: newStatus,
+                    updated_at: new Date().toISOString()
+                });
+                if (error) {
+                    console.error("Failed to sync bid status to Supabase:", error);
+                    showCustomToast(`Cloud Sync Error: ${error.message}`, "error");
+                } else {
+                    showCustomToast("✨ Status saved to cloud!", "success");
+                }
+            } catch (err) {
+                console.error("Error updating bid status:", err);
+                showCustomToast(`Cloud Sync Error: ${err.message}`, "error");
+            }
+        };
     
         window.renderAdminBidsLedger = async function() {
             const tbody = document.getElementById('admin-bids-tbody');
@@ -2139,6 +2159,21 @@
                 });
     
                 if (error) throw error;
+
+                // Fetch saved admin bid statuses from Supabase
+                let bidStatusesMap = {};
+                try {
+                    const { data: statusData } = await supabaseClient
+                        .from('admin_bid_statuses')
+                        .select('*');
+                    if (statusData) {
+                        statusData.forEach(s => {
+                            bidStatusesMap[s.bidder_key] = s.status;
+                        });
+                    }
+                } catch (e) {
+                    console.warn("Failed to load admin bid statuses:", e);
+                }
     
                 tbody.innerHTML = '';
                 if (!data || data.length === 0) {
@@ -2219,11 +2254,15 @@
                         ? `<div class="mt-1.5"><span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-md shadow-sm">⚡ ${group.bids.length} ${currentAdminBidView === 'live' ? 'Active' : 'Archived'} Bids</span></div>` 
                         : '';
 
+                    // --- 1. RESOLVE BIDDER KEY & SAVED STATUS ---
+                    const bidUserKey = (group.email || group.bidder).toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const statusVal = bidStatusesMap[bidUserKey] || 'Pending';
+
                     let actionCellHTML = '';
                     if (currentAdminBidView === 'live') {
                         actionCellHTML = `
                             <td class="p-3 text-center">
-                                <button type="button" onclick="archiveLiveBidsForGroup('${escapeHtml(cardIdsJoined)}', this)" class="bg-amber-600/20 hover:bg-amber-600 border border-amber-500/30 hover:text-white text-amber-400 text-[10px] font-black px-2.5 py-1 rounded transition-all shadow-sm uppercase tracking-wider">
+                                <button type="button" onclick="archiveLiveBidsForGroup('${escapeHtml(cardIdsJoined)}', this, '${bidUserKey}')" class="bg-amber-600/20 hover:bg-amber-600 border border-amber-500/30 hover:text-white text-amber-400 text-[10px] font-black px-2.5 py-1 rounded transition-all shadow-sm uppercase tracking-wider">
                                     📦 Archive Cards & Bids
                                 </button>
                             </td>
@@ -2235,6 +2274,11 @@
                             </td>
                         `;
                     }
+
+                    let selectColorClass = 'text-yellow-500 border-yellow-500/30';
+                    if (statusVal === 'Processed') selectColorClass = 'text-green-400 border-green-500/30';
+                    if (statusVal === 'Shipped') selectColorClass = 'text-blue-400 border-blue-500/30';
+                    if (statusVal === 'Cancelled') selectColorClass = 'text-red-400 border-red-500/30';
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-white/5 border-b border-gray-800/60 text-top";
@@ -2254,11 +2298,11 @@
                         </td>
                         <td class="p-3 font-mono text-amber-400 font-bold text-sm">${formatPHP(group.totalAmount)}</td>
                         <td class="p-3">
-                            <select onchange="this.className = 'bg-[#2a2a2a] border rounded px-2.5 py-1 text-xs font-bold focus:outline-none cursor-pointer ' + (this.value === 'Processed' ? 'text-green-400 border-green-500/30' : this.value === 'Shipped' ? 'text-blue-400 border-blue-500/30' : this.value === 'Cancelled' ? 'text-red-400 border-red-500/30' : 'text-yellow-500 border-yellow-500/30')" class="bg-[#2a2a2a] border text-yellow-500 border-yellow-500/30 rounded px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 transition-colors cursor-pointer">
-                                <option value="Pending" class="text-yellow-500 font-bold bg-[#1e1e1e]">⏳ Pending</option>
-                                <option value="Processed" class="text-green-400 font-bold bg-[#1e1e1e]">✅ Processed</option>
-                                <option value="Shipped" class="text-blue-400 font-bold bg-[#1e1e1e]">📦 Shipped</option>
-                                <option value="Cancelled" class="text-red-400 font-bold bg-[#1e1e1e]">❌ Cancelled</option>
+                            <select onchange="window.updateBidStatus('${bidUserKey}', this.value); this.className = 'bg-[#2a2a2a] border rounded px-2.5 py-1 text-xs font-bold focus:outline-none cursor-pointer ' + (this.value === 'Processed' ? 'text-green-400 border-green-500/30' : this.value === 'Shipped' ? 'text-blue-400 border-blue-500/30' : this.value === 'Cancelled' ? 'text-red-400 border-red-500/30' : 'text-yellow-500 border-yellow-500/30')" class="bg-[#2a2a2a] border ${selectColorClass} rounded px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 transition-colors cursor-pointer">
+                                <option value="Pending" ${statusVal === 'Pending' ? 'selected' : ''} class="text-yellow-500 font-bold bg-[#1e1e1e]">⏳ Pending</option>
+                                <option value="Processed" ${statusVal === 'Processed' ? 'selected' : ''} class="text-green-400 font-bold bg-[#1e1e1e]">✅ Processed</option>
+                                <option value="Shipped" ${statusVal === 'Shipped' ? 'selected' : ''} class="text-blue-400 font-bold bg-[#1e1e1e]">📦 Shipped</option>
+                                <option value="Cancelled" ${statusVal === 'Cancelled' ? 'selected' : ''} class="text-red-400 font-bold bg-[#1e1e1e]">❌ Cancelled</option>
                             </select>
                         </td>
                         ${actionCellHTML}
@@ -2272,7 +2316,7 @@
             lucide.createIcons();
         };
 
-        window.archiveLiveBidsForGroup = async function(cardIdsJoined, buttonEl) {
+        window.archiveLiveBidsForGroup = async function(cardIdsJoined, buttonEl, bidderKey = null) {
             if (!supabaseClient) {
                 showCustomToast("Simulator active. Connect Supabase to archive live entries.", "error");
                 return;
@@ -2333,6 +2377,11 @@
                     }]);
 
                     await supabaseClient.from('cards').delete().eq('id', cardId);
+                }
+
+                // Clean up admin bid status record so future bids reset to Pending
+                if (bidderKey && supabaseClient) {
+                    await supabaseClient.from('admin_bid_statuses').delete().eq('bidder_key', bidderKey);
                 }
 
                 showCustomToast("✨ Success! All cards for this bidder moved to your dedicated archived cards table.", "success");
