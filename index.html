@@ -1829,10 +1829,20 @@
             if (!tbody) return;
         
             let dbOrdersList = []; 
+            let profilesMap = {};
             if (supabaseClient) { 
                 try {
                     const { data } = await supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }); 
                     if (data) dbOrdersList = data; 
+
+                    // Fetch user Facebook links directly from the profiles table
+                    const { data: profs } = await supabaseClient.from('profiles').select('id, name, facebook_page');
+                    if (profs) {
+                        profs.forEach(p => {
+                            if (p.id) profilesMap[p.id] = p.facebook_page;
+                            if (p.name) profilesMap[p.name.toLowerCase().trim()] = p.facebook_page;
+                        });
+                    }
                 } catch(e) {
                     console.warn("Failed to fetch orders from Supabase:", e); 
                 }
@@ -1859,10 +1869,39 @@
                     }
                 }
             }); 
+
+            // --- CONSOLIDATION ENGINE: Group orders by customer email or name ---
+            const groupedOrders = {};
+            dataset.forEach(ord => {
+                const key = (ord.customer_email || ord.customer_name || 'unknown').toLowerCase().trim();
+                if (!groupedOrders[key]) {
+                    groupedOrders[key] = {
+                        customer_name: ord.customer_name,
+                        customer_email: ord.customer_email,
+                        shipping_address: ord.shipping_address,
+                        phone_number: ord.phone_number,
+                        google_maps_pin: ord.google_maps_pin,
+                        user_id: ord.user_id,
+                        order_status: ord.order_status || 'Pending',
+                        order_ids: [String(ord.id)],
+                        items_ordered: [...(ord.items_ordered || [])]
+                    };
+                } else {
+                    groupedOrders[key].order_ids.push(String(ord.id));
+                    if (ord.items_ordered && Array.isArray(ord.items_ordered)) {
+                        groupedOrders[key].items_ordered.push(...ord.items_ordered);
+                    }
+                    if (ord.order_status && ord.order_status !== 'Pending') {
+                        groupedOrders[key].order_status = ord.order_status;
+                    }
+                }
+            });
+
+            const consolidatedDataset = Object.values(groupedOrders);
         
             tbody.innerHTML = ''; 
         
-            dataset.forEach(ord => { 
+            consolidatedDataset.forEach(ord => { 
                 let itemsListHTML = ''; 
                 let totalOrderPrice = 0; 
 
@@ -1895,25 +1934,56 @@
                 if (statusVal === 'Shipped') selectColorClass = 'text-blue-400 border-blue-500/30';
                 if (statusVal === 'Cancelled') selectColorClass = 'text-red-400 border-red-500/30';
                 
-                const mapsPinUrl = ord.google_maps_pin || `http://googleusercontent.com/maps.google.com/${encodeURIComponent(ord.shipping_address || '')}`;
+                // Resolve Facebook link from ord.phone_number or profilesMap lookup
+                let rawFb = (ord.phone_number && !ord.phone_number.includes("Facebook Direct Contact") && !ord.phone_number.includes("Linked Account Profile")) 
+                            ? ord.phone_number.trim() 
+                            : "";
+
+                if (!rawFb && ord.user_id && profilesMap[ord.user_id]) {
+                    rawFb = profilesMap[ord.user_id];
+                }
+                if (!rawFb && ord.customer_name && profilesMap[ord.customer_name.toLowerCase().trim()]) {
+                    rawFb = profilesMap[ord.customer_name.toLowerCase().trim()];
+                }
+
+                if (rawFb && !rawFb.startsWith('http://') && !rawFb.startsWith('https://')) {
+                    rawFb = 'https://' + rawFb;
+                }
+
+                const hasFbLink = rawFb && rawFb.length > 5;
+
+                let addressDisplayText = ord.shipping_address || '';
+                if (!addressDisplayText || addressDisplayText.includes("N/A - Facebook Direct Contact") || addressDisplayText === "N/A") {
+                    addressDisplayText = hasFbLink ? rawFb : "N/A - No Address Provided";
+                }
+
+                const joinedOrderIds = ord.order_ids.join(',');
+                const orderCountBadge = ord.order_ids.length > 1 
+                    ? `<div class="mt-2"><span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-md shadow-sm">⚡ ${ord.order_ids.length} Consolidated Orders</span></div>` 
+                    : '';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-white/5 border-b border-gray-800 text-top";
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-white">
-                        <div>${escapeHtml(ord.customer_name)}</div>
-                        <div class="text-[10px] text-gray-500">${escapeHtml(ord.customer_email || '')}</div>
+                    <td class="p-3">
+                        <div class="text-sm font-bold text-white">${escapeHtml(ord.customer_name)}</div>
+                        <div class="text-xs text-gray-400 mt-0.5">${escapeHtml(ord.customer_email || '')}</div>
+                        ${orderCountBadge}
                     </td>
                     <td class="p-3">
-                        <div class="text-gray-400 max-w-xs leading-relaxed text-[11px]">${escapeHtml(ord.shipping_address || '')}</div>
-                        <a href="${mapsPinUrl}" target="_blank" class="mt-2 inline-flex items-center gap-1.5 text-[10px] text-red-400 hover:text-red-300 font-bold bg-red-950/20 px-2 py-0.5 rounded border border-red-500/20 transition-colors">
-                            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Link Destination
-                        </a>
+                        <div class="text-sm text-gray-200 max-w-md leading-relaxed break-all font-mono font-medium">${escapeHtml(addressDisplayText)}</div>
+                        ${hasFbLink ? `
+                            <a href="${escapeHtml(rawFb)}" target="_blank" rel="noopener noreferrer" class="mt-2.5 inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-bold bg-blue-950/40 px-3 py-1 rounded-lg border border-blue-500/40 transition-colors">
+                                <i data-lucide="external-link" class="w-4 h-4"></i> Open Facebook Profile
+                            </a>
+                        ` : `
+                            <span class="mt-2 inline-block text-xs text-gray-500 italic">No Facebook Link</span>
+                        `}
                     </td>
                     <td class="p-3">${itemsListHTML}</td>
-                    <td class="p-3 font-mono text-green-400 font-bold">${formatPHP(totalOrderPrice)}</td>
+                    <td class="p-3 font-mono text-green-400 font-bold text-sm">${formatPHP(totalOrderPrice)}</td>
                     <td class="p-3">
-                        <select onchange="changeOrderStatus('${escapeHtml(ord.id)}', this.value)" class="bg-[#2a2a2a] border ${selectColorClass} rounded px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 transition-colors cursor-pointer">
+                        <select onchange="changeGroupOrderStatus('${escapeHtml(joinedOrderIds)}', this.value)" class="bg-[#2a2a2a] border ${selectColorClass} rounded px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 transition-colors cursor-pointer">
                             <option value="Pending" ${statusVal === 'Pending' ? 'selected' : ''} class="text-yellow-500 font-bold bg-[#1e1e1e]">⏳ Pending</option>
                             <option value="Processed" ${statusVal === 'Processed' ? 'selected' : ''} class="text-green-400 font-bold bg-[#1e1e1e]">✅ Processed</option>
                             <option value="Shipped" ${statusVal === 'Shipped' ? 'selected' : ''} class="text-blue-400 font-bold bg-[#1e1e1e]">📦 Shipped</option>
@@ -1922,17 +1992,17 @@
                     </td>
                     <td class="p-3 text-center">
                         <div class="flex flex-col sm:flex-row gap-1.5 justify-center items-center mb-1.5">
-                            <button type="button" onclick="processUiInvoice('unified', '${escapeHtml(ord.id)}')" class="px-2 py-1 text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
+                            <button type="button" onclick="processGroupInvoice('unified', '${escapeHtml(joinedOrderIds)}', '${escapeHtml(ord.customer_name)}', '${escapeHtml(ord.customer_email || '')}')" class="px-2 py-1 text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
                                 📬 Combo
                             </button>
-                            <button type="button" onclick="processUiInvoice('sale', '${escapeHtml(ord.id)}')" class="px-2 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
+                            <button type="button" onclick="processGroupInvoice('sale', '${escapeHtml(joinedOrderIds)}', '${escapeHtml(ord.customer_name)}', '${escapeHtml(ord.customer_email || '')}')" class="px-2 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
                                 🛒 Sale
                             </button>
-                            <button type="button" onclick="processUiInvoice('bid', null, '${escapeHtml(ord.customer_name)}', '${escapeHtml(ord.customer_email || '')}')" class="px-2 py-1 text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
+                            <button type="button" onclick="processGroupInvoice('bid', '${escapeHtml(joinedOrderIds)}', '${escapeHtml(ord.customer_name)}', '${escapeHtml(ord.customer_email || '')}')" class="px-2 py-1 text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors shadow-sm w-full sm:w-auto whitespace-nowrap">
                                 🏆 Bids
                             </button>
                         </div>
-                        <button type="button" onclick="purgeOrderLogRecord('${escapeHtml(ord.id)}', this)" class="text-red-400 text-[10px] hover:underline hover:text-red-300 transition-colors font-medium block mx-auto">Clear Row</button>
+                        <button type="button" onclick="purgeGroupOrderLogRecord('${escapeHtml(joinedOrderIds)}', this)" class="text-red-400 text-[10px] hover:underline hover:text-red-300 transition-colors font-medium block mx-auto">Clear Row</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1940,6 +2010,45 @@
 
             lucide.createIcons();
         }
+
+        window.processGroupInvoice = async function(type, joinedOrderIds, custName, custEmail) {
+            const ids = joinedOrderIds.split(',');
+            if (type === 'bid') {
+                await processUiInvoice('bid', null, custName, custEmail);
+            } else {
+                for (const id of ids) {
+                    await processUiInvoice(type, id.trim());
+                }
+            }
+        };
+
+        window.changeGroupOrderStatus = async function(joinedOrderIds, newStatus) {
+            const ids = joinedOrderIds.split(',');
+            for (const id of ids) {
+                await changeOrderStatus(id.trim(), newStatus);
+            }
+        };
+
+        window.purgeGroupOrderLogRecord = async function(joinedOrderIds, buttonEl) {
+            if (!buttonEl.dataset.confirmed) {
+                buttonEl.dataset.confirmed = "true";
+                buttonEl.innerText = "Are you sure? Click again to confirm";
+                buttonEl.className = "bg-red-950/80 border border-red-500/40 text-red-200 text-[10px] px-2 py-1 rounded transition-all font-bold hover:bg-red-900/80";
+                setTimeout(() => {
+                    if (buttonEl && buttonEl.dataset.confirmed) {
+                        buttonEl.removeAttribute('data-confirmed');
+                        buttonEl.innerText = "Clear Row";
+                        buttonEl.className = "text-red-400 text-xs hover:underline hover:text-red-300 transition-colors font-medium";
+                    }
+                }, 4000);
+                return;
+            }
+
+            const ids = joinedOrderIds.split(',');
+            for (const id of ids) {
+                await purgeOrderLogRecord(id.trim(), buttonEl);
+            }
+        };
 
         window.processUiInvoice = async function(type, orderId = null, custName = null, custEmail = null) {
             if (!supabaseClient) {
@@ -2008,6 +2117,21 @@
             }
     
             try {
+                // 1. Fetch user profiles for Facebook links
+                let profilesMap = {};
+                try {
+                    const { data: profs } = await supabaseClient.from('profiles').select('id, name, facebook_page');
+                    if (profs) {
+                        profs.forEach(p => {
+                            if (p.id) profilesMap[p.id] = p.facebook_page;
+                            if (p.name) profilesMap[p.name.toLowerCase().trim()] = p.facebook_page;
+                        });
+                    }
+                } catch (e) {
+                    console.warn("Failed to fetch profiles for bids ledger:", e);
+                }
+
+                // 2. Fetch admin bids ledger data
                 const { data, error } = await supabaseClient.rpc('get_admin_bids_ledger_rpc', {
                     p_view_type: currentAdminBidView
                 });
@@ -2022,6 +2146,7 @@
     
                 const sortColumn = currentAdminBidView === 'live' ? 'bid_timestamp' : 'archived_at';
                 
+                // Filter top high bid log per card / order
                 const highBidsMap = {};
                 data.forEach(log => {
                     const trackingKey = currentAdminBidView === 'live' ? String(log.card_id) : `${log.card_id}_${log.order_id || 'manual'}`;
@@ -2031,24 +2156,73 @@
                 });
     
                 const uniqueHighBids = Object.values(highBidsMap);
-                uniqueHighBids.sort((a, b) => new Date(b[sortColumn]).getTime() - new Date(a[sortColumn]).getTime());
-    
+
+                // 3. CONSOLIDATION ENGINE: Group bids by collector (Email or Bidder Username)
+                const groupedBids = {};
                 uniqueHighBids.forEach(log => {
-                    const card = items.find(i => i.id == log.card_id);
-                    const nameDisplay = card ? `${card.name} (${card.set})` : `Card Reference Code #${log.card_id}`;
-                    
-                    const timeStr = log.bid_timestamp || log.archived_at || new Date().toISOString();
-                    
-                    const emailDisplay = log.email 
-                        ? `<div class="text-[10px] text-gray-500 font-normal mt-0.5">${escapeHtml(log.email)}</div>` 
-                        : `<div class="text-[10px] text-gray-600 font-normal italic mt-0.5">No email linked</div>`;
-    
+                    const key = (log.email || log.bidder || 'unknown').toLowerCase().trim();
+                    if (!groupedBids[key]) {
+                        groupedBids[key] = {
+                            bidder: log.bidder,
+                            email: log.email,
+                            user_id: log.user_id,
+                            bids: [log],
+                            totalAmount: Number(log.amount),
+                            latestTimestamp: log[sortColumn]
+                        };
+                    } else {
+                        groupedBids[key].bids.push(log);
+                        groupedBids[key].totalAmount += Number(log.amount);
+                        if (new Date(log[sortColumn]).getTime() > new Date(groupedBids[key].latestTimestamp).getTime()) {
+                            groupedBids[key].latestTimestamp = log[sortColumn];
+                        }
+                    }
+                });
+
+                const consolidatedBids = Object.values(groupedBids);
+                consolidatedBids.sort((a, b) => new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime());
+
+                consolidatedBids.forEach(group => {
+                    // Build cards trace box
+                    let cardsListHTML = '<div class="space-y-1 bg-black/40 p-1.5 rounded border border-gray-800">';
+                    const cardIds = [];
+                    group.bids.forEach(b => {
+                        cardIds.push(b.card_id);
+                        const card = items.find(i => i.id == b.card_id);
+                        const nameDisplay = card ? `${card.name} (${card.set})` : `Card Reference #${b.card_id}`;
+                        cardsListHTML += `<div class="text-[11px] text-amber-400 font-medium">${escapeHtml(nameDisplay)} <span class="text-gray-400 font-mono">(${formatPHP(b.amount)})</span></div>`;
+                    });
+                    cardsListHTML += '</div>';
+
+                    const cardIdsJoined = cardIds.join(',');
+
+                    // Resolve Facebook link
+                    let rawFb = "";
+                    if (group.user_id && profilesMap[group.user_id]) {
+                        rawFb = profilesMap[group.user_id];
+                    }
+                    if (!rawFb && group.bidder && profilesMap[group.bidder.toLowerCase().trim()]) {
+                        rawFb = profilesMap[group.bidder.toLowerCase().trim()];
+                    }
+                    if (rawFb && !rawFb.startsWith('http://') && !rawFb.startsWith('https://')) {
+                        rawFb = 'https://' + rawFb;
+                    }
+                    const hasFbLink = rawFb && rawFb.length > 5;
+
+                    const emailDisplay = group.email 
+                        ? `<div class="text-xs text-gray-400 mt-0.5">${escapeHtml(group.email)}</div>` 
+                        : `<div class="text-xs text-gray-600 italic mt-0.5">No email linked</div>`;
+
+                    const activeBidsBadge = group.bids.length > 1 
+                        ? `<div class="mt-1.5"><span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-md shadow-sm">⚡ ${group.bids.length} ${currentAdminBidView === 'live' ? 'Active' : 'Archived'} Bids</span></div>` 
+                        : '';
+
                     let actionCellHTML = '';
                     if (currentAdminBidView === 'live') {
                         actionCellHTML = `
                             <td class="p-3 text-center">
-                                <button type="button" onclick="archiveLiveBidsForCard(${log.card_id}, this)" class="bg-amber-600/20 hover:bg-amber-600 border border-amber-500/30 hover:text-white text-amber-400 text-[10px] font-black px-2.5 py-1 rounded transition-all shadow-sm uppercase tracking-wider">
-                                    📦 Archive Card & Bids
+                                <button type="button" onclick="archiveLiveBidsForGroup('${escapeHtml(cardIdsJoined)}', this)" class="bg-amber-600/20 hover:bg-amber-600 border border-amber-500/30 hover:text-white text-amber-400 text-[10px] font-black px-2.5 py-1 rounded transition-all shadow-sm uppercase tracking-wider">
+                                    📦 Archive Cards & Bids
                                 </button>
                             </td>
                         `;
@@ -2059,17 +2233,25 @@
                             </td>
                         `;
                     }
-    
+
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-white/5 border-b border-gray-800/60 text-top";
                     tr.innerHTML = `
-                        <td class="p-3 font-semibold text-white truncate max-w-[200px]">${escapeHtml(nameDisplay)}</td>
-                        <td class="p-3 text-gray-300 font-mono text-[11px]">
-                            <div class="font-bold text-white">${escapeHtml(log.bidder)}</div>
+                        <td class="p-3">${cardsListHTML}</td>
+                        <td class="p-3">
+                            <div class="text-sm font-bold text-white">${escapeHtml(group.bidder)}</div>
                             ${emailDisplay}
+                            ${activeBidsBadge}
+                            ${hasFbLink ? `
+                                <div class="mt-2">
+                                    <a href="${escapeHtml(rawFb)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-bold bg-blue-950/40 px-2.5 py-1 rounded-lg border border-blue-500/40 transition-colors">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Open Facebook Profile
+                                    </a>
+                                </div>
+                            ` : ''}
                         </td>
-                        <td class="p-3 font-mono text-amber-400 font-bold">${formatPHP(log.amount)}</td>
-                        <td class="p-3 text-right text-gray-400 font-medium bg-white/[0.01]">${formatOrderDate(timeStr)}</td>
+                        <td class="p-3 font-mono text-amber-400 font-bold text-sm">${formatPHP(group.totalAmount)}</td>
+                        <td class="p-3 text-right text-gray-400 font-medium bg-white/[0.01]">${formatOrderDate(group.latestTimestamp)}</td>
                         ${actionCellHTML}
                     `;
                     tbody.appendChild(tr);
@@ -2079,6 +2261,85 @@
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-red-400 font-bold">Error reading cloud data: ${escapeHtml(err.message)}</td></tr>`;
             }
             lucide.createIcons();
+        };
+
+        window.archiveLiveBidsForGroup = async function(cardIdsJoined, buttonEl) {
+            if (!supabaseClient) {
+                showCustomToast("Simulator active. Connect Supabase to archive live entries.", "error");
+                return;
+            }
+
+            const ids = String(cardIdsJoined).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+            if (ids.length === 0) return;
+
+            const confirmed = await askCustomConfirmation("Archive Auction Bids", `Are you sure you want to finalize this auction for all ${ids.length} cards for this collector? This will move these cards into your separate archived cards table and clear them from active storefront layouts.`);
+            if (!confirmed) return;
+
+            const originalText = buttonEl.innerText;
+            buttonEl.disabled = true;
+            buttonEl.innerHTML = `<i data-lucide="loader" class="animate-spin w-3 h-3 inline-block mr-1"></i> Moving to Archive...`;
+            lucide.createIcons();
+
+            try {
+                for (const cardId of ids) {
+                    const { data: cardData, error: cardFetchErr } = await supabaseClient
+                        .from('cards')
+                        .select('*')
+                        .eq('id', cardId)
+                        .single();
+
+                    if (cardFetchErr) continue;
+
+                    const { data: activeBids, error: fetchErr } = await supabaseClient
+                        .from('bid_history')
+                        .select('*')
+                        .eq('card_id', cardId);
+
+                    if (!fetchErr && activeBids && activeBids.length > 0) {
+                        const archiveRows = activeBids.map(b => ({
+                            card_id: b.card_id,
+                            bidder: b.bidder,
+                            amount: b.amount,
+                            timestamp: b.timestamp,
+                            order_id: 'MANUAL_DASHBOARD_CLEAR'
+                        }));
+
+                        await supabaseClient.from('archived_bid_history').insert(archiveRows);
+                        await supabaseClient.from('bid_history').delete().eq('card_id', cardId);
+                    }
+
+                    await supabaseClient.from('archived_cards').insert([{
+                        id: cardData.id,
+                        name: cardData.name,
+                        set_code: cardData.set_code,
+                        rarity: cardData.rarity,
+                        price: cardData.price,
+                        stock: cardData.stock,
+                        front_img: cardData.front_img,
+                        back_img: cardData.back_img,
+                        type: cardData.type,
+                        bidding_ends_at: cardData.bidding_ends_at,
+                        top_bidder: cardData.top_bidder,
+                        condition: cardData.condition
+                    }]);
+
+                    await supabaseClient.from('cards').delete().eq('id', cardId);
+                }
+
+                showCustomToast("✨ Success! All cards for this bidder moved to your dedicated archived cards table.", "success");
+                await fetchLiveInventory(true);
+                await window.renderAdminBidsLedger();
+
+            } catch (err) {
+                console.error("Archival migration execution crash:", err);
+                showCustomToast(`❌ Action Interrupted: ${err.message || 'Check network connection state'}`, "error");
+            } finally {
+                if (buttonEl) {
+                    buttonEl.disabled = false;
+                    buttonEl.innerText = originalText;
+                    lucide.createIcons();
+                }
+            }
         };
     
         window.archiveLiveBidsForCard = async function(cardId, buttonEl) {
