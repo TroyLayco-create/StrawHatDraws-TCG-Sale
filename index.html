@@ -495,7 +495,7 @@
                             <th class="p-3">Card Target Definition</th>
                             <th class="p-3">Collector Username</th>
                             <th class="p-3">Bid Amount Value</th>
-                            <th class="p-3 text-right">Timestamp Ledger Metric</th>
+                            <th class="p-3">Process Status</th>
                             <th class="p-3 text-center">Management Action</th>
                         </tr>
                     </thead>
@@ -754,13 +754,15 @@
 
         function safeParseBiddingTime(dateStr) {
             if (!dateStr) return new Date(0);
-            // If it already explicitly states a timezone (ends with Z or has an offset), parse normally
-            if (dateStr.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(dateStr)) {
-                return new Date(dateStr);
+            const str = String(dateStr).trim();
+            // Normalize spaces to ISO 'T' format for Safari / iOS compatibility
+            const isoStr = str.replace(' ', 'T');
+            // If it already has timezone offset (+08:00, -05:00, Z), parse directly
+            if (isoStr.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(isoStr)) {
+                return new Date(isoStr);
             }
-            // Otherwise, normalize it and explicitly anchor it to Philippine Time (+08:00)
-            const normalizedStr = dateStr.trim().replace(' ', 'T');
-            return new Date(normalizedStr.includes('T') ? normalizedStr + '+08:00' : normalizedStr + 'T00:00:00+08:00');
+            // Otherwise, strictly anchor un-offset strings to Philippine Time (+08:00)
+            return new Date(isoStr.includes('T') ? isoStr + '+08:00' : isoStr + 'T00:00:00+08:00');
         }
 
         function formatPHP(num) {
@@ -783,8 +785,9 @@
 
         function formatOrderDate(datetimeStr) {
             if (!datetimeStr) return "Just now";
-            const dt = new Date(datetimeStr);
+            const dt = safeParseBiddingTime(datetimeStr);
             return dt.toLocaleString('en-PH', {
+                timeZone: 'Asia/Manila', // Forces exact Philippine Standard Time (GMT+8)
                 month: 'short',
                 day: 'numeric',
                 hour: 'numeric',
@@ -1441,15 +1444,14 @@
             // --- 🔒 TIMEZONE-SAFE ANTI-SNIPE GATEKEEPER MECHANISM ---
             const fiveMinutesInMs = 5 * 60 * 1000;
             
-            // 1. Force the database end time to parse with a fixed Philippine GMT+8 timezone offset
-            const biddingEndTimePST = safeParseBiddingTime(card.bidding_ends_at).getTime();
+            // 1. Parse database end time into absolute UTC epoch milliseconds (PHT anchored)
+            const biddingEndTimeMs = safeParseBiddingTime(card.bidding_ends_at).getTime();
             
-            // 2. Get the current global absolute UTC time and apply the exact Philippine offset (+8 hours)
+            // 2. Current global UTC epoch milliseconds (device timezone independent)
             const currentGlobalUtc = Date.now();
-            const currentPstTime = currentGlobalUtc + (new Date().getTimezoneOffset() * 60000) + (8 * 3600000);
             
-            // 3. Calculate time remaining purely based on Manila time
-            const timeRemainingPST = biddingEndTimePST - currentPstTime;
+            // 3. Absolute remaining time until auction closes
+            const timeRemainingPST = biddingEndTimeMs - currentGlobalUtc;
 
             if (card.bidding_ends_at && timeRemainingPST < 0) {
                 showCustomToast("This auction bidding window has already closed!", "error");
@@ -2173,14 +2175,14 @@
                     } else {
                         groupedBids[key].bids.push(log);
                         groupedBids[key].totalAmount += Number(log.amount);
-                        if (new Date(log[sortColumn]).getTime() > new Date(groupedBids[key].latestTimestamp).getTime()) {
-                            groupedBids[key].latestTimestamp = log[sortColumn];
-                        }
+                        if (safeParseBiddingTime(log[sortColumn]).getTime() > safeParseBiddingTime(groupedBids[key].latestTimestamp).getTime()) {
+                        groupedBids[key].latestTimestamp = log[sortColumn];
                     }
-                });
+                }
+            });
 
-                const consolidatedBids = Object.values(groupedBids);
-                consolidatedBids.sort((a, b) => new Date(b.latestTimestamp).getTime() - new Date(a.latestTimestamp).getTime());
+            const consolidatedBids = Object.values(groupedBids);
+            consolidatedBids.sort((a, b) => safeParseBiddingTime(b.latestTimestamp).getTime() - safeParseBiddingTime(a.latestTimestamp).getTime());
 
                 consolidatedBids.forEach(group => {
                     // Build cards trace box
@@ -2251,7 +2253,14 @@
                             ` : ''}
                         </td>
                         <td class="p-3 font-mono text-amber-400 font-bold text-sm">${formatPHP(group.totalAmount)}</td>
-                        <td class="p-3 text-right text-gray-400 font-medium bg-white/[0.01]">${formatOrderDate(group.latestTimestamp)}</td>
+                        <td class="p-3">
+                            <select onchange="this.className = 'bg-[#2a2a2a] border rounded px-2.5 py-1 text-xs font-bold focus:outline-none cursor-pointer ' + (this.value === 'Processed' ? 'text-green-400 border-green-500/30' : this.value === 'Shipped' ? 'text-blue-400 border-blue-500/30' : this.value === 'Cancelled' ? 'text-red-400 border-red-500/30' : 'text-yellow-500 border-yellow-500/30')" class="bg-[#2a2a2a] border text-yellow-500 border-yellow-500/30 rounded px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-red-500 transition-colors cursor-pointer">
+                                <option value="Pending" class="text-yellow-500 font-bold bg-[#1e1e1e]">⏳ Pending</option>
+                                <option value="Processed" class="text-green-400 font-bold bg-[#1e1e1e]">✅ Processed</option>
+                                <option value="Shipped" class="text-blue-400 font-bold bg-[#1e1e1e]">📦 Shipped</option>
+                                <option value="Cancelled" class="text-red-400 font-bold bg-[#1e1e1e]">❌ Cancelled</option>
+                            </select>
+                        </td>
                         ${actionCellHTML}
                     `;
                     tbody.appendChild(tr);
@@ -2602,14 +2611,14 @@
             textOutput += `==================================================\n`;
             textOutput += `Item Card Name : ${card.name}\n`;
             textOutput += `Set Reference  : ${card.set} (${card.rarity})\n`;
-            textOutput += `Compiled Date  : ${new Date().toLocaleString('en-PH')}\n`;
+            textOutput += `Compiled Date  : ${new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}\n`;
             textOutput += `==================================================\n\n`;
             textOutput += `VERIFIED CHRONOLOGICAL BID HISTORY LOGS:\n`;
             textOutput += `--------------------------------------------------\n`;
             
             logs.forEach((log, index) => {
                 const sequenceNum = logs.length - index;
-                const entryDate = new Date(log.timestamp).toLocaleString('en-PH');
+                const entryDate = safeParseBiddingTime(log.timestamp).toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
                 textOutput += `[ENTRY #0${sequenceNum}] Recorded: ${entryDate}\n`;
                 textOutput += `  Collector Name : ${log.bidder}\n`;
                 textOutput += `  Bid Valuation  : PHP ${Number(log.amount).toLocaleString()}\n`;
@@ -2889,7 +2898,7 @@
                 front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                 back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                 type: normalizedDbType,
-                bidding_ends_at: typeVal === 'bidding' ? (biddingEndsVal ? new Date(biddingEndsVal).toISOString() : null) : null,
+                bidding_ends_at: typeVal === 'bidding' ? (biddingEndsVal ? safeParseBiddingTime(biddingEndsVal).toISOString() : null) : null,
                 top_bidder: typeVal === 'bidding' ? 'No bids yet' : null
             };
             const { error } = await supabaseClient.from('cards').insert([cardPayload]);
