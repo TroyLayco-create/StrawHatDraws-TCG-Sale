@@ -1,0 +1,17 @@
+{
+  "name": "StrawHatDraws Admin",
+  "short_name": "SHD Admin",
+  "description": "Admin Control Center for SHD TCG Sales",
+  "start_url": "./admin.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/891/891462.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
