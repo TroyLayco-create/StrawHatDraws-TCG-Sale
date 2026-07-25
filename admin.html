@@ -71,7 +71,6 @@
     <!-- Top Sticky Mobile Header -->
     <header class="bg-[#1e1e1e] border-b border-gray-800 sticky top-0 z-30 px-4 py-3 flex justify-between items-center shadow-md">
         <div class="flex items-center gap-2.5">
-            <!-- Custom Image Logo -->
             <div class="bg-red-600 px-2 py-1 rounded-lg text-white font-black text-xs">SHD</div>
             <div>
                 <h1 id="mobile-title" class="text-sm font-bold text-white leading-tight">Overview</h1>
@@ -93,20 +92,49 @@
     <!-- Main Container Body -->
     <main class="p-4 flex-1 max-w-lg mx-auto w-full">
 
-        <!-- TAB 1: OVERVIEW & METRICS -->
+        <!-- TAB 1: OVERVIEW & METRICS (INTERACTIVE DASHBOARD) -->
         <section id="view-overview" class="space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl flex flex-col justify-between">
-                    <span class="text-[10px] uppercase font-bold text-gray-400">Pending Orders</span>
-                    <h2 id="stat-pending-orders" class="text-3xl font-black text-amber-400 mt-2">0</h2>
+            
+            <!-- 💵 FINANCIAL ANALYTICS BAR -->
+            <div class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl space-y-3 shadow-lg">
+                <div class="text-[10px] uppercase font-black text-gray-400 tracking-wider flex items-center justify-between">
+                    <span class="flex items-center gap-1.5"><i data-lucide="circle-dollar-sign" class="w-4 h-4 text-emerald-400"></i> Store Revenue Summary</span>
+                    <span class="text-[9px] text-gray-500 font-mono">LIVE SYNC</span>
                 </div>
-                <div class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl flex flex-col justify-between">
-                    <span class="text-[10px] uppercase font-bold text-gray-400">Active Auctions</span>
-                    <h2 id="stat-active-auctions" class="text-3xl font-black text-red-500 mt-2">0</h2>
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div class="bg-amber-950/20 border border-amber-500/20 p-3 rounded-xl">
+                        <span class="text-[10px] font-bold text-amber-400 uppercase">Pending Collections</span>
+                        <h2 id="stat-pending-revenue" class="text-xl font-black text-amber-400 mt-1">₱0</h2>
+                    </div>
+                    <div class="bg-emerald-950/20 border border-emerald-500/20 p-3 rounded-xl">
+                        <span class="text-[10px] font-bold text-emerald-400 uppercase">Completed Sales</span>
+                        <h2 id="stat-completed-sales" class="text-xl font-black text-emerald-400 mt-1">₱0</h2>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl flex justify-between items-center">
+            <!-- 📊 METRIC GRID -->
+            <div class="grid grid-cols-2 gap-3">
+                <div onclick="switchTab('orders')" class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl flex flex-col justify-between cursor-pointer active:scale-95 transition-transform hover:border-amber-500/50 shadow-md">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] uppercase font-bold text-gray-400">Pending Orders</span>
+                        <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5 text-gray-500"></i>
+                    </div>
+                    <h2 id="stat-pending-orders" class="text-3xl font-black text-amber-400 mt-2">0</h2>
+                </div>
+                <div onclick="switchTab('bids')" class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl flex flex-col justify-between cursor-pointer active:scale-95 transition-transform hover:border-red-500/50 shadow-md">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] uppercase font-bold text-gray-400">Active Auctions</span>
+                        <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5 text-gray-500"></i>
+                    </div>
+                    <div class="flex justify-between items-end mt-2">
+                        <h2 id="stat-active-auctions" class="text-3xl font-black text-red-500">0</h2>
+                        <span id="stat-auction-value" class="text-[10px] font-mono text-gray-400 font-bold mb-1">₱0 pool</span>
+                    </div>
+                </div>
+            </div>
+
+            <div onclick="switchTab('add')" class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl flex justify-between items-center cursor-pointer active:scale-95 transition-transform hover:border-emerald-500/50 shadow-md">
                 <div>
                     <span class="text-[10px] uppercase font-bold text-gray-400">Total Store Inventory</span>
                     <h3 id="stat-total-stock" class="text-xl font-bold text-emerald-400 mt-0.5">0 Items</h3>
@@ -116,14 +144,29 @@
                 </div>
             </div>
 
+            <!-- ⚡ REAL-TIME LIVE ACTIVITY FEED WIDGET (ENHANCED DESIGN) -->
+            <div class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl space-y-3 shadow-xl">
+                <div class="flex justify-between items-center border-b border-gray-800/80 pb-2.5">
+                    <span class="text-[11px] uppercase font-black text-gray-200 tracking-wider flex items-center gap-2">
+                        <i data-lucide="zap" class="w-4 h-4 text-amber-400 fill-amber-400/20"></i> Live Store Activity Feed
+                    </span>
+                    <span class="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> LIVE
+                    </span>
+                </div>
+                <div id="activity-feed-container" class="space-y-2">
+                    <div class="text-center py-6 text-gray-500 text-xs italic">Connecting live feed...</div>
+                </div>
+            </div>
+
             <div class="bg-[#1a1a1a] border border-gray-800/80 rounded-2xl p-4 space-y-3">
                 <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
                     <i data-lucide="smartphone" class="w-4 h-4 text-red-500"></i> Mobile Control Center Tips
                 </h3>
                 <ul class="text-xs text-gray-400 space-y-2 list-disc pl-4 leading-relaxed">
-                    <li>Tap <strong class="text-gray-200">Orders</strong> tab below to view incoming sales & direct customer FB links.</li>
-                    <li>Tap <strong class="text-gray-200">Auctions</strong> tab to monitor high bidders in real time.</li>
-                    <li>Enable **Bell Notifications** at top right to allow **Sound + Vibration** alerts for new sales and bids.</li>
+                    <li><strong class="text-amber-400">Live Activity Feed</strong> tracks sales, bids, and updates in PST time[cite: 1].</li>
+                    <li>Changing order status to <strong class="text-emerald-400">Processed / Shipped</strong> updates revenue in real time[cite: 1].</li>
+                    <li>Tap any metric card above to jump straight to its detail tab![cite: 1]</li>
                 </ul>
             </div>
         </section>
@@ -226,6 +269,16 @@
             auth: { persistSession: true, autoRefreshToken: true }
         });
 
+        let currentGroupedOrders = {};
+        let activityLogs = [];
+
+        // Helper function: Formats Date + Time strictly in Philippine Standard Time (e.g. "Jul 23 • 1:07 PM")
+        function getPSTDateTimeString(dateObj = new Date()) {
+            const d = dateObj.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
+            const t = dateObj.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
+            return `${d} • ${t}`;
+        }
+
         // Tab Switching Engine
         function switchTab(tabName) {
             ['overview', 'orders', 'bids', 'add'].forEach(t => {
@@ -262,11 +315,18 @@
         }
 
         function requestAlertPermissions() {
-            if ("Notification" in window) {
+            playAlert('purchase');
+            if (!("Notification" in window)) {
+                alert("⚠️ Web Notifications are not supported by this mobile browser.");
+                return;
+            }
+            if (Notification.permission === "granted") {
+                alert("🔔 Push Notifications are Active!");
+            } else if (Notification.permission === "denied") {
+                alert("⚠️ Notifications are blocked in browser settings.");
+            } else {
                 Notification.requestPermission().then(perm => {
-                    if (perm === "granted") {
-                        alert("Push & Sound Notifications Enabled!");
-                    }
+                    if (perm === "granted") alert("✅ Push & Sound Notifications Enabled!");
                 });
             }
         }
@@ -275,6 +335,66 @@
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(title, { body });
             }
+        }
+
+        // REDESIGNED LIVE ACTIVITY LOG ENGINE (HIGH CONTRAST & VISUAL HIERARCHY)
+        function pushActivity(item) {
+            activityLogs.unshift(item);
+            if (activityLogs.length > 5) activityLogs.pop();
+            renderActivityFeed();
+        }
+
+        function renderActivityFeed() {
+            const feedEl = document.getElementById('activity-feed-container');
+            if (!feedEl) return;
+
+            if (activityLogs.length === 0) {
+                feedEl.innerHTML = '<div class="text-center py-6 text-gray-500 text-xs italic">No activity recorded today.</div>';
+                return;
+            }
+
+            feedEl.innerHTML = activityLogs.map(item => {
+                let accentBorder = 'border-l-emerald-500';
+                let iconBg = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                let badgeBg = 'bg-emerald-950/80 text-emerald-400 border-emerald-500/30';
+                let priceColor = 'text-emerald-400';
+
+                if (item.type === 'bid') {
+                    accentBorder = 'border-l-amber-500';
+                    iconBg = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                    badgeBg = 'bg-amber-950/80 text-amber-400 border-amber-500/30';
+                    priceColor = 'text-amber-400';
+                } else if (item.type === 'status') {
+                    accentBorder = 'border-l-blue-500';
+                    iconBg = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+                    badgeBg = 'bg-blue-950/80 text-blue-400 border-blue-500/30';
+                    priceColor = 'text-blue-400';
+                }
+
+                return `
+                    <div class="relative flex items-center justify-between bg-[#161616] hover:bg-[#1a1a1a] border border-gray-800/80 border-l-4 ${accentBorder} p-3 rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
+                        <div class="flex items-center gap-3 min-w-0 pr-2">
+                            <div class="w-9 h-9 rounded-xl ${iconBg} border flex items-center justify-center shrink-0 shadow-inner">
+                                <i data-lucide="${item.icon}" class="w-4 h-4"></i>
+                            </div>
+                            
+                            <div class="min-w-0 space-y-0.5">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="font-extrabold text-white text-xs truncate max-w-[130px] sm:max-w-[180px]">${escapeHtml(item.name)}</span>
+                                    <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 border rounded ${badgeBg}">${escapeHtml(item.badgeText)}</span>
+                                </div>
+                                <div class="text-[11px] text-gray-400 truncate font-medium">${escapeHtml(item.subtitle)}</div>
+                            </div>
+                        </div>
+
+                        <div class="text-right shrink-0 space-y-0.5">
+                            ${item.price ? `<div class="font-mono text-xs font-black ${priceColor}">${escapeHtml(item.price)}</div>` : ''}
+                            <div class="text-[9px] text-gray-500 font-mono font-medium">${escapeHtml(item.timeStr)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
         }
 
         // Auth Listener
@@ -316,38 +436,222 @@
             await loadOrders();
             await loadBids();
             await updateMetrics();
+            await seedInitialActivityFeed();
 
             supabaseClient
                 .channel('mobile-live-channel')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Orders' }, (payload) => {
                     playAlert('purchase');
-                    triggerNotification("🚨 NEW PURCHASE!", `Order from ${payload.new.customer_name || 'Customer'}`);
+                    const name = payload.new.customer_name || 'Customer';
+                    const itemsArr = payload.new.items_ordered || [];
+                    const total = itemsArr.reduce((s, i) => s + Number(i.price || 0), 0);
+                    
+                    pushActivity({
+                        type: 'purchase',
+                        icon: 'shopping-bag',
+                        badgeText: 'SALE',
+                        name: name,
+                        subtitle: `${itemsArr.length} item${itemsArr.length > 1 ? 's' : ''} ordered`,
+                        price: `₱${total.toLocaleString()}`,
+                        timeStr: getPSTDateTimeString()
+                    });
+
+                    triggerNotification("🚨 NEW PURCHASE!", `Order from ${name}`);
                     loadOrders();
                     updateMetrics();
                 })
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards' }, (payload) => {
                     playAlert('bid');
-                    triggerNotification("🔨 NEW BID!", `${payload.new.top_bidder || 'Someone'} bid ₱${payload.new.price}`);
+                    const cardName = payload.new.name || 'Card';
+                    const bidder = payload.new.top_bidder || 'Someone';
+                    const price = Number(payload.new.price || 0);
+
+                    pushActivity({
+                        type: 'bid',
+                        icon: 'gavel',
+                        badgeText: 'BID',
+                        name: bidder,
+                        subtitle: `Top bid on ${cardName}`,
+                        price: `₱${price.toLocaleString()}`,
+                        timeStr: getPSTDateTimeString()
+                    });
+
+                    triggerNotification("🔨 NEW BID!", `${bidder} bid ₱${price.toLocaleString()}`);
                     loadBids();
+                    loadOrders();
+                    updateMetrics();
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Orders' }, (payload) => {
+                    const name = payload.new.customer_name || 'Customer';
+                    const status = payload.new.order_status || 'UPDATED';
+                    
+                    pushActivity({
+                        type: 'status',
+                        icon: 'package',
+                        badgeText: status.toUpperCase(),
+                        name: name,
+                        subtitle: `Order status set to ${status}`,
+                        price: null,
+                        timeStr: getPSTDateTimeString()
+                    });
+
+                    loadOrders();
+                    updateMetrics();
                 })
                 .subscribe();
         }
 
+        async function seedInitialActivityFeed() {
+            const [{ data: orders }, { data: cards }] = await Promise.all([
+                supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }).limit(5),
+                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid').order('id', { ascending: false }).limit(5)
+            ]);
+
+            let combinedEvents = [];
+
+            (orders || []).forEach(o => {
+                const total = (o.items_ordered || []).reduce((s, i) => s + Number(i.price || 0), 0);
+                const dt = o.created_at ? getPSTDateTimeString(new Date(o.created_at)) : 'Recent';
+                const timeMs = o.created_at ? new Date(o.created_at).getTime() : 0;
+                const itemCount = (o.items_ordered || []).length;
+
+                combinedEvents.push({
+                    timestamp: timeMs,
+                    type: 'purchase',
+                    icon: 'shopping-bag',
+                    badgeText: 'SALE',
+                    name: o.customer_name || 'Customer',
+                    subtitle: `${itemCount} item${itemCount > 1 ? 's' : ''} ordered`,
+                    price: `₱${total.toLocaleString()}`,
+                    timeStr: dt
+                });
+            });
+
+            (cards || []).forEach(c => {
+                if (c.top_bidder && c.top_bidder !== 'No bids yet') {
+                    combinedEvents.push({
+                        timestamp: 0,
+                        type: 'bid',
+                        icon: 'gavel',
+                        badgeText: 'BID',
+                        name: c.top_bidder,
+                        subtitle: `Top bid on ${c.name}`,
+                        price: `₱${Number(c.price || 0).toLocaleString()}`,
+                        timeStr: 'Active'
+                    });
+                }
+            });
+
+            // Sort chronologically and strictly limit to 5 lines
+            combinedEvents.sort((a, b) => b.timestamp - a.timestamp);
+            activityLogs = combinedEvents.slice(0, 5);
+
+            renderActivityFeed();
+        }
+
+        // LOAD & MERGE ORDERS + AUCTION WINNINGS
         async function loadOrders() {
             const feed = document.getElementById('orders-mobile-feed');
-            const { data: orders } = await supabaseClient.from('Orders').select('*').order('created_at', { ascending: false });
+            const [{ data: orders }, { data: cards }, { data: profiles }] = await Promise.all([
+                supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }),
+                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid'),
+                supabaseClient.from('profiles').select('id, name, facebook_page')
+            ]);
 
-            if (!orders || orders.length === 0) {
+            if ((!orders || orders.length === 0) && (!cards || cards.length === 0)) {
                 feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No customer orders logged.</div>';
                 return;
             }
 
-            feed.innerHTML = orders.map(ord => {
-                let total = 0;
-                let itemsHtml = (ord.items_ordered || []).map(i => {
-                    total += Number(i.price || 0);
-                    return `<div class="text-xs text-red-400 font-bold">• ${escapeHtml(i.name)} <span class="text-gray-500">(${escapeHtml(i.set || '')})</span></div>`;
+            const profilesMap = {};
+            (profiles || []).forEach(p => {
+                if (p.id) profilesMap[p.id] = p.facebook_page;
+                if (p.name) profilesMap[p.name.toLowerCase().trim()] = p.facebook_page;
+            });
+
+            currentGroupedOrders = {};
+
+            // 1. Group direct store purchases
+            (orders || []).forEach(ord => {
+                const key = (ord.customer_email || ord.customer_name || 'unknown').toLowerCase().trim();
+                
+                if (!currentGroupedOrders[key]) {
+                    currentGroupedOrders[key] = {
+                        customer_name: ord.customer_name,
+                        customer_email: ord.customer_email,
+                        phone_number: ord.phone_number || profilesMap[ord.user_id] || profilesMap[ord.customer_name?.toLowerCase().trim()] || '',
+                        order_status: ord.order_status || 'Pending',
+                        order_ids: [ord.id],
+                        purchases: [...(ord.items_ordered || [])],
+                        auction_winnings: []
+                    };
+                } else {
+                    currentGroupedOrders[key].order_ids.push(ord.id);
+                    currentGroupedOrders[key].purchases.push(...(ord.items_ordered || []));
+                    if (!currentGroupedOrders[key].phone_number && ord.phone_number) {
+                        currentGroupedOrders[key].phone_number = ord.phone_number;
+                    }
+                }
+            });
+
+            // 2. Group auction bid winnings
+            (cards || []).forEach(c => {
+                if (!c.top_bidder || c.top_bidder === 'No bids yet') return;
+                
+                const bidderKey = c.top_bidder.toLowerCase().trim();
+                
+                let matchKey = Object.keys(currentGroupedOrders).find(k => {
+                    const g = currentGroupedOrders[k];
+                    return k === bidderKey || 
+                           (g.customer_name && g.customer_name.toLowerCase().trim() === bidderKey) ||
+                           (g.customer_email && g.customer_email.toLowerCase().trim() === bidderKey);
+                });
+
+                const winItem = { name: c.name, set: c.set_code || '', price: c.price || 0, card_id: c.id };
+
+                if (matchKey) {
+                    currentGroupedOrders[matchKey].auction_winnings.push(winItem);
+                } else {
+                    currentGroupedOrders[bidderKey] = {
+                        customer_name: c.top_bidder,
+                        customer_email: '',
+                        phone_number: profilesMap[bidderKey] || '',
+                        order_status: 'Pending',
+                        order_ids: [],
+                        purchases: [],
+                        auction_winnings: [winItem]
+                    };
+                }
+            });
+
+            const keys = Object.keys(currentGroupedOrders);
+            if (keys.length === 0) {
+                feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No customer orders logged.</div>';
+                return;
+            }
+
+            feed.innerHTML = keys.map(key => {
+                const ord = currentGroupedOrders[key];
+                let purchaseTotal = 0;
+                let auctionTotal = 0;
+
+                let purchasesHtml = ord.purchases.map(i => {
+                    purchaseTotal += Number(i.price || 0);
+                    return `<div class="text-xs text-red-400 font-bold">• ${escapeHtml(i.name)} <span class="text-gray-500">(${escapeHtml(i.set || '')})</span> - ₱${Number(i.price || 0).toLocaleString()}</div>`;
                 }).join('');
+
+                let auctionsHtml = ord.auction_winnings.map(i => {
+                    auctionTotal += Number(i.price || 0);
+                    return `<div class="text-xs text-amber-400 font-bold">• ${escapeHtml(i.name)} <span class="text-gray-500">(${escapeHtml(i.set || '')})</span> - ₱${Number(i.price || 0).toLocaleString()}</div>`;
+                }).join('');
+
+                const grandTotal = purchaseTotal + auctionTotal;
+                const idsString = ord.order_ids.join(',');
+
+                let rawFb = ord.phone_number || '';
+                if (rawFb && !rawFb.startsWith('http://') && !rawFb.startsWith('https://')) {
+                    rawFb = 'https://' + rawFb;
+                }
 
                 return `
                     <div class="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-4 space-y-3 shadow-md">
@@ -356,33 +660,145 @@
                                 <h3 class="text-sm font-bold text-white">${escapeHtml(ord.customer_name)}</h3>
                                 <p class="text-[11px] text-gray-400">${escapeHtml(ord.customer_email || 'No email')}</p>
                             </div>
-                            <span class="font-mono text-sm font-black text-green-400">₱${total.toLocaleString()}</span>
+                            <span class="font-mono text-sm font-black text-green-400">₱${grandTotal.toLocaleString()}</span>
                         </div>
                         
-                        <div class="bg-black/30 p-2.5 rounded-xl border border-gray-800/80 space-y-1">
-                            ${itemsHtml}
+                        <div class="bg-black/30 p-2.5 rounded-xl border border-gray-800/80 space-y-2">
+                            ${ord.purchases.length > 0 ? `
+                                <div>
+                                    <div class="text-[10px] uppercase font-bold text-gray-400 mb-1">🛒 Store Purchases</div>
+                                    <div class="space-y-1">${purchasesHtml}</div>
+                                </div>
+                            ` : ''}
+                            ${ord.auction_winnings.length > 0 ? `
+                                <div>
+                                    <div class="text-[10px] uppercase font-bold text-amber-500 mb-1">🔨 Live Auction Winnings</div>
+                                    <div class="space-y-1">${auctionsHtml}</div>
+                                </div>
+                            ` : ''}
                         </div>
 
-                        <div class="flex items-center gap-2 pt-1">
-                            ${ord.phone_number ? `
-                                <a href="${escapeHtml(ord.phone_number)}" target="_blank" class="flex-1 bg-blue-600/20 text-blue-400 border border-blue-500/30 text-center py-2 rounded-xl text-xs font-bold active:scale-95 transition-transform">
-                                    FB Profile
-                                </a>
-                            ` : ''}
-                            <select onchange="updateStatus('${ord.id}', this.value)" class="flex-1 bg-[#2a2a2a] border border-gray-700 text-white rounded-xl p-2 text-xs font-bold">
-                                <option value="Pending" ${ord.order_status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
-                                <option value="Processed" ${ord.order_status === 'Processed' ? 'selected' : ''}>✅ Processed</option>
-                                <option value="Shipped" ${ord.order_status === 'Shipped' ? 'selected' : ''}>📦 Shipped</option>
-                                <option value="Cancelled" ${ord.order_status === 'Cancelled' ? 'selected' : ''}>❌ Cancelled</option>
-                            </select>
-                            <button onclick="deleteOrder('${ord.id}')" class="p-2 bg-red-950/40 text-red-400 border border-red-900/30 rounded-xl">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <div class="flex flex-col gap-2 pt-1">
+                            <button onclick="copyCustomerSummary('${escapeHtml(key)}')" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-transform flex items-center justify-center gap-1.5 shadow">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Summary for Messenger
                             </button>
+
+                            <div class="flex items-center gap-2">
+                                ${rawFb.length > 5 ? `
+                                    <a href="${escapeHtml(rawFb)}" target="_blank" class="flex-1 bg-blue-600/20 text-blue-400 border border-blue-500/30 text-center py-2 rounded-xl text-xs font-bold active:scale-95 transition-transform">
+                                        FB Profile
+                                    </a>
+                                ` : ''}
+                                ${idsString ? `
+                                    <select onchange="updateGroupedStatus('${idsString}', this.value)" class="flex-1 bg-[#2a2a2a] border border-gray-700 text-white rounded-xl p-2 text-xs font-bold">
+                                        <option value="Pending" ${ord.order_status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+                                        <option value="Processed" ${ord.order_status === 'Processed' ? 'selected' : ''}>✅ Processed</option>
+                                        <option value="Shipped" ${ord.order_status === 'Shipped' ? 'selected' : ''}>📦 Shipped</option>
+                                        <option value="Cancelled" ${ord.order_status === 'Cancelled' ? 'selected' : ''}>❌ Cancelled</option>
+                                    </select>
+                                    <button onclick="deleteGroupedOrders('${idsString}')" class="p-2 bg-red-950/40 text-red-400 border border-red-900/30 rounded-xl active:scale-95 transition-transform">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
             lucide.createIcons();
+        }
+
+        // ONE-TAP COPY SUMMARY FOR MESSENGER
+        function copyCustomerSummary(key) {
+            const ord = currentGroupedOrders[key];
+            if (!ord) return;
+
+            let lines = [];
+            lines.push(`🎩 StrawHatDraws Order Summary`);
+            lines.push(`👤 Customer: ${ord.customer_name}`);
+            if (ord.customer_email) lines.push(`📧 Email: ${ord.customer_email}`);
+            lines.push(``);
+
+            let grandTotal = 0;
+
+            if (ord.purchases && ord.purchases.length > 0) {
+                lines.push(`🛒 STORE PURCHASES:`);
+                ord.purchases.forEach(i => {
+                    const price = Number(i.price || 0);
+                    grandTotal += price;
+                    lines.push(`• ${i.name} ${i.set ? '(' + i.set + ')' : ''} - ₱${price.toLocaleString()}`);
+                });
+                lines.push(``);
+            }
+
+            if (ord.auction_winnings && ord.auction_winnings.length > 0) {
+                lines.push(`🔨 AUCTION WINNINGS:`);
+                ord.auction_winnings.forEach(i => {
+                    const price = Number(i.price || 0);
+                    grandTotal += price;
+                    lines.push(`• ${i.name} ${i.set ? '(' + i.set + ')' : ''} - ₱${price.toLocaleString()}`);
+                });
+                lines.push(``);
+            }
+
+            lines.push(`💰 GRAND TOTAL: ₱${grandTotal.toLocaleString()}`);
+            lines.push(`\nThank you for shopping at StrawHatDraws TCG! 🔥`);
+
+            const summaryText = lines.join('\n');
+
+            navigator.clipboard.writeText(summaryText).then(() => {
+                if (navigator.vibrate) navigator.vibrate(50);
+                alert(`✅ Order summary for ${ord.customer_name} copied to clipboard! You can now paste it directly into Messenger.`);
+            }).catch(err => {
+                alert(`Error copying: ${err.message}`);
+            });
+        }
+
+        async function updateGroupedStatus(idsString, status) {
+            const ids = idsString.split(',');
+            await supabaseClient.from('Orders').update({ order_status: status }).in('id', ids);
+            await updateMetrics();
+        }
+
+        async function deleteGroupedOrders(idsString) {
+            if (confirm("Move all order records for this customer to Archives?")) {
+                const ids = idsString.split(',');
+
+                const { data: ordersToArchive, error: fetchErr } = await supabaseClient
+                    .from('Orders')
+                    .select('*')
+                    .in('id', ids);
+
+                if (fetchErr) {
+                    alert(`Error fetching order records: ${fetchErr.message}`);
+                    return;
+                }
+
+                if (ordersToArchive && ordersToArchive.length > 0) {
+                    const { error: archiveErr } = await supabaseClient
+                        .from('archived_orders')
+                        .insert(ordersToArchive);
+
+                    if (archiveErr) {
+                        alert(`Archival failed: ${archiveErr.message}`);
+                        return;
+                    }
+
+                    const { error: deleteErr } = await supabaseClient
+                        .from('Orders')
+                        .delete()
+                        .in('id', ids);
+
+                    if (deleteErr) {
+                        alert(`Error clearing active orders: ${deleteErr.message}`);
+                    } else {
+                        alert("📦 Orders successfully moved to archived_orders table!");
+                    }
+                }
+
+                await loadOrders();
+                await updateMetrics();
+            }
         }
 
         async function loadBids() {
@@ -417,35 +833,113 @@
             lucide.createIcons();
         }
 
+        // UPDATE REVENUE & METRICS ENGINE
         async function updateMetrics() {
-            const { data: orders } = await supabaseClient.from('Orders').select('id').eq('order_status', 'Pending');
-            const { data: auctions } = await supabaseClient.from('cards').select('id').or('type.eq.bidding,type.eq.bid');
-            const { data: totalCards } = await supabaseClient.from('cards').select('stock');
+            const [{ data: orders }, { data: auctions }, { data: totalCards }] = await Promise.all([
+                supabaseClient.from('Orders').select('*'),
+                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid'),
+                supabaseClient.from('cards').select('stock')
+            ]);
 
-            document.getElementById('stat-pending-orders').innerText = orders?.length || 0;
+            let pendingCount = 0;
+            let pendingRevenue = 0;
+            let completedSales = 0;
+
+            // 1. Calculate store orders revenue
+            (orders || []).forEach(ord => {
+                let orderTotal = (ord.items_ordered || []).reduce((sum, item) => sum + Number(item.price || 0), 0);
+                
+                if (!ord.order_status || ord.order_status === 'Pending') {
+                    pendingCount++;
+                    pendingRevenue += orderTotal;
+                } else if (ord.order_status === 'Processed' || ord.order_status === 'Shipped') {
+                    completedSales += orderTotal;
+                }
+            });
+
+            // 2. Add uncollected auction winnings to pending revenue
+            let activeAuctionVal = 0;
+            (auctions || []).forEach(card => {
+                const val = Number(card.price || 0);
+                activeAuctionVal += val;
+                if (card.top_bidder && card.top_bidder !== 'No bids yet') {
+                    pendingRevenue += val;
+                }
+            });
+
+            let sumStock = (totalCards || []).reduce((acc, curr) => acc + Number(curr.stock || 0), 0);
+
+            // Update UI
+            document.getElementById('stat-pending-orders').innerText = pendingCount;
             document.getElementById('stat-active-auctions').innerText = auctions?.length || 0;
-            const sumStock = (totalCards || []).reduce((acc, curr) => acc + Number(curr.stock || 0), 0);
             document.getElementById('stat-total-stock').innerText = `${sumStock} Items`;
-        }
+            document.getElementById('stat-pending-revenue').innerText = `₱${pendingRevenue.toLocaleString()}`;
+            document.getElementById('stat-completed-sales').innerText = `₱${completedSales.toLocaleString()}`;
+            document.getElementById('stat-auction-value').innerText = `₱${activeAuctionVal.toLocaleString()} pool`;
 
-        async function updateStatus(id, status) {
-            await supabaseClient.from('Orders').update({ order_status: status }).eq('id', id);
-            updateMetrics();
-        }
-
-        async function deleteOrder(id) {
-            if (confirm("Clear this order record?")) {
-                await supabaseClient.from('Orders').delete().eq('id', id);
-                loadOrders();
-                updateMetrics();
-            }
+            lucide.createIcons();
         }
 
         async function archiveAuction(id) {
-            if (confirm("Move auction item to archives?")) {
-                await supabaseClient.from('cards').delete().eq('id', id);
-                loadBids();
-                updateMetrics();
+            if (confirm("Move this auction item to Archives?")) {
+                const { data: cardData, error: cardFetchErr } = await supabaseClient
+                    .from('cards')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (cardFetchErr) {
+                    alert(`Error fetching auction item: ${cardFetchErr.message}`);
+                    return;
+                }
+
+                if (cardData) {
+                    const { data: activeBids } = await supabaseClient
+                        .from('bid_history')
+                        .select('*')
+                        .eq('card_id', id);
+
+                    if (activeBids && activeBids.length > 0) {
+                        const archiveRows = activeBids.map(b => ({
+                            card_id: b.card_id,
+                            bidder: b.bidder,
+                            amount: b.amount,
+                            timestamp: b.timestamp,
+                            order_id: 'MOBILE_DASHBOARD_CLEAR'
+                        }));
+                        await supabaseClient.from('archived_bid_history').insert(archiveRows);
+                        await supabaseClient.from('bid_history').delete().eq('card_id', id);
+                    }
+
+                    const { error: archiveErr } = await supabaseClient
+                        .from('archived_cards')
+                        .insert([{
+                            id: cardData.id,
+                            name: cardData.name,
+                            set_code: cardData.set_code,
+                            rarity: cardData.rarity,
+                            price: cardData.price,
+                            stock: cardData.stock,
+                            front_img: cardData.front_img,
+                            back_img: cardData.back_img,
+                            type: cardData.type,
+                            bidding_ends_at: cardData.bidding_ends_at,
+                            top_bidder: cardData.top_bidder,
+                            condition: cardData.condition
+                        }]);
+
+                    if (archiveErr) {
+                        alert(`Archival failed: ${archiveErr.message}`);
+                        return;
+                    }
+
+                    await supabaseClient.from('cards').delete().eq('id', id);
+                    alert("📦 Auction item moved to archived_cards!");
+                }
+
+                await loadBids();
+                await loadOrders();
+                await updateMetrics();
             }
         }
 
@@ -471,7 +965,7 @@
                 alert("Listing created successfully!");
                 document.getElementById('new-inventory-form').reset();
                 switchTab('overview');
-                updateMetrics();
+                await updateMetrics();
             } else {
                 alert(`Error: ${error.message}`);
             }
