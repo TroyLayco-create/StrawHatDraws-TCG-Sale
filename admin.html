@@ -92,7 +92,7 @@
     <!-- Main Container Body -->
     <main class="p-4 flex-1 max-w-lg mx-auto w-full">
 
-        <!-- TAB 1: OVERVIEW & METRICS (INTERACTIVE DASHBOARD) -->
+        <!-- TAB 1: OVERVIEW & METRICS -->
         <section id="view-overview" class="space-y-4">
             
             <!-- 💵 FINANCIAL ANALYTICS BAR -->
@@ -144,31 +144,36 @@
                 </div>
             </div>
 
-            <!-- ⚡ REAL-TIME LIVE ACTIVITY FEED WIDGET (ENHANCED DESIGN) -->
+            <!-- 🛒 FEED 1: LIVE STORE ORDERS FEED -->
             <div class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl space-y-3 shadow-xl">
                 <div class="flex justify-between items-center border-b border-gray-800/80 pb-2.5">
                     <span class="text-[11px] uppercase font-black text-gray-200 tracking-wider flex items-center gap-2">
-                        <i data-lucide="zap" class="w-4 h-4 text-amber-400 fill-amber-400/20"></i> Live Store Activity Feed
+                        <i data-lucide="shopping-bag" class="w-4 h-4 text-emerald-400"></i> Live Store Orders Feed
                     </span>
                     <span class="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1.5 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
                         <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> LIVE
                     </span>
                 </div>
-                <div id="activity-feed-container" class="space-y-2">
-                    <div class="text-center py-6 text-gray-500 text-xs italic">Connecting live feed...</div>
+                <div id="orders-feed-container" class="space-y-2">
+                    <div class="text-center py-6 text-gray-500 text-xs italic">Connecting order feed...</div>
                 </div>
             </div>
 
-            <div class="bg-[#1a1a1a] border border-gray-800/80 rounded-2xl p-4 space-y-3">
-                <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <i data-lucide="smartphone" class="w-4 h-4 text-red-500"></i> Mobile Control Center Tips
-                </h3>
-                <ul class="text-xs text-gray-400 space-y-2 list-disc pl-4 leading-relaxed">
-                    <li><strong class="text-amber-400">Live Activity Feed</strong> tracks sales, bids, and updates in PST time[cite: 1].</li>
-                    <li>Changing order status to <strong class="text-emerald-400">Processed / Shipped</strong> updates revenue in real time[cite: 1].</li>
-                    <li>Tap any metric card above to jump straight to its detail tab![cite: 1]</li>
-                </ul>
+            <!-- 🔨 FEED 2: LIVE BIDDING FEED -->
+            <div class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl space-y-3 shadow-xl">
+                <div class="flex justify-between items-center border-b border-gray-800/80 pb-2.5">
+                    <span class="text-[11px] uppercase font-black text-gray-200 tracking-wider flex items-center gap-2">
+                        <i data-lucide="gavel" class="w-4 h-4 text-amber-400"></i> Live Bidding Feed
+                    </span>
+                    <span class="text-[9px] text-amber-400 font-mono font-bold flex items-center gap-1.5 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span> LIVE
+                    </span>
+                </div>
+                <div id="bids-feed-container" class="space-y-2">
+                    <div class="text-center py-6 text-gray-500 text-xs italic">Connecting bidding feed...</div>
+                </div>
             </div>
+
         </section>
 
         <!-- TAB 2: PURCHASES / ORDERS -->
@@ -270,9 +275,13 @@
         });
 
         let currentGroupedOrders = {};
-        let activityLogs = [];
+        let orderActivityLogs = [];
+        let bidActivityLogs = [];
+        
+        // Smart Debounce tracker for bids
+        let processedBids = new Set();
 
-        // Helper function: Formats Date + Time strictly in Philippine Standard Time (e.g. "Jul 23 • 1:07 PM")
+        // Helper: Formats Date + Time strictly in Philippine Standard Time
         function getPSTDateTimeString(dateObj = new Date()) {
             const d = dateObj.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
             const t = dateObj.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
@@ -337,34 +346,35 @@
             }
         }
 
-        // REDESIGNED LIVE ACTIVITY LOG ENGINE (HIGH CONTRAST & VISUAL HIERARCHY)
-        function pushActivity(item) {
-            activityLogs.unshift(item);
-            if (activityLogs.length > 5) activityLogs.pop();
-            renderActivityFeed();
+        // DUAL LIVE FEED LOGIC
+        function pushOrderActivity(item) {
+            orderActivityLogs.unshift(item);
+            if (orderActivityLogs.length > 5) orderActivityLogs.pop();
+            renderOrderFeed();
         }
 
-        function renderActivityFeed() {
-            const feedEl = document.getElementById('activity-feed-container');
+        function pushBidActivity(item) {
+            bidActivityLogs.unshift(item);
+            if (bidActivityLogs.length > 5) bidActivityLogs.pop();
+            renderBidFeed();
+        }
+
+        function renderOrderFeed() {
+            const feedEl = document.getElementById('orders-feed-container');
             if (!feedEl) return;
 
-            if (activityLogs.length === 0) {
-                feedEl.innerHTML = '<div class="text-center py-6 text-gray-500 text-xs italic">No activity recorded today.</div>';
+            if (orderActivityLogs.length === 0) {
+                feedEl.innerHTML = '<div class="text-center py-6 text-gray-500 text-xs italic">No orders recorded today.</div>';
                 return;
             }
 
-            feedEl.innerHTML = activityLogs.map(item => {
+            feedEl.innerHTML = orderActivityLogs.map(item => {
                 let accentBorder = 'border-l-emerald-500';
                 let iconBg = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
                 let badgeBg = 'bg-emerald-950/80 text-emerald-400 border-emerald-500/30';
                 let priceColor = 'text-emerald-400';
 
-                if (item.type === 'bid') {
-                    accentBorder = 'border-l-amber-500';
-                    iconBg = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-                    badgeBg = 'bg-amber-950/80 text-amber-400 border-amber-500/30';
-                    priceColor = 'text-amber-400';
-                } else if (item.type === 'status') {
+                if (item.type === 'status') {
                     accentBorder = 'border-l-blue-500';
                     iconBg = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
                     badgeBg = 'bg-blue-950/80 text-blue-400 border-blue-500/30';
@@ -394,6 +404,40 @@
                     </div>
                 `;
             }).join('');
+            lucide.createIcons();
+        }
+
+        function renderBidFeed() {
+            const feedEl = document.getElementById('bids-feed-container');
+            if (!feedEl) return;
+
+            if (bidActivityLogs.length === 0) {
+                feedEl.innerHTML = '<div class="text-center py-6 text-gray-500 text-xs italic">No active bids recorded today.</div>';
+                return;
+            }
+
+            feedEl.innerHTML = bidActivityLogs.map(item => `
+                <div class="relative flex items-center justify-between bg-[#161616] hover:bg-[#1a1a1a] border border-gray-800/80 border-l-4 border-l-amber-500 p-3 rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center gap-3 min-w-0 pr-2">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0 shadow-inner">
+                            <i data-lucide="gavel" class="w-4 h-4"></i>
+                        </div>
+                        
+                        <div class="min-w-0 space-y-0.5">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-extrabold text-white text-xs truncate max-w-[130px] sm:max-w-[180px]">${escapeHtml(item.name)}</span>
+                                <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 border rounded bg-amber-950/80 text-amber-400 border-amber-500/30">${escapeHtml(item.badgeText)}</span>
+                            </div>
+                            <div class="text-[11px] text-gray-400 truncate font-medium">${escapeHtml(item.subtitle)}</div>
+                        </div>
+                    </div>
+
+                    <div class="text-right shrink-0 space-y-0.5">
+                        <div class="font-mono text-xs font-black text-amber-400">${escapeHtml(item.price)}</div>
+                        <div class="text-[9px] text-gray-500 font-mono font-medium">${escapeHtml(item.timeStr)}</div>
+                    </div>
+                </div>
+            `).join('');
             lucide.createIcons();
         }
 
@@ -440,13 +484,14 @@
 
             supabaseClient
                 .channel('mobile-live-channel')
+                // 🛒 1. New Orders -> Goes to Orders Feed
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Orders' }, (payload) => {
                     playAlert('purchase');
                     const name = payload.new.customer_name || 'Customer';
                     const itemsArr = payload.new.items_ordered || [];
                     const total = itemsArr.reduce((s, i) => s + Number(i.price || 0), 0);
                     
-                    pushActivity({
+                    pushOrderActivity({
                         type: 'purchase',
                         icon: 'shopping-bag',
                         badgeText: 'SALE',
@@ -460,13 +505,23 @@
                     loadOrders();
                     updateMetrics();
                 })
+                // 🔨 2. Live Bids -> Smart Debounce applied to cards UPDATE
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards' }, (payload) => {
-                    playAlert('bid');
-                    const cardName = payload.new.name || 'Card';
+                    if (payload.new.type !== 'bidding' && payload.new.type !== 'bid') return;
+                    
                     const bidder = payload.new.top_bidder || 'Someone';
                     const price = Number(payload.new.price || 0);
+                    const cardName = payload.new.name || 'Card';
+                    
+                    // Smart Debounce: Prevents duplicate triggers for the EXACT same bid combo
+                    const uniqueBidKey = `${payload.new.id}-${bidder}-${price}`;
+                    if (processedBids.has(uniqueBidKey)) return;
+                    processedBids.add(uniqueBidKey);
+                    setTimeout(() => processedBids.delete(uniqueBidKey), 2500);
 
-                    pushActivity({
+                    playAlert('bid');
+
+                    pushBidActivity({
                         type: 'bid',
                         icon: 'gavel',
                         badgeText: 'BID',
@@ -481,11 +536,38 @@
                     loadOrders();
                     updateMetrics();
                 })
+                // 🔨 3. Catch-all for Bid History (If backend misses the cards table update)
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bid_history' }, (payload) => {
+                    const bidder = payload.new.bidder || 'Someone';
+                    const price = Number(payload.new.amount || 0);
+                    
+                    const uniqueBidKey = `${payload.new.card_id}-${bidder}-${price}`;
+                    if (processedBids.has(uniqueBidKey)) return; // Ignored if already processed by cards table listener
+                    processedBids.add(uniqueBidKey);
+                    setTimeout(() => processedBids.delete(uniqueBidKey), 2500);
+
+                    playAlert('bid');
+
+                    pushBidActivity({
+                        type: 'bid',
+                        icon: 'gavel',
+                        badgeText: 'BID',
+                        name: bidder,
+                        subtitle: `Placed a new bid`,
+                        price: `₱${price.toLocaleString()}`,
+                        timeStr: getPSTDateTimeString()
+                    });
+
+                    triggerNotification("🔨 NEW BID!", `${bidder} bid ₱${price.toLocaleString()}`);
+                    loadBids();
+                    updateMetrics();
+                })
+                // 📦 4. Order Status Updates -> Goes to Orders Feed
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Orders' }, (payload) => {
                     const name = payload.new.customer_name || 'Customer';
                     const status = payload.new.order_status || 'UPDATED';
                     
-                    pushActivity({
+                    pushOrderActivity({
                         type: 'status',
                         icon: 'package',
                         badgeText: status.toUpperCase(),
@@ -502,21 +584,21 @@
         }
 
         async function seedInitialActivityFeed() {
-            const [{ data: orders }, { data: cards }] = await Promise.all([
-                supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }).limit(5),
-                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid').order('id', { ascending: false }).limit(5)
+            const [{ data: orders }, { data: cards }, { data: bids }] = await Promise.all([
+                supabaseClient.from('Orders').select('*').order('id', { ascending: false }).limit(5),
+                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid').order('id', { ascending: false }).limit(5),
+                supabaseClient.from('bid_history').select('*').order('id', { ascending: false }).limit(5)
             ]);
 
-            let combinedEvents = [];
-
+            // 1. Seed Order Feed
+            orderActivityLogs = [];
             (orders || []).forEach(o => {
                 const total = (o.items_ordered || []).reduce((s, i) => s + Number(i.price || 0), 0);
-                const dt = o.created_at ? getPSTDateTimeString(new Date(o.created_at)) : 'Recent';
-                const timeMs = o.created_at ? new Date(o.created_at).getTime() : 0;
+                const rawTime = o.created_at || o.timestamp;
+                const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Recent';
                 const itemCount = (o.items_ordered || []).length;
 
-                combinedEvents.push({
-                    timestamp: timeMs,
+                orderActivityLogs.push({
                     type: 'purchase',
                     icon: 'shopping-bag',
                     badgeText: 'SALE',
@@ -527,33 +609,51 @@
                 });
             });
 
-            (cards || []).forEach(c => {
-                if (c.top_bidder && c.top_bidder !== 'No bids yet') {
-                    combinedEvents.push({
-                        timestamp: 0,
+            // 2. Seed Bidding Feed
+            bidActivityLogs = [];
+            if (bids && bids.length > 0) {
+                bids.forEach(b => {
+                    const rawTime = b.timestamp || b.created_at;
+                    const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Recent';
+
+                    bidActivityLogs.push({
                         type: 'bid',
                         icon: 'gavel',
                         badgeText: 'BID',
-                        name: c.top_bidder,
-                        subtitle: `Top bid on ${c.name}`,
-                        price: `₱${Number(c.price || 0).toLocaleString()}`,
-                        timeStr: 'Active'
+                        name: b.bidder || 'Bidder',
+                        subtitle: `Placed a bid`,
+                        price: `₱${Number(b.amount || 0).toLocaleString()}`,
+                        timeStr: dt
                     });
-                }
-            });
+                });
+            } else {
+                (cards || []).forEach(c => {
+                    if (c.top_bidder && c.top_bidder !== 'No bids yet') {
+                        const rawTime = c.updated_at || c.created_at;
+                        const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
 
-            // Sort chronologically and strictly limit to 5 lines
-            combinedEvents.sort((a, b) => b.timestamp - a.timestamp);
-            activityLogs = combinedEvents.slice(0, 5);
+                        bidActivityLogs.push({
+                            type: 'bid',
+                            icon: 'gavel',
+                            badgeText: 'BID',
+                            name: c.top_bidder,
+                            subtitle: `Top bid on ${c.name}`,
+                            price: `₱${Number(c.price || 0).toLocaleString()}`,
+                            timeStr: dt
+                        });
+                    }
+                });
+            }
 
-            renderActivityFeed();
+            renderOrderFeed();
+            renderBidFeed();
         }
 
         // LOAD & MERGE ORDERS + AUCTION WINNINGS
         async function loadOrders() {
             const feed = document.getElementById('orders-mobile-feed');
             const [{ data: orders }, { data: cards }, { data: profiles }] = await Promise.all([
-                supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }),
+                supabaseClient.from('Orders').select('*').order('id', { ascending: false }),
                 supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid'),
                 supabaseClient.from('profiles').select('id, name, facebook_page')
             ]);
@@ -653,6 +753,8 @@
                     rawFb = 'https://' + rawFb;
                 }
 
+                const safeKey = encodeURIComponent(key);
+
                 return `
                     <div class="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-4 space-y-3 shadow-md">
                         <div class="flex justify-between items-start">
@@ -679,7 +781,7 @@
                         </div>
 
                         <div class="flex flex-col gap-2 pt-1">
-                            <button onclick="copyCustomerSummary('${escapeHtml(key)}')" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-transform flex items-center justify-center gap-1.5 shadow">
+                            <button onclick="copyCustomerSummary('${safeKey}')" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-transform flex items-center justify-center gap-1.5 shadow">
                                 <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Summary for Messenger
                             </button>
 
@@ -709,7 +811,8 @@
         }
 
         // ONE-TAP COPY SUMMARY FOR MESSENGER
-        function copyCustomerSummary(key) {
+        function copyCustomerSummary(encodedKey) {
+            const key = decodeURIComponent(encodedKey);
             const ord = currentGroupedOrders[key];
             if (!ord) return;
 
@@ -904,7 +1007,7 @@
                             card_id: b.card_id,
                             bidder: b.bidder,
                             amount: b.amount,
-                            timestamp: b.timestamp,
+                            timestamp: b.timestamp || new Date().toISOString(),
                             order_id: 'MOBILE_DASHBOARD_CLEAR'
                         }));
                         await supabaseClient.from('archived_bid_history').insert(archiveRows);
@@ -914,7 +1017,7 @@
                     const { error: archiveErr } = await supabaseClient
                         .from('archived_cards')
                         .insert([{
-                            id: cardData.id,
+                            id: cardData.id,  // <-- CRITICAL FIX: Explicitly carrying over the ID
                             name: cardData.name,
                             set_code: cardData.set_code,
                             rarity: cardData.rarity,
