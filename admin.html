@@ -174,6 +174,21 @@
                 </div>
             </div>
 
+            <!-- 👑 FEED 3: LIVE PREMIUM BIDDING FEED -->
+            <div class="bg-[#1e1e1e] border border-amber-500/30 p-4 rounded-2xl space-y-3 shadow-xl">
+                <div class="flex justify-between items-center border-b border-gray-800/80 pb-2.5">
+                    <span class="text-[11px] uppercase font-black text-amber-400 tracking-wider flex items-center gap-2">
+                        <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i> Live Premium Bidding Feed
+                    </span>
+                    <span class="text-[9px] text-amber-300 font-mono font-bold flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/40 px-2 py-0.5 rounded-full">
+                        <span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span> LIVE
+                    </span>
+                </div>
+                <div id="premium-feed-container" class="space-y-2">
+                    <div class="text-center py-6 text-gray-500 text-xs italic">Connecting premium bidding feed...</div>
+                </div>
+            </div>
+
         </section>
 
         <!-- TAB 2: PURCHASES / ORDERS -->
@@ -187,6 +202,13 @@
         <section id="view-bids" class="hidden space-y-3">
             <div id="bids-mobile-feed" class="space-y-3">
                 <div class="text-center py-8 text-gray-500 text-xs italic">Loading auction audit feed...</div>
+            </div>
+        </section>
+
+        <!-- TAB 3.5: PREMIUM AUCTIONS -->
+        <section id="view-premium" class="hidden space-y-3">
+            <div id="premium-mobile-feed" class="space-y-3">
+                <div class="text-center py-8 text-gray-500 text-xs italic">Loading premium auction feed...</div>
             </div>
         </section>
 
@@ -215,7 +237,8 @@
                         <label class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Listing Type</label>
                         <select id="inv-type" onchange="toggleBiddingFields(this.value)" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-xl p-3 text-white font-bold">
                             <option value="sale">Buy Now (Sale)</option>
-                            <option value="bidding">Live Auction (Bidding)</option>
+                            <option value="bidding">Live Auction (Standard)</option>
+                            <option value="premium">👑 Premium Auction</option>
                         </select>
                     </div>
                     <div>
@@ -245,22 +268,26 @@
 
     <!-- Fixed Bottom Thumb Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 bg-[#1e1e1e] border-t border-gray-800 z-40 safe-bottom shadow-2xl">
-        <div class="max-w-lg mx-auto flex justify-around items-center h-16 px-2">
+        <div class="max-w-lg mx-auto flex justify-around items-center h-16 px-1">
             <button onclick="switchTab('overview')" id="tab-btn-overview" class="flex flex-col items-center justify-center flex-1 h-full text-red-500 font-bold">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                <span class="text-[10px] mt-1">Overview</span>
+                <i data-lucide="layout-dashboard" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                <span class="text-[9px] sm:text-[10px] mt-1">Overview</span>
             </button>
             <button onclick="switchTab('orders')" id="tab-btn-orders" class="flex flex-col items-center justify-center flex-1 h-full text-gray-400 hover:text-white">
-                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-                <span class="text-[10px] mt-1">Orders</span>
+                <i data-lucide="shopping-bag" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                <span class="text-[9px] sm:text-[10px] mt-1">Orders</span>
             </button>
             <button onclick="switchTab('bids')" id="tab-btn-bids" class="flex flex-col items-center justify-center flex-1 h-full text-gray-400 hover:text-white">
-                <i data-lucide="gavel" class="w-5 h-5"></i>
-                <span class="text-[10px] mt-1">Auctions</span>
+                <i data-lucide="gavel" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                <span class="text-[9px] sm:text-[10px] mt-1">Auctions</span>
+            </button>
+            <button onclick="switchTab('premium')" id="tab-btn-premium" class="flex flex-col items-center justify-center flex-1 h-full text-amber-500/70 hover:text-amber-400">
+                <i data-lucide="crown" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
+                <span class="text-[9px] sm:text-[10px] mt-1 font-bold">Premium</span>
             </button>
             <button onclick="switchTab('add')" id="tab-btn-add" class="flex flex-col items-center justify-center flex-1 h-full text-gray-400 hover:text-white">
-                <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                <span class="text-[10px] mt-1">+ Listing</span>
+                <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                <span class="text-[9px] sm:text-[10px] mt-1">+ Listing</span>
             </button>
         </div>
     </nav>
@@ -277,9 +304,21 @@
         let currentGroupedOrders = {};
         let orderActivityLogs = [];
         let bidActivityLogs = [];
-        
-        // Smart Debounce tracker for bids
+        let premiumActivityLogs = [];
         let processedBids = new Set();
+
+        // 🛡️ Helper: Safely parse items_ordered whether array, JSON string, or null
+        function safeParseArray(data) {
+            if (!data) return [];
+            if (Array.isArray(data)) return data;
+            if (typeof data === 'string') {
+                try {
+                    const parsed = JSON.parse(data);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch(e) { return []; }
+            }
+            return [];
+        }
 
         // Helper: Formats Date + Time strictly in Philippine Standard Time
         function getPSTDateTimeString(dateObj = new Date()) {
@@ -290,25 +329,35 @@
 
         // Tab Switching Engine
         function switchTab(tabName) {
-            ['overview', 'orders', 'bids', 'add'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`tab-btn-${t}`).className = "flex flex-col items-center justify-center flex-1 h-full text-gray-400";
+            ['overview', 'orders', 'bids', 'premium', 'add'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (btn) btn.className = "flex flex-col items-center justify-center flex-1 h-full text-gray-400";
             });
 
-            document.getElementById(`view-${tabName}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tabName}`).className = "flex flex-col items-center justify-center flex-1 h-full text-red-500 font-bold active-tab";
+            const activeView = document.getElementById(`view-${tabName}`);
+            if (activeView) activeView.classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            if (activeBtn) activeBtn.className = tabName === 'premium' 
+                ? "flex flex-col items-center justify-center flex-1 h-full text-amber-400 font-bold active-tab" 
+                : "flex flex-col items-center justify-center flex-1 h-full text-red-500 font-bold active-tab";
             
-            const titles = { overview: "Overview", orders: "Customer Orders", bids: "Live Auctions", add: "Post Listing" };
-            document.getElementById('mobile-title').innerText = titles[tabName];
+            const titles = { 
+                overview: "Overview", 
+                orders: "Customer Orders", 
+                bids: "Standard Auctions", 
+                premium: "👑 Premium Auctions", 
+                add: "Post Listing" 
+            };
+            document.getElementById('mobile-title').innerText = titles[tabName] || "Overview";
             
             if (navigator.vibrate) navigator.vibrate(15);
         }
 
-        // Haptic & Sound Notifications
+        // Notifications
         function playAlert(type = 'purchase') {
-            if (navigator.vibrate) {
-                navigator.vibrate(type === 'purchase' ? [200, 100, 200] : [100, 50, 100]);
-            }
+            if (navigator.vibrate) navigator.vibrate(type === 'purchase' ? [200, 100, 200] : [100, 50, 100]);
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
@@ -346,7 +395,7 @@
             }
         }
 
-        // DUAL LIVE FEED LOGIC
+        // Live Feed Controllers
         function pushOrderActivity(item) {
             orderActivityLogs.unshift(item);
             if (orderActivityLogs.length > 5) orderActivityLogs.pop();
@@ -357,6 +406,12 @@
             bidActivityLogs.unshift(item);
             if (bidActivityLogs.length > 5) bidActivityLogs.pop();
             renderBidFeed();
+        }
+
+        function pushPremiumActivity(item) {
+            premiumActivityLogs.unshift(item);
+            if (premiumActivityLogs.length > 5) premiumActivityLogs.pop();
+            renderPremiumFeed();
         }
 
         function renderOrderFeed() {
@@ -441,7 +496,41 @@
             lucide.createIcons();
         }
 
-        // Auth Listener
+        function renderPremiumFeed() {
+            const feedEl = document.getElementById('premium-feed-container');
+            if (!feedEl) return;
+
+            if (premiumActivityLogs.length === 0) {
+                feedEl.innerHTML = '<div class="text-center py-6 text-gray-500 text-xs italic">No active premium bids recorded today.</div>';
+                return;
+            }
+
+            feedEl.innerHTML = premiumActivityLogs.map(item => `
+                <div class="relative flex items-center justify-between bg-[#161616] hover:bg-[#1a1a1a] border border-amber-500/40 border-l-4 border-l-amber-500 p-3 rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center gap-3 min-w-0 pr-2">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0 shadow-inner">
+                            <i data-lucide="crown" class="w-4 h-4"></i>
+                        </div>
+                        
+                        <div class="min-w-0 space-y-0.5">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-extrabold text-white text-xs truncate max-w-[130px] sm:max-w-[180px]">${escapeHtml(item.name)}</span>
+                                <span class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 border rounded bg-amber-950/80 text-amber-300 border-amber-500/40">👑 PREMIUM</span>
+                            </div>
+                            <div class="text-[11px] text-gray-400 truncate font-medium">${escapeHtml(item.subtitle)}</div>
+                        </div>
+                    </div>
+
+                    <div class="text-right shrink-0 space-y-0.5">
+                        <div class="font-mono text-xs font-black text-amber-400">${escapeHtml(item.price)}</div>
+                        <div class="text-[9px] text-gray-500 font-mono font-medium">${escapeHtml(item.timeStr)}</div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Login Handler
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('admin-email').value.trim();
@@ -471,24 +560,25 @@
         }
 
         function toggleBiddingFields(type) {
-            document.getElementById('inv-stock-container').classList.toggle('hidden', type === 'bidding');
-            document.getElementById('inv-bidding-ends-container').classList.toggle('hidden', type !== 'bidding');
+            const isAuction = (type === 'bidding' || type === 'premium');
+            document.getElementById('inv-stock-container').classList.toggle('hidden', isAuction);
+            document.getElementById('inv-bidding-ends-container').classList.toggle('hidden', !isAuction);
         }
 
         async function initMobileApp() {
             lucide.createIcons();
             await loadOrders();
             await loadBids();
+            await loadPremiumBids();
             await updateMetrics();
             await seedInitialActivityFeed();
 
             supabaseClient
                 .channel('mobile-live-channel')
-                // 🛒 1. New Orders -> Goes to Orders Feed
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Orders' }, (payload) => {
                     playAlert('purchase');
                     const name = payload.new.customer_name || 'Customer';
-                    const itemsArr = payload.new.items_ordered || [];
+                    const itemsArr = safeParseArray(payload.new.items_ordered);
                     const total = itemsArr.reduce((s, i) => s + Number(i.price || 0), 0);
                     
                     pushOrderActivity({
@@ -505,15 +595,15 @@
                     loadOrders();
                     updateMetrics();
                 })
-                // 🔨 2. Live Bids -> Smart Debounce applied to cards UPDATE
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards' }, (payload) => {
-                    if (payload.new.type !== 'bidding' && payload.new.type !== 'bid') return;
+                    const itemType = (payload.new.type || '').toLowerCase();
+                    if (!['bidding', 'bid', 'premium', 'premium_bidding'].includes(itemType)) return;
                     
                     const bidder = payload.new.top_bidder || 'Someone';
                     const price = Number(payload.new.price || 0);
                     const cardName = payload.new.name || 'Card';
+                    const isPremium = ['premium', 'premium_bidding'].includes(itemType);
                     
-                    // Smart Debounce: Prevents duplicate triggers for the EXACT same bid combo
                     const uniqueBidKey = `${payload.new.id}-${bidder}-${price}`;
                     if (processedBids.has(uniqueBidKey)) return;
                     processedBids.add(uniqueBidKey);
@@ -521,62 +611,29 @@
 
                     playAlert('bid');
 
-                    pushBidActivity({
+                    const feedItem = {
                         type: 'bid',
-                        icon: 'gavel',
-                        badgeText: 'BID',
+                        icon: isPremium ? 'crown' : 'gavel',
+                        badgeText: isPremium ? '👑 PREMIUM' : 'BID',
                         name: bidder,
                         subtitle: `Top bid on ${cardName}`,
                         price: `₱${price.toLocaleString()}`,
                         timeStr: getPSTDateTimeString()
-                    });
+                    };
 
-                    triggerNotification("🔨 NEW BID!", `${bidder} bid ₱${price.toLocaleString()}`);
-                    loadBids();
+                    if (isPremium) {
+                        pushPremiumActivity(feedItem);
+                        loadPremiumBids();
+                    } else {
+                        pushBidActivity(feedItem);
+                        loadBids();
+                    }
+
+                    triggerNotification(isPremium ? "👑 NEW PREMIUM BID!" : "🔨 NEW BID!", `${bidder} bid ₱${price.toLocaleString()}`);
                     loadOrders();
                     updateMetrics();
                 })
-                // 🔨 3. Catch-all for Bid History (If backend misses the cards table update)
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bid_history' }, (payload) => {
-                    const bidder = payload.new.bidder || 'Someone';
-                    const price = Number(payload.new.amount || 0);
-                    
-                    const uniqueBidKey = `${payload.new.card_id}-${bidder}-${price}`;
-                    if (processedBids.has(uniqueBidKey)) return; // Ignored if already processed by cards table listener
-                    processedBids.add(uniqueBidKey);
-                    setTimeout(() => processedBids.delete(uniqueBidKey), 2500);
-
-                    playAlert('bid');
-
-                    pushBidActivity({
-                        type: 'bid',
-                        icon: 'gavel',
-                        badgeText: 'BID',
-                        name: bidder,
-                        subtitle: `Placed a new bid`,
-                        price: `₱${price.toLocaleString()}`,
-                        timeStr: getPSTDateTimeString()
-                    });
-
-                    triggerNotification("🔨 NEW BID!", `${bidder} bid ₱${price.toLocaleString()}`);
-                    loadBids();
-                    updateMetrics();
-                })
-                // 📦 4. Order Status Updates -> Goes to Orders Feed
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Orders' }, (payload) => {
-                    const name = payload.new.customer_name || 'Customer';
-                    const status = payload.new.order_status || 'UPDATED';
-                    
-                    pushOrderActivity({
-                        type: 'status',
-                        icon: 'package',
-                        badgeText: status.toUpperCase(),
-                        name: name,
-                        subtitle: `Order status set to ${status}`,
-                        price: null,
-                        timeStr: getPSTDateTimeString()
-                    });
-
                     loadOrders();
                     updateMetrics();
                 })
@@ -584,50 +641,35 @@
         }
 
         async function seedInitialActivityFeed() {
-            const [{ data: orders }, { data: cards }, { data: bids }] = await Promise.all([
-                supabaseClient.from('Orders').select('*').order('id', { ascending: false }).limit(5),
-                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid').order('id', { ascending: false }).limit(5),
-                supabaseClient.from('bid_history').select('*').order('id', { ascending: false }).limit(5)
-            ]);
+            try {
+                const [{ data: orders }, { data: stdCards }, { data: premCards }] = await Promise.all([
+                    supabaseClient.from('Orders').select('*').order('id', { ascending: false }).limit(5),
+                    supabaseClient.from('cards').select('*').in('type', ['bidding', 'bid', 'Bidding', 'Bid']).order('id', { ascending: false }).limit(5),
+                    supabaseClient.from('cards').select('*').in('type', ['premium', 'premium_bidding', 'Premium', 'Premium_Bidding']).order('id', { ascending: false }).limit(5)
+                ]);
 
-            // 1. Seed Order Feed
-            orderActivityLogs = [];
-            (orders || []).forEach(o => {
-                const total = (o.items_ordered || []).reduce((s, i) => s + Number(i.price || 0), 0);
-                const rawTime = o.created_at || o.timestamp;
-                const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Recent';
-                const itemCount = (o.items_ordered || []).length;
-
-                orderActivityLogs.push({
-                    type: 'purchase',
-                    icon: 'shopping-bag',
-                    badgeText: 'SALE',
-                    name: o.customer_name || 'Customer',
-                    subtitle: `${itemCount} item${itemCount > 1 ? 's' : ''} ordered`,
-                    price: `₱${total.toLocaleString()}`,
-                    timeStr: dt
-                });
-            });
-
-            // 2. Seed Bidding Feed
-            bidActivityLogs = [];
-            if (bids && bids.length > 0) {
-                bids.forEach(b => {
-                    const rawTime = b.timestamp || b.created_at;
+                // 1. Seed Orders
+                orderActivityLogs = [];
+                (orders || []).forEach(o => {
+                    const itemsArr = safeParseArray(o.items_ordered);
+                    const total = itemsArr.reduce((s, i) => s + Number(i.price || 0), 0);
+                    const rawTime = o.created_at || o.timestamp;
                     const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Recent';
 
-                    bidActivityLogs.push({
-                        type: 'bid',
-                        icon: 'gavel',
-                        badgeText: 'BID',
-                        name: b.bidder || 'Bidder',
-                        subtitle: `Placed a bid`,
-                        price: `₱${Number(b.amount || 0).toLocaleString()}`,
+                    orderActivityLogs.push({
+                        type: 'purchase',
+                        icon: 'shopping-bag',
+                        badgeText: 'SALE',
+                        name: o.customer_name || 'Customer',
+                        subtitle: `${itemsArr.length} item${itemsArr.length > 1 ? 's' : ''} ordered`,
+                        price: `₱${total.toLocaleString()}`,
                         timeStr: dt
                     });
                 });
-            } else {
-                (cards || []).forEach(c => {
+
+                // 2. Seed Standard Bids
+                bidActivityLogs = [];
+                (stdCards || []).forEach(c => {
                     if (c.top_bidder && c.top_bidder !== 'No bids yet') {
                         const rawTime = c.updated_at || c.created_at;
                         const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
@@ -643,174 +685,198 @@
                         });
                     }
                 });
+
+                // 3. Seed Premium Bids
+                premiumActivityLogs = [];
+                (premCards || []).forEach(c => {
+                    if (c.top_bidder && c.top_bidder !== 'No bids yet') {
+                        const rawTime = c.updated_at || c.created_at;
+                        const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
+
+                        premiumActivityLogs.push({
+                            type: 'bid',
+                            icon: 'crown',
+                            badgeText: '👑 PREMIUM',
+                            name: c.top_bidder,
+                            subtitle: `Top bid on ${c.name}`,
+                            price: `₱${Number(c.price || 0).toLocaleString()}`,
+                            timeStr: dt
+                        });
+                    }
+                });
+
+            } catch (e) {
+                console.warn("Activity feed seed error:", e);
             }
 
             renderOrderFeed();
             renderBidFeed();
+            renderPremiumFeed();
         }
 
-        // LOAD & MERGE ORDERS + AUCTION WINNINGS
         async function loadOrders() {
             const feed = document.getElementById('orders-mobile-feed');
-            const [{ data: orders }, { data: cards }, { data: profiles }] = await Promise.all([
-                supabaseClient.from('Orders').select('*').order('id', { ascending: false }),
-                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid'),
-                supabaseClient.from('profiles').select('id, name, facebook_page')
-            ]);
+            if (!feed) return;
 
-            if ((!orders || orders.length === 0) && (!cards || cards.length === 0)) {
-                feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No customer orders logged.</div>';
-                return;
-            }
+            try {
+                const [{ data: orders }, { data: cards }, { data: profiles }] = await Promise.all([
+                    supabaseClient.from('Orders').select('*').order('id', { ascending: false }),
+                    supabaseClient.from('cards').select('*').in('type', ['bidding', 'bid', 'premium', 'premium_bidding', 'Bidding', 'Bid', 'Premium', 'Premium_Bidding']),
+                    supabaseClient.from('profiles').select('id, name, facebook_page')
+                ]);
 
-            const profilesMap = {};
-            (profiles || []).forEach(p => {
-                if (p.id) profilesMap[p.id] = p.facebook_page;
-                if (p.name) profilesMap[p.name.toLowerCase().trim()] = p.facebook_page;
-            });
-
-            currentGroupedOrders = {};
-
-            // 1. Group direct store purchases
-            (orders || []).forEach(ord => {
-                const key = (ord.customer_email || ord.customer_name || 'unknown').toLowerCase().trim();
-                
-                if (!currentGroupedOrders[key]) {
-                    currentGroupedOrders[key] = {
-                        customer_name: ord.customer_name,
-                        customer_email: ord.customer_email,
-                        phone_number: ord.phone_number || profilesMap[ord.user_id] || profilesMap[ord.customer_name?.toLowerCase().trim()] || '',
-                        order_status: ord.order_status || 'Pending',
-                        order_ids: [ord.id],
-                        purchases: [...(ord.items_ordered || [])],
-                        auction_winnings: []
-                    };
-                } else {
-                    currentGroupedOrders[key].order_ids.push(ord.id);
-                    currentGroupedOrders[key].purchases.push(...(ord.items_ordered || []));
-                    if (!currentGroupedOrders[key].phone_number && ord.phone_number) {
-                        currentGroupedOrders[key].phone_number = ord.phone_number;
-                    }
+                if ((!orders || orders.length === 0) && (!cards || cards.length === 0)) {
+                    feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No customer orders logged.</div>';
+                    return;
                 }
-            });
 
-            // 2. Group auction bid winnings
-            (cards || []).forEach(c => {
-                if (!c.top_bidder || c.top_bidder === 'No bids yet') return;
-                
-                const bidderKey = c.top_bidder.toLowerCase().trim();
-                
-                let matchKey = Object.keys(currentGroupedOrders).find(k => {
-                    const g = currentGroupedOrders[k];
-                    return k === bidderKey || 
-                           (g.customer_name && g.customer_name.toLowerCase().trim() === bidderKey) ||
-                           (g.customer_email && g.customer_email.toLowerCase().trim() === bidderKey);
+                const profilesMap = {};
+                (profiles || []).forEach(p => {
+                    if (p.id) profilesMap[p.id] = p.facebook_page;
+                    if (p.name) profilesMap[p.name.toLowerCase().trim()] = p.facebook_page;
                 });
 
-                const winItem = { name: c.name, set: c.set_code || '', price: c.price || 0, card_id: c.id };
+                currentGroupedOrders = {};
 
-                if (matchKey) {
-                    currentGroupedOrders[matchKey].auction_winnings.push(winItem);
-                } else {
-                    currentGroupedOrders[bidderKey] = {
-                        customer_name: c.top_bidder,
-                        customer_email: '',
-                        phone_number: profilesMap[bidderKey] || '',
-                        order_status: 'Pending',
-                        order_ids: [],
-                        purchases: [],
-                        auction_winnings: [winItem]
-                    };
+                (orders || []).forEach(ord => {
+                    const key = (ord.customer_email || ord.customer_name || 'unknown').toLowerCase().trim();
+                    const itemsArr = safeParseArray(ord.items_ordered);
+
+                    if (!currentGroupedOrders[key]) {
+                        currentGroupedOrders[key] = {
+                            customer_name: ord.customer_name,
+                            customer_email: ord.customer_email,
+                            phone_number: ord.phone_number || profilesMap[ord.user_id] || profilesMap[ord.customer_name?.toLowerCase().trim()] || '',
+                            order_status: ord.order_status || 'Pending',
+                            order_ids: [ord.id],
+                            purchases: [...itemsArr],
+                            auction_winnings: []
+                        };
+                    } else {
+                        currentGroupedOrders[key].order_ids.push(ord.id);
+                        currentGroupedOrders[key].purchases.push(...itemsArr);
+                    }
+                });
+
+                (cards || []).forEach(c => {
+                    if (!c.top_bidder || c.top_bidder === 'No bids yet') return;
+                    const bidderKey = c.top_bidder.toLowerCase().trim();
+                    
+                    let matchKey = Object.keys(currentGroupedOrders).find(k => {
+                        const g = currentGroupedOrders[k];
+                        return k === bidderKey || 
+                               (g.customer_name && g.customer_name.toLowerCase().trim() === bidderKey) ||
+                               (g.customer_email && g.customer_email.toLowerCase().trim() === bidderKey);
+                    });
+
+                    const winItem = { name: c.name, set: c.set_code || '', price: c.price || 0, card_id: c.id };
+
+                    if (matchKey) {
+                        currentGroupedOrders[matchKey].auction_winnings.push(winItem);
+                    } else {
+                        currentGroupedOrders[bidderKey] = {
+                            customer_name: c.top_bidder,
+                            customer_email: '',
+                            phone_number: profilesMap[bidderKey] || '',
+                            order_status: 'Pending',
+                            order_ids: [],
+                            purchases: [],
+                            auction_winnings: [winItem]
+                        };
+                    }
+                });
+
+                const keys = Object.keys(currentGroupedOrders);
+                if (keys.length === 0) {
+                    feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No customer orders logged.</div>';
+                    return;
                 }
-            });
 
-            const keys = Object.keys(currentGroupedOrders);
-            if (keys.length === 0) {
-                feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No customer orders logged.</div>';
-                return;
+                feed.innerHTML = keys.map(key => {
+                    const ord = currentGroupedOrders[key];
+                    let purchaseTotal = 0;
+                    let auctionTotal = 0;
+
+                    let purchasesHtml = ord.purchases.map(i => {
+                        purchaseTotal += Number(i.price || 0);
+                        return `<div class="text-xs text-red-400 font-bold">• ${escapeHtml(i.name)} <span class="text-gray-500">(${escapeHtml(i.set || '')})</span> - ₱${Number(i.price || 0).toLocaleString()}</div>`;
+                    }).join('');
+
+                    let auctionsHtml = ord.auction_winnings.map(i => {
+                        auctionTotal += Number(i.price || 0);
+                        return `<div class="text-xs text-amber-400 font-bold">• ${escapeHtml(i.name)} <span class="text-gray-500">(${escapeHtml(i.set || '')})</span> - ₱${Number(i.price || 0).toLocaleString()}</div>`;
+                    }).join('');
+
+                    const grandTotal = purchaseTotal + auctionTotal;
+                    const idsString = ord.order_ids.join(',');
+
+                    let rawFb = ord.phone_number || '';
+                    if (rawFb && !rawFb.startsWith('http://') && !rawFb.startsWith('https://')) {
+                        rawFb = 'https://' + rawFb;
+                    }
+
+                    const safeKey = encodeURIComponent(key);
+
+                    return `
+                        <div class="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-4 space-y-3 shadow-md">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-sm font-bold text-white">${escapeHtml(ord.customer_name)}</h3>
+                                    <p class="text-[11px] text-gray-400">${escapeHtml(ord.customer_email || 'No email')}</p>
+                                </div>
+                                <span class="font-mono text-sm font-black text-green-400">₱${grandTotal.toLocaleString()}</span>
+                            </div>
+                            
+                            <div class="bg-black/30 p-2.5 rounded-xl border border-gray-800/80 space-y-2">
+                                ${ord.purchases.length > 0 ? `
+                                    <div>
+                                        <div class="text-[10px] uppercase font-bold text-gray-400 mb-1">🛒 Store Purchases</div>
+                                        <div class="space-y-1">${purchasesHtml}</div>
+                                    </div>
+                                ` : ''}
+                                ${ord.auction_winnings.length > 0 ? `
+                                    <div>
+                                        <div class="text-[10px] uppercase font-bold text-amber-500 mb-1">🔨 Live Auction Winnings</div>
+                                        <div class="space-y-1">${auctionsHtml}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="flex flex-col gap-2 pt-1">
+                                <button onclick="copyCustomerSummary('${safeKey}')" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-transform flex items-center justify-center gap-1.5 shadow">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Summary for Messenger
+                                </button>
+
+                                <div class="flex items-center gap-2">
+                                    ${rawFb.length > 5 ? `
+                                        <a href="${escapeHtml(rawFb)}" target="_blank" class="flex-1 bg-blue-600/20 text-blue-400 border border-blue-500/30 text-center py-2 rounded-xl text-xs font-bold active:scale-95 transition-transform">
+                                            FB Profile
+                                        </a>
+                                    ` : ''}
+                                    ${idsString ? `
+                                        <select onchange="updateGroupedStatus('${idsString}', this.value)" class="flex-1 bg-[#2a2a2a] border border-gray-700 text-white rounded-xl p-2 text-xs font-bold">
+                                            <option value="Pending" ${ord.order_status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+                                            <option value="Processed" ${ord.order_status === 'Processed' ? 'selected' : ''}>✅ Processed</option>
+                                            <option value="Shipped" ${ord.order_status === 'Shipped' ? 'selected' : ''}>📦 Shipped</option>
+                                            <option value="Cancelled" ${ord.order_status === 'Cancelled' ? 'selected' : ''}>❌ Cancelled</option>
+                                        </select>
+                                        <button onclick="deleteGroupedOrders('${idsString}')" class="p-2 bg-red-950/40 text-red-400 border border-red-900/30 rounded-xl active:scale-95 transition-transform">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("Error loading orders:", err);
+                feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">Error loading orders feed.</div>';
             }
-
-            feed.innerHTML = keys.map(key => {
-                const ord = currentGroupedOrders[key];
-                let purchaseTotal = 0;
-                let auctionTotal = 0;
-
-                let purchasesHtml = ord.purchases.map(i => {
-                    purchaseTotal += Number(i.price || 0);
-                    return `<div class="text-xs text-red-400 font-bold">• ${escapeHtml(i.name)} <span class="text-gray-500">(${escapeHtml(i.set || '')})</span> - ₱${Number(i.price || 0).toLocaleString()}</div>`;
-                }).join('');
-
-                let auctionsHtml = ord.auction_winnings.map(i => {
-                    auctionTotal += Number(i.price || 0);
-                    return `<div class="text-xs text-amber-400 font-bold">• ${escapeHtml(i.name)} <span class="text-gray-500">(${escapeHtml(i.set || '')})</span> - ₱${Number(i.price || 0).toLocaleString()}</div>`;
-                }).join('');
-
-                const grandTotal = purchaseTotal + auctionTotal;
-                const idsString = ord.order_ids.join(',');
-
-                let rawFb = ord.phone_number || '';
-                if (rawFb && !rawFb.startsWith('http://') && !rawFb.startsWith('https://')) {
-                    rawFb = 'https://' + rawFb;
-                }
-
-                const safeKey = encodeURIComponent(key);
-
-                return `
-                    <div class="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-4 space-y-3 shadow-md">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-sm font-bold text-white">${escapeHtml(ord.customer_name)}</h3>
-                                <p class="text-[11px] text-gray-400">${escapeHtml(ord.customer_email || 'No email')}</p>
-                            </div>
-                            <span class="font-mono text-sm font-black text-green-400">₱${grandTotal.toLocaleString()}</span>
-                        </div>
-                        
-                        <div class="bg-black/30 p-2.5 rounded-xl border border-gray-800/80 space-y-2">
-                            ${ord.purchases.length > 0 ? `
-                                <div>
-                                    <div class="text-[10px] uppercase font-bold text-gray-400 mb-1">🛒 Store Purchases</div>
-                                    <div class="space-y-1">${purchasesHtml}</div>
-                                </div>
-                            ` : ''}
-                            ${ord.auction_winnings.length > 0 ? `
-                                <div>
-                                    <div class="text-[10px] uppercase font-bold text-amber-500 mb-1">🔨 Live Auction Winnings</div>
-                                    <div class="space-y-1">${auctionsHtml}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-
-                        <div class="flex flex-col gap-2 pt-1">
-                            <button onclick="copyCustomerSummary('${safeKey}')" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-transform flex items-center justify-center gap-1.5 shadow">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Summary for Messenger
-                            </button>
-
-                            <div class="flex items-center gap-2">
-                                ${rawFb.length > 5 ? `
-                                    <a href="${escapeHtml(rawFb)}" target="_blank" class="flex-1 bg-blue-600/20 text-blue-400 border border-blue-500/30 text-center py-2 rounded-xl text-xs font-bold active:scale-95 transition-transform">
-                                        FB Profile
-                                    </a>
-                                ` : ''}
-                                ${idsString ? `
-                                    <select onchange="updateGroupedStatus('${idsString}', this.value)" class="flex-1 bg-[#2a2a2a] border border-gray-700 text-white rounded-xl p-2 text-xs font-bold">
-                                        <option value="Pending" ${ord.order_status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
-                                        <option value="Processed" ${ord.order_status === 'Processed' ? 'selected' : ''}>✅ Processed</option>
-                                        <option value="Shipped" ${ord.order_status === 'Shipped' ? 'selected' : ''}>📦 Shipped</option>
-                                        <option value="Cancelled" ${ord.order_status === 'Cancelled' ? 'selected' : ''}>❌ Cancelled</option>
-                                    </select>
-                                    <button onclick="deleteGroupedOrders('${idsString}')" class="p-2 bg-red-950/40 text-red-400 border border-red-900/30 rounded-xl active:scale-95 transition-transform">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
             lucide.createIcons();
         }
 
-        // ONE-TAP COPY SUMMARY FOR MESSENGER
+        // Copy Messenger Summary
         function copyCustomerSummary(encodedKey) {
             const key = decodeURIComponent(encodedKey);
             const ord = currentGroupedOrders[key];
@@ -904,82 +970,143 @@
             }
         }
 
+        // 6. Load Standard Auctions Tab
         async function loadBids() {
             const feed = document.getElementById('bids-mobile-feed');
-            const { data: cards } = await supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid').order('id', { ascending: false });
+            if (!feed) return;
 
-            if (!cards || cards.length === 0) {
-                feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No active live auction items.</div>';
-                return;
-            }
+            try {
+                const { data: cards } = await supabaseClient
+                    .from('cards')
+                    .select('*')
+                    .in('type', ['bidding', 'bid', 'Bidding', 'Bid'])
+                    .order('id', { ascending: false });
 
-            feed.innerHTML = cards.map(c => `
-                <div class="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-4 space-y-3 shadow-md">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-sm font-bold text-amber-400">${escapeHtml(c.name)}</h3>
-                            <p class="text-[11px] font-mono text-gray-400">${escapeHtml(c.set_code || '')}</p>
+                if (!cards || cards.length === 0) {
+                    feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No active standard auction items.</div>';
+                    return;
+                }
+
+                feed.innerHTML = cards.map(c => `
+                    <div class="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-4 space-y-3 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-100">${escapeHtml(c.name)}</h3>
+                                <p class="text-[11px] font-mono text-gray-400">${escapeHtml(c.set_code || '')}</p>
+                            </div>
+                            <span class="font-mono text-sm font-black text-emerald-400">₱${Number(c.price || 0).toLocaleString()}</span>
                         </div>
-                        <span class="font-mono text-sm font-black text-emerald-400">₱${Number(c.price || 0).toLocaleString()}</span>
-                    </div>
 
-                    <div class="bg-yellow-950/20 border border-yellow-500/20 p-2.5 rounded-xl flex justify-between items-center text-xs">
-                        <span class="text-gray-400">Highest Bidder:</span>
-                        <span class="font-bold text-white">${escapeHtml(c.top_bidder || 'No bids yet')}</span>
-                    </div>
+                        <div class="bg-yellow-950/20 border border-yellow-500/20 p-2.5 rounded-xl flex justify-between items-center text-xs">
+                            <span class="text-gray-400">Highest Bidder:</span>
+                            <span class="font-bold text-white">${escapeHtml(c.top_bidder || 'No bids yet')}</span>
+                        </div>
 
-                    <button onclick="archiveAuction('${c.id}')" class="w-full bg-amber-600/20 text-amber-400 border border-amber-500/30 text-xs font-bold py-2.5 rounded-xl active:scale-95 transition-transform">
-                        Archive Closed Auction
-                    </button>
-                </div>
-            `).join('');
+                        <button onclick="archiveAuction('${c.id}')" class="w-full bg-amber-600/20 text-amber-400 border border-amber-500/30 text-xs font-bold py-2.5 rounded-xl active:scale-95 transition-transform">
+                            Archive Closed Auction
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Error loading standard auctions:", err);
+                feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">Error loading standard auctions.</div>';
+            }
             lucide.createIcons();
         }
 
-        // UPDATE REVENUE & METRICS ENGINE
+        // 7. Load 👑 Premium Auctions Tab
+        async function loadPremiumBids() {
+            const feed = document.getElementById('premium-mobile-feed');
+            if (!feed) return;
+
+            try {
+                const { data: cards } = await supabaseClient
+                    .from('cards')
+                    .select('*')
+                    .in('type', ['premium', 'premium_bidding', 'Premium', 'Premium_Bidding'])
+                    .order('id', { ascending: false });
+
+                if (!cards || cards.length === 0) {
+                    feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">No active premium auction items.</div>';
+                    return;
+                }
+
+                feed.innerHTML = cards.map(c => `
+                    <div class="bg-[#1e1e1e] border border-amber-500/40 rounded-2xl p-4 space-y-3 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs">👑</span>
+                                    <h3 class="text-sm font-bold text-amber-400">${escapeHtml(c.name)}</h3>
+                                </div>
+                                <p class="text-[11px] font-mono text-gray-400">${escapeHtml(c.set_code || '')}</p>
+                            </div>
+                            <span class="font-mono text-sm font-black text-amber-400">₱${Number(c.price || 0).toLocaleString()}</span>
+                        </div>
+
+                        <div class="bg-amber-950/30 border border-amber-500/30 p-2.5 rounded-xl flex justify-between items-center text-xs">
+                            <span class="text-gray-400">Highest Bidder:</span>
+                            <span class="font-bold text-white">${escapeHtml(c.top_bidder || 'No bids yet')}</span>
+                        </div>
+
+                        <button onclick="archiveAuction('${c.id}')" class="w-full bg-amber-600/20 text-amber-400 border border-amber-500/30 text-xs font-bold py-2.5 rounded-xl active:scale-95 transition-transform">
+                            Archive Closed Auction
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Error loading premium auctions:", err);
+                feed.innerHTML = '<div class="text-center py-8 text-gray-500 text-xs">Error loading premium auctions.</div>';
+            }
+            lucide.createIcons();
+        }
+
+        // 8. Update Metrics Engine
         async function updateMetrics() {
-            const [{ data: orders }, { data: auctions }, { data: totalCards }] = await Promise.all([
-                supabaseClient.from('Orders').select('*'),
-                supabaseClient.from('cards').select('*').or('type.eq.bidding,type.eq.bid'),
-                supabaseClient.from('cards').select('stock')
-            ]);
+            try {
+                const [{ data: orders }, { data: auctions }, { data: totalCards }] = await Promise.all([
+                    supabaseClient.from('Orders').select('*'),
+                    supabaseClient.from('cards').select('*').in('type', ['bidding', 'bid', 'premium', 'premium_bidding', 'Bidding', 'Bid', 'Premium', 'Premium_Bidding']),
+                    supabaseClient.from('cards').select('stock')
+                ]);
 
-            let pendingCount = 0;
-            let pendingRevenue = 0;
-            let completedSales = 0;
+                let pendingCount = 0;
+                let pendingRevenue = 0;
+                let completedSales = 0;
 
-            // 1. Calculate store orders revenue
-            (orders || []).forEach(ord => {
-                let orderTotal = (ord.items_ordered || []).reduce((sum, item) => sum + Number(item.price || 0), 0);
-                
-                if (!ord.order_status || ord.order_status === 'Pending') {
-                    pendingCount++;
-                    pendingRevenue += orderTotal;
-                } else if (ord.order_status === 'Processed' || ord.order_status === 'Shipped') {
-                    completedSales += orderTotal;
-                }
-            });
+                (orders || []).forEach(ord => {
+                    const itemsArr = safeParseArray(ord.items_ordered);
+                    let orderTotal = itemsArr.reduce((sum, item) => sum + Number(item.price || 0), 0);
+                    
+                    if (!ord.order_status || ord.order_status === 'Pending') {
+                        pendingCount++;
+                        pendingRevenue += orderTotal;
+                    } else if (ord.order_status === 'Processed' || ord.order_status === 'Shipped') {
+                        completedSales += orderTotal;
+                    }
+                });
 
-            // 2. Add uncollected auction winnings to pending revenue
-            let activeAuctionVal = 0;
-            (auctions || []).forEach(card => {
-                const val = Number(card.price || 0);
-                activeAuctionVal += val;
-                if (card.top_bidder && card.top_bidder !== 'No bids yet') {
-                    pendingRevenue += val;
-                }
-            });
+                let activeAuctionVal = 0;
+                (auctions || []).forEach(card => {
+                    const val = Number(card.price || 0);
+                    activeAuctionVal += val;
+                    if (card.top_bidder && card.top_bidder !== 'No bids yet') {
+                        pendingRevenue += val;
+                    }
+                });
 
-            let sumStock = (totalCards || []).reduce((acc, curr) => acc + Number(curr.stock || 0), 0);
+                let sumStock = (totalCards || []).reduce((acc, curr) => acc + Number(curr.stock || 0), 0);
 
-            // Update UI
-            document.getElementById('stat-pending-orders').innerText = pendingCount;
-            document.getElementById('stat-active-auctions').innerText = auctions?.length || 0;
-            document.getElementById('stat-total-stock').innerText = `${sumStock} Items`;
-            document.getElementById('stat-pending-revenue').innerText = `₱${pendingRevenue.toLocaleString()}`;
-            document.getElementById('stat-completed-sales').innerText = `₱${completedSales.toLocaleString()}`;
-            document.getElementById('stat-auction-value').innerText = `₱${activeAuctionVal.toLocaleString()} pool`;
+                document.getElementById('stat-pending-orders').innerText = pendingCount;
+                document.getElementById('stat-active-auctions').innerText = auctions?.length || 0;
+                document.getElementById('stat-total-stock').innerText = `${sumStock} Items`;
+                document.getElementById('stat-pending-revenue').innerText = `₱${pendingRevenue.toLocaleString()}`;
+                document.getElementById('stat-completed-sales').innerText = `₱${completedSales.toLocaleString()}`;
+                document.getElementById('stat-auction-value').innerText = `₱${activeAuctionVal.toLocaleString()} pool`;
 
+            } catch (e) {
+                console.warn("Metrics calculation issue:", e);
+            }
             lucide.createIcons();
         }
 
@@ -1017,7 +1144,7 @@
                     const { error: archiveErr } = await supabaseClient
                         .from('archived_cards')
                         .insert([{
-                            id: cardData.id,  // <-- CRITICAL FIX: Explicitly carrying over the ID
+                            id: cardData.id,
                             name: cardData.name,
                             set_code: cardData.set_code,
                             rarity: cardData.rarity,
@@ -1041,6 +1168,7 @@
                 }
 
                 await loadBids();
+                await loadPremiumBids();
                 await loadOrders();
                 await updateMetrics();
             }
@@ -1050,6 +1178,7 @@
             e.preventDefault();
             const typeVal = document.getElementById('inv-type').value;
             const endsVal = document.getElementById('inv-bidding-ends').value;
+            const isAuction = (typeVal === 'bidding' || typeVal === 'premium');
 
             const payload = {
                 name: document.getElementById('inv-name').value,
@@ -1058,9 +1187,9 @@
                 price: Number(document.getElementById('inv-price').value),
                 stock: Number(document.getElementById('inv-stock').value),
                 front_img: document.getElementById('inv-front').value || null,
-                type: typeVal === 'bidding' ? 'bidding' : 'sale',
-                bidding_ends_at: typeVal === 'bidding' && endsVal ? new Date(endsVal).toISOString() : null,
-                top_bidder: typeVal === 'bidding' ? 'No bids yet' : null
+                type: isAuction ? typeVal : 'sale',
+                bidding_ends_at: isAuction && endsVal ? new Date(endsVal).toISOString() : null,
+                top_bidder: isAuction ? 'No bids yet' : null
             };
 
             const { error } = await supabaseClient.from('cards').insert([payload]);
