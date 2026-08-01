@@ -22,6 +22,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Cloudflare Turnstile API -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
     
     <style>
         /* Mobile OS Feel Tweaks */
@@ -60,6 +63,10 @@
                     <label class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Password</label>
                     <input type="password" id="admin-password" required class="w-full bg-[#2a2a2a] border border-gray-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-red-500">
                 </div>
+
+                <!-- 🛡️ CLOUDFLARE TURNSTILE WIDGET ADDED HERE -->
+                <div class="cf-turnstile flex justify-center my-2" data-sitekey="0x4AAAAAAEDnIYOW_KG0tl4d" data-theme="dark"></div>
+
                 <button type="submit" class="w-full bg-red-600 active:bg-red-700 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider text-white shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2">
                     <i data-lucide="unlock" class="w-4 h-4"></i> Access Console
                 </button>
@@ -586,9 +593,32 @@
                 return;
             }
 
+            // 🛡️ Extract Cloudflare Turnstile Token
+            const captchaToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : null;
+
+            if (!captchaToken && supabaseClient) {
+                errEl.innerText = "Please complete the Turnstile security check first.";
+                errEl.classList.remove('hidden');
+                return;
+            }
+
             try {
-                const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                if (error) throw error;
+                // 🛡️ Pass captchaToken into signInWithPassword options
+                const { error } = await supabaseClient.auth.signInWithPassword({ 
+                    email, 
+                    password,
+                    options: {
+                        captchaToken: captchaToken // 👈 Attaches token to Supabase request
+                    } 
+                });
+
+                if (error) {
+                    if (typeof turnstile !== 'undefined' && typeof turnstile.reset === 'function') {
+                        turnstile.reset();
+                    }
+                    throw error;
+                }
+
                 document.getElementById('auth-gate').classList.add('hidden');
                 initMobileApp();
             } catch (err) {
@@ -685,10 +715,11 @@
 
         async function seedInitialActivityFeed() {
             try {
-                // Clean 2-query fetch: avoids PostgREST syntax errors completely
-                const [{ data: orders }, { data: allCards }] = await Promise.all([
+                // Fetch orders, recent bid history entries, and card metadata in parallel
+                const [{ data: orders }, { data: bidHistory }, { data: allCards }] = await Promise.all([
                     supabaseClient.from('Orders').select('*').order('id', { ascending: false }).limit(5),
-                    supabaseClient.from('cards').select('*').order('id', { ascending: false })
+                    supabaseClient.from('bid_history').select('*').order('id', { ascending: false }).limit(30),
+                    supabaseClient.from('cards').select('*')
                 ]);
 
                 // 1. Seed Orders Feed
@@ -697,7 +728,7 @@
                     const itemsArr = safeParseArray(o.items_ordered);
                     const total = itemsArr.reduce((s, i) => s + Number(i.price || 0), 0);
                     const rawTime = o.created_at || o.timestamp;
-                    const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Recent';
+                    const dt = rawTime ? getPSTDateTimeString(safeParseBiddingTime(rawTime)) : 'Recent';
 
                     orderActivityLogs.push({
                         type: 'purchase',
@@ -710,52 +741,46 @@
                     });
                 });
 
-                // 2. Seed Standard Bids Feed (JavaScript Filter)
+                // Build a card lookup map by ID
+                const cardsMap = {};
+                (allCards || []).forEach(c => { cardsMap[c.id] = c; });
+
                 bidActivityLogs = [];
-                const stdCards = (allCards || []).filter(c => {
-                    const t = (c.type || '').toLowerCase().trim();
-                    const isStd = t === 'bidding' || t === 'bid' || t === 'standard' || t === 'standard_bidding';
-                    const hasBid = c.top_bidder && c.top_bidder !== 'No bids yet';
-                    return isStd && hasBid;
-                }).slice(0, 5);
-
-                stdCards.forEach(c => {
-                    const rawTime = c.updated_at || c.created_at;
-                    const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
-
-                    bidActivityLogs.push({
-                        type: 'bid',
-                        icon: 'gavel',
-                        badgeText: 'BID',
-                        name: c.top_bidder,
-                        subtitle: `Top bid on ${c.name}`,
-                        price: `₱${Number(c.price || 0).toLocaleString()}`,
-                        timeStr: dt
-                    });
-                });
-
-                // 3. Seed Premium Bids Feed (JavaScript Filter)
                 premiumActivityLogs = [];
-                const premCards = (allCards || []).filter(c => {
-                    const t = (c.type || '').toLowerCase().trim();
+
+                const seenStdCards = new Set();
+                const seenPremCards = new Set();
+
+                // 2 & 3. Seed Bids Feeds using exact timestamps from bid_history
+                (bidHistory || []).forEach(b => {
+                    const card = cardsMap[b.card_id];
+                    if (!card) return;
+
+                    const t = (card.type || '').toLowerCase().trim();
                     const isPrem = t === 'premium' || t === 'premium_bidding';
-                    const hasBid = c.top_bidder && c.top_bidder !== 'No bids yet';
-                    return isPrem && hasBid;
-                }).slice(0, 5);
+                    const dt = b.timestamp ? getPSTDateTimeString(safeParseBiddingTime(b.timestamp)) : 'Active';
 
-                premCards.forEach(c => {
-                    const rawTime = c.updated_at || c.created_at;
-                    const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
-
-                    premiumActivityLogs.push({
+                    const item = {
                         type: 'bid',
-                        icon: 'crown',
-                        badgeText: '👑 PREMIUM',
-                        name: c.top_bidder,
-                        subtitle: `Top bid on ${c.name}`,
-                        price: `₱${Number(c.price || 0).toLocaleString()}`,
+                        icon: isPrem ? 'crown' : 'gavel',
+                        badgeText: isPrem ? '👑 PREMIUM' : 'BID',
+                        name: b.bidder || 'Collector',
+                        subtitle: `Top bid on ${card.name}`,
+                        price: `₱${Number(b.amount || 0).toLocaleString()}`,
                         timeStr: dt
-                    });
+                    };
+
+                    if (isPrem) {
+                        if (!seenPremCards.has(b.card_id) && premiumActivityLogs.length < 5) {
+                            seenPremCards.add(b.card_id);
+                            premiumActivityLogs.push(item);
+                        }
+                    } else {
+                        if (!seenStdCards.has(b.card_id) && bidActivityLogs.length < 5) {
+                            seenStdCards.add(b.card_id);
+                            bidActivityLogs.push(item);
+                        }
+                    }
                 });
 
             } catch (e) {
