@@ -2867,8 +2867,7 @@
                 textOutput += `  Bid Valuation  : PHP ${Number(log.amount).toLocaleString()}\n`;
                 textOutput += `--------------------------------------------------\n`;
             });
-            });
-            
+                       
             const plainTextBlob = new Blob([textOutput], { type: "text/plain;charset=utf-8" });
             const downloadAnchor = document.createElement("a");
             downloadAnchor.href = URL.createObjectURL(plainTextBlob);
