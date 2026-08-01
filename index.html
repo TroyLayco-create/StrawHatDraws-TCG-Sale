@@ -871,48 +871,44 @@
             }, 300);
         };
 
+        // 1. Core Parser: Prevents double offset shifts when parsing database strings
         function safeParseBiddingTime(dateStr) {
             if (!dateStr) return new Date(0);
-            const str = String(dateStr).trim();
-            // Normalize spaces to ISO 'T' format for Safari / iOS compatibility
-            const isoStr = str.replace(' ', 'T');
-            // If it already has timezone offset (+08:00, -05:00, Z), parse directly
-            if (isoStr.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(isoStr)) {
-                return new Date(isoStr);
+            let str = String(dateStr).trim().replace(' ', 'T');
+        
+            // If string already has explicit ISO offset (+08:00, -05:00, or UTC Z)
+            if (str.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(str)) {
+                return new Date(str);
             }
-            // Otherwise, strictly anchor un-offset strings to Philippine Time (+08:00)
-            return new Date(isoStr.includes('T') ? isoStr + '+08:00' : isoStr + 'T00:00:00+08:00');
+        
+            // Un-offset strings (e.g. "2026-08-01T20:00:00") -> strictly force PHT (+08:00)
+            return new Date(str.includes('T') ? str + '+08:00' : str + 'T00:00:00+08:00');
         }
-
+        
         function formatPHP(num) {
             return `₱${Number(num || 0).toLocaleString()}`;
         }
-
-        function formatAuctionEnd(datetimeStr) {
-            if (!datetimeStr) return "No end time";
+        
+        // 2. Uniform PHT Formatting Engine for Audit Trail, Orders & Auctions
+        function formatOrderDate(datetimeStr) {
+            if (!datetimeStr) return "Just now";
             const dt = safeParseBiddingTime(datetimeStr);
+            if (isNaN(dt.getTime())) return "Invalid Date";
             return dt.toLocaleString('en-PH', {
-                timeZone: 'Asia/Manila', // Forces out-of-country browsers to display the text in PHT
+                timeZone: 'Asia/Manila',
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
                 hour: 'numeric',
                 minute: '2-digit',
+                second: '2-digit',
                 hour12: true
             });
         }
-
-        function formatOrderDate(datetimeStr) {
-            if (!datetimeStr) return "Just now";
-            const dt = safeParseBiddingTime(datetimeStr);
-            return dt.toLocaleString('en-PH', {
-                timeZone: 'Asia/Manila', // Forces exact Philippine Standard Time (GMT+8)
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
+        
+        function formatAuctionEnd(datetimeStr) {
+            if (!datetimeStr) return "No end time";
+            return formatOrderDate(datetimeStr);
         }
 
         let isRegisterMode = true;
@@ -2865,11 +2861,12 @@
             
             logs.forEach((log, index) => {
                 const sequenceNum = logs.length - index;
-                const entryDate = safeParseBiddingTime(log.timestamp).toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
+                const entryDate = formatOrderDate(log.timestamp);
                 textOutput += `[ENTRY #0${sequenceNum}] Recorded: ${entryDate}\n`;
                 textOutput += `  Collector Name : ${log.bidder}\n`;
                 textOutput += `  Bid Valuation  : PHP ${Number(log.amount).toLocaleString()}\n`;
                 textOutput += `--------------------------------------------------\n`;
+            });
             });
             
             const plainTextBlob = new Blob([textOutput], { type: "text/plain;charset=utf-8" });
@@ -4022,7 +4019,7 @@
                 if (!container) return;
 
                 const isMe = currentUserProfile && currentUserProfile.name === msg.username;
-                const timeFormatted = new Date(msg.created_at).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Manila' });
+                const timeFormatted = safeParseBiddingTime(msg.created_at).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Manila' });
                 
                 const onlyEmoji = isOnlyEmoji(msg.message);
 
