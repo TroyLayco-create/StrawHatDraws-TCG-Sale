@@ -4302,6 +4302,11 @@
             }
         };
 
+        window.addEventListener('focus', () => {
+            if (typeof fetchLiveInventory === 'function') {
+                fetchLiveInventory(true);
+            }
+        });
             
     </script>
 
