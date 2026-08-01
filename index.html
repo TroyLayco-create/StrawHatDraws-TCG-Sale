@@ -876,13 +876,13 @@
         function safeParseBiddingTime(dateStr) {
             if (!dateStr) return new Date(0);
             let str = String(dateStr).trim().replace(' ', 'T');
-        
-            // If string already has explicit ISO offset (+08:00, -05:00, or UTC Z)
-            if (str.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(str)) {
+
+            // Enhanced offset detector: handles Z, +00, +00:00, +08, +08:00, etc.
+            if (/(Z|[+-]\d{2}(?::?\d{2})?)$/i.test(str)) {
                 return new Date(str);
             }
-        
-            // Un-offset strings -> strictly force Philippine Time (+08:00)
+
+            // For plain un-offset strings -> strictly anchor to Philippine Standard Time (+08:00)
             return new Date(str.includes('T') ? str + '+08:00' : str + 'T00:00:00+08:00');
         }
         
@@ -4095,7 +4095,8 @@
                     const { error } = await supabaseClient.from('live_chat').insert([{
                         user_id: currentUserProfile.id,
                         username: currentUserProfile.name,
-                        message: text
+                        message: text,
+                        created_at: new Date().toISOString() // 👈 Fixes timezone shift on send
                     }]);
                     if (error) throw error;
                     input.value = '';
