@@ -241,9 +241,19 @@
                             <option value="premium">👑 Premium Auction</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-[10px] text-gray-400 uppercase font-bold mb-1" id="inv-price-label">Price / Starting Bid (₱)</label>
-                        <input type="number" id="inv-price" required placeholder="14500" class="w-full bg-[#2a2a2a] border border-gray-700 rounded-xl p-3 text-white font-mono font-bold">
+                    <div id="inv-standard-auction-prices" class="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-black/30 rounded-lg border border-gray-800">
+                        <div>
+                            <label class="block text-[10px] text-blue-400 mb-1 uppercase font-bold">SB Price (₱)</label>
+                            <input type="number" id="inv-sb-price" placeholder="1000" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-purple-400 mb-1 uppercase font-bold">DIBS Price (₱)</label>
+                            <input type="number" id="inv-dibs-price" placeholder="1500" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-amber-400 mb-1 uppercase font-bold">BO Price (₱)</label>
+                            <input type="number" id="inv-bo-price" placeholder="2000" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white font-mono">
+                        </div>
                     </div>
                     <div id="inv-stock-container">
                         <label class="block text-[10px] text-gray-400 uppercase font-bold mb-1">Stock Quantity</label>
@@ -325,6 +335,17 @@
             const d = dateObj.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
             const t = dateObj.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
             return `${d} • ${t}`;
+        }
+
+        // 👈 PASTE IT HERE
+        function safeParseBiddingTime(dateStr) {
+            if (!dateStr) return new Date(0);
+            const str = String(dateStr).trim();
+            const isoStr = str.replace(' ', 'T');
+            if (isoStr.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(isoStr)) {
+                return new Date(isoStr);
+            }
+            return new Date(isoStr.includes('T') ? isoStr + '+08:00' : isoStr + 'T00:00:00+08:00');
         }
 
         // Tab Switching Engine
@@ -1180,19 +1201,33 @@
             const endsVal = document.getElementById('inv-bidding-ends').value;
             const isAuction = (typeVal === 'bidding' || typeVal === 'premium');
 
-            const payload = {
+            const frontVal = document.getElementById('inv-front').value.trim();
+
+            const sbVal = Number(document.getElementById('inv-sb-price').value || 0);
+            const dibsVal = Number(document.getElementById('inv-dibs-price').value || 0);
+            const boVal = Number(document.getElementById('inv-bo-price').value || 0);
+
+            // For auctions, starting price defaults to SB Price or BO Price
+            const initialPrice = isAuction ? (sbVal || boVal || 0) : boVal;
+
+            const cardPayload = {
                 name: document.getElementById('inv-name').value,
                 set_code: document.getElementById('inv-set').value,
                 rarity: document.getElementById('inv-rarity').value,
-                price: Number(document.getElementById('inv-price').value),
-                stock: Number(document.getElementById('inv-stock').value),
-                front_img: document.getElementById('inv-front').value || null,
+                price: initialPrice,
+                sb_price: isAuction ? sbVal : initialPrice,
+                dibs_price: isAuction ? dibsVal : 0,
+                bo_price: isAuction ? boVal : initialPrice,
+                stock: isAuction ? 1 : Number(document.getElementById('inv-stock').value || 1),
+                condition: "Near Mint",
+                front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
+                back_img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                 type: isAuction ? typeVal : 'sale',
-                bidding_ends_at: isAuction && endsVal ? new Date(endsVal).toISOString() : null,
+                bidding_ends_at: isAuction && endsVal ? safeParseBiddingTime(endsVal).toISOString() : null,
                 top_bidder: isAuction ? 'No bids yet' : null
             };
 
-            const { error } = await supabaseClient.from('cards').insert([payload]);
+            const { error } = await supabaseClient.from('cards').insert([cardPayload]);
             if (!error) {
                 alert("Listing created successfully!");
                 document.getElementById('new-inventory-form').reset();
