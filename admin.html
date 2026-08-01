@@ -359,22 +359,42 @@
             return [];
         }
 
-        // Helper: Formats Date + Time strictly in Philippine Standard Time
-        function getPSTDateTimeString(dateObj = new Date()) {
-            const d = dateObj.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
-            const t = dateObj.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
-            return `${d} • ${t}`;
+        // 🛡️ Mobile-Safe Parser: Truncates 6-digit microseconds (.223318 -> .223) for iOS/PWA WebKit compatibility
+        function safeParseBiddingTime(dateStr) {
+            if (!dateStr) return new Date();
+            let str = String(dateStr).trim().replace(' ', 'T');
+
+            // 1. Truncate microsecond precision (>3 fractional digits)
+            str = str.replace(/(\.\d{3})\d+/, '$1');
+
+            // 2. Normalize shorthand offsets (e.g., +00 -> +00:00)
+            str = str.replace(/([+-]\d{2})$/, '$1:00');
+
+            // 3. Parse offset or anchor un-offset strings to Philippine Standard Time (+08:00)
+            if (/(Z|[+-]\d{2}(?::?\d{2})?)$/i.test(str)) {
+                return new Date(str);
+            }
+
+            return new Date(str.includes('T') ? str + '+08:00' : str + 'T00:00:00+08:00');
         }
 
-        // 👈 PASTE IT HERE
-        function safeParseBiddingTime(dateStr) {
-            if (!dateStr) return new Date(0);
-            const str = String(dateStr).trim();
-            const isoStr = str.replace(' ', 'T');
-            if (isoStr.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(isoStr)) {
-                return new Date(isoStr);
+        // 🛡️ Mobile-Safe Formatter: Accepts both strings or Date objects and formats cleanly to PHT
+        function getPSTDateTimeString(dateInput = new Date()) {
+            let dt = (typeof dateInput === 'string' || typeof dateInput === 'number') 
+                ? safeParseBiddingTime(dateInput) 
+                : dateInput;
+
+            if (!(dt instanceof Date) || isNaN(dt.getTime())) {
+                dt = new Date();
             }
-            return new Date(isoStr.includes('T') ? isoStr + '+08:00' : isoStr + 'T00:00:00+08:00');
+
+            try {
+                const d = dt.toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
+                const t = dt.toLocaleTimeString('en-PH', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: true });
+                return `${d} • ${t}`;
+            } catch (e) {
+                return dt.toLocaleString();
+            }
         }
 
         // Tab Switching Engine
@@ -648,11 +668,13 @@
 
             supabaseClient
                 .channel('mobile-live-channel')
+                // 📦 1. Realtime Order Insert Listener
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'Orders' }, (payload) => {
                     playAlert('purchase');
                     const name = payload.new.customer_name || 'Customer';
                     const itemsArr = safeParseArray(payload.new.items_ordered);
                     const total = itemsArr.reduce((s, i) => s + Number(i.price || 0), 0);
+                    const rawTime = payload.new.created_at || payload.new.timestamp;
                     
                     pushOrderActivity({
                         type: 'purchase',
@@ -661,13 +683,15 @@
                         name: name,
                         subtitle: `${itemsArr.length} item${itemsArr.length > 1 ? 's' : ''} ordered`,
                         price: `₱${total.toLocaleString()}`,
-                        timeStr: getPSTDateTimeString()
+                        timeStr: getPSTDateTimeString(rawTime) // 👈 Uses database timestamp
                     });
 
                     triggerNotification("🚨 NEW PURCHASE!", `Order from ${name}`);
                     loadOrders();
                     updateMetrics();
                 })
+
+                // 🔨 2. Realtime Card Update Listener
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards' }, (payload) => {
                     const itemType = (payload.new.type || '').toLowerCase();
                     if (!['bidding', 'bid', 'premium', 'premium_bidding'].includes(itemType)) return;
@@ -676,6 +700,7 @@
                     const price = Number(payload.new.price || 0);
                     const cardName = payload.new.name || 'Card';
                     const isPremium = ['premium', 'premium_bidding'].includes(itemType);
+                    const rawTime = payload.new.updated_at || payload.new.bidding_ends_at || new Date();
                     
                     const uniqueBidKey = `${payload.new.id}-${bidder}-${price}`;
                     if (processedBids.has(uniqueBidKey)) return;
@@ -691,7 +716,7 @@
                         name: bidder,
                         subtitle: `Top bid on ${cardName}`,
                         price: `₱${price.toLocaleString()}`,
-                        timeStr: getPSTDateTimeString()
+                        timeStr: getPSTDateTimeString(rawTime) // 👈 Uses database timestamp
                     };
 
                     if (isPremium) {
@@ -703,10 +728,6 @@
                     }
 
                     triggerNotification(isPremium ? "👑 NEW PREMIUM BID!" : "🔨 NEW BID!", `${bidder} bid ₱${price.toLocaleString()}`);
-                    loadOrders();
-                    updateMetrics();
-                })
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'Orders' }, (payload) => {
                     loadOrders();
                     updateMetrics();
                 })
