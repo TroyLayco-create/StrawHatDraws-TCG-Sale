@@ -871,7 +871,8 @@
             }, 300);
         };
 
-        // 1. Core Parser: Prevents double offset shifts when parsing database strings
+        // --- TIMEZONE & FORMATTING UTILITIES (PHILIPPINE TIME ENFORCED) ---
+
         function safeParseBiddingTime(dateStr) {
             if (!dateStr) return new Date(0);
             let str = String(dateStr).trim().replace(' ', 'T');
@@ -881,7 +882,7 @@
                 return new Date(str);
             }
         
-            // Un-offset strings (e.g. "2026-08-01T20:00:00") -> strictly force PHT (+08:00)
+            // Un-offset strings -> strictly force Philippine Time (+08:00)
             return new Date(str.includes('T') ? str + '+08:00' : str + 'T00:00:00+08:00');
         }
         
@@ -889,7 +890,6 @@
             return `₱${Number(num || 0).toLocaleString()}`;
         }
         
-        // 2. Uniform PHT Formatting Engine for Audit Trail, Orders & Auctions
         function formatOrderDate(datetimeStr) {
             if (!datetimeStr) return "Just now";
             const dt = safeParseBiddingTime(datetimeStr);
