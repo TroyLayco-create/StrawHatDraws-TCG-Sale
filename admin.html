@@ -663,18 +663,10 @@
 
         async function seedInitialActivityFeed() {
             try {
-                const [{ data: orders }, { data: stdCards }, { data: premCards }] = await Promise.all([
-                    supabaseClient.from('Orders').select('*').order('id', { ascending: false }).limit(5),
-                    supabaseClient.from('cards').select('*')
-                        .in('type', ['bidding', 'bid', 'Bidding', 'Bid'])
-                        .not('top_bidder', 'is', null)
-                        .neq('top_bidder', 'No bids yet')
-                        .order('updated_at', { ascending: false }).limit(5),
-                    supabaseClient.from('cards').select('*')
-                        .in('type', ['premium', 'premium_bidding', 'Premium', 'Premium_Bidding'])
-                        .not('top_bidder', 'is', null)
-                        .neq('top_bidder', 'No bids yet')
-                        .order('updated_at', { ascending: false }).limit(5)
+                // Fetch all bidding cards without strict filter limits first
+                const [{ data: orders }, { data: allCards }] = await Promise.all([
+                    supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }).limit(5),
+                    supabaseClient.from('cards').select('*').in('type', ['bidding', 'bid', 'Bidding', 'Bid', 'premium', 'premium_bidding', 'Premium', 'Premium_Bidding']).order('id', { ascending: false })
                 ]);
 
                 // 1. Seed Orders
@@ -696,41 +688,33 @@
                     });
                 });
 
-                // 2. Seed Standard Bids
                 bidActivityLogs = [];
-                (stdCards || []).forEach(c => {
-                    if (c.top_bidder && c.top_bidder !== 'No bids yet') {
-                        const rawTime = c.updated_at || c.created_at;
-                        const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
-
-                        bidActivityLogs.push({
-                            type: 'bid',
-                            icon: 'gavel',
-                            badgeText: 'BID',
-                            name: c.top_bidder,
-                            subtitle: `Top bid on ${c.name}`,
-                            price: `₱${Number(c.price || 0).toLocaleString()}`,
-                            timeStr: dt
-                        });
-                    }
-                });
-
-                // 3. Seed Premium Bids
                 premiumActivityLogs = [];
-                (premCards || []).forEach(c => {
-                    if (c.top_bidder && c.top_bidder !== 'No bids yet') {
+
+                // 2. Filter & Seed Bids Dynamically in JavaScript
+                (allCards || []).forEach(c => {
+                    const bidder = c.top_bidder ? String(c.top_bidder).trim() : '';
+                    if (bidder && bidder.toLowerCase() !== 'no bids yet' && bidder !== '') {
                         const rawTime = c.updated_at || c.created_at;
                         const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
+                        const cardType = String(c.type || '').toLowerCase();
+                        const isPrem = cardType.includes('premium');
 
-                        premiumActivityLogs.push({
+                        const logItem = {
                             type: 'bid',
-                            icon: 'crown',
-                            badgeText: '👑 PREMIUM',
-                            name: c.top_bidder,
+                            icon: isPrem ? 'crown' : 'gavel',
+                            badgeText: isPrem ? '👑 PREMIUM' : 'BID',
+                            name: bidder,
                             subtitle: `Top bid on ${c.name}`,
                             price: `₱${Number(c.price || 0).toLocaleString()}`,
                             timeStr: dt
-                        });
+                        };
+
+                        if (isPrem) {
+                            if (premiumActivityLogs.length < 5) premiumActivityLogs.push(logItem);
+                        } else {
+                            if (bidActivityLogs.length < 5) bidActivityLogs.open ? null : bidActivityLogs.push(logItem);
+                        }
                     }
                 });
 
