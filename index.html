@@ -2867,7 +2867,7 @@
                 textOutput += `  Bid Valuation  : PHP ${Number(log.amount).toLocaleString()}\n`;
                 textOutput += `--------------------------------------------------\n`;
             });
-                       
+                        
             const plainTextBlob = new Blob([textOutput], { type: "text/plain;charset=utf-8" });
             const downloadAnchor = document.createElement("a");
             downloadAnchor.href = URL.createObjectURL(plainTextBlob);
@@ -3003,11 +3003,23 @@
                 } else if (isBidding) {
                     const claims = item.claims || { sb: false, dibs: false, bo: false };
                     
+                    // Check if all 3 tiers (SB, DIBS, BO) are claimed
+                    const canBid = claims.sb && claims.dibs && claims.bo;
+                    
                     const sbDisabled = claims.sb ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-blue-600 active:bg-blue-700 text-white font-extrabold shadow-md shadow-blue-950/40';
                     const dibsDisabled = claims.dibs ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-purple-600 active:bg-purple-700 text-white font-extrabold shadow-md shadow-purple-950/40';
                     const boDisabled = claims.bo ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-amber-500 active:bg-amber-600 text-black font-black shadow-md shadow-amber-950/40';
                     
                     const currentHighestPrice = Number(item.price || item.bo_price || 0);
+
+                    // Dynamic styles depending on whether all 3 tiers are claimed
+                    const bidBtnClass = canBid 
+                        ? 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-black active:scale-95 shadow-md' 
+                        : 'bg-gray-800 text-gray-500 font-bold opacity-50 cursor-not-allowed';
+                        
+                    const selectClass = canBid 
+                        ? 'bg-[#222] border-gray-700 text-white focus:outline-none focus:border-red-500 cursor-pointer' 
+                        : 'bg-[#181818] border-gray-800 text-gray-600 cursor-not-allowed opacity-50';
 
                     // 👑 Highest Bidder Banner Pinned to Absolute Top (top-2)
                     biddingHeaderMarkup = `
@@ -3048,13 +3060,13 @@
                             </div>
 
                             <div class="flex gap-1.5 w-full">
-                                <select id="custom-increment-${item.id}" class="flex-1 bg-[#222] border border-gray-700 rounded-xl px-2.5 py-2 text-white focus:outline-none focus:border-red-500 font-mono text-xs sm:text-sm cursor-pointer shadow-inner">
+                                <select id="custom-increment-${item.id}" ${!canBid ? 'disabled' : ''} class="flex-1 border rounded-xl px-2.5 py-2 font-mono text-xs sm:text-sm shadow-inner transition-all ${selectClass}">
                                     <option value="10">BO + ₱10 (${formatPHP(currentHighestPrice + 10)})</option>
                                     <option value="20">BO + ₱20 (${formatPHP(currentHighestPrice + 20)})</option>
                                     <option value="50">BO + ₱50 (${formatPHP(currentHighestPrice + 50)})</option>
                                     <option value="100">BO + ₱100 (${formatPHP(currentHighestPrice + 100)})</option>
                                 </select>
-                                <button type="button" onclick="placeCustomStandardBid(${item.id}, ${currentHighestPrice})" class="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider shrink-0 shadow-md transition-transform active:scale-95">
+                                <button type="button" ${!canBid ? 'disabled' : ''} onclick="placeCustomStandardBid(${item.id}, ${currentHighestPrice})" class="${bidBtnClass} px-4 py-2 rounded-xl text-xs uppercase tracking-wider shrink-0 transition-all">
                                     Bid
                                 </button>
                             </div>
