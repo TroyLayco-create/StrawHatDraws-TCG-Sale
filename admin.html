@@ -124,13 +124,35 @@
                 </div>
                 <div onclick="switchTab('bids')" class="bg-[#1e1e1e] border border-gray-800 p-4 rounded-2xl flex flex-col justify-between cursor-pointer active:scale-95 transition-transform hover:border-red-500/50 shadow-md">
                     <div class="flex justify-between items-center">
-                        <span class="text-[10px] uppercase font-bold text-gray-400">Active Auctions</span>
+                        <span class="text-[10px] uppercase font-bold text-gray-400">Total Active Auctions</span>
                         <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5 text-gray-500"></i>
                     </div>
                     <div class="flex justify-between items-end mt-2">
                         <h2 id="stat-active-auctions" class="text-3xl font-black text-red-500">0</h2>
-                        <span id="stat-auction-value" class="text-[10px] font-mono text-gray-400 font-bold mb-1">₱0 pool</span>
+                        <span id="stat-auction-value" class="text-[10px] font-mono text-gray-400 font-bold mb-1">₱0 total pool</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- 🔨 INDIVIDUAL AUCTION POOL BREAKDOWN (STANDARD vs PREMIUM) -->
+            <div class="grid grid-cols-2 gap-3">
+                <div onclick="switchTab('bids')" class="bg-[#1e1e1e] border border-gray-800 p-3.5 rounded-2xl flex flex-col justify-between cursor-pointer active:scale-95 transition-transform hover:border-amber-500/50 shadow-md">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] uppercase font-bold text-amber-400 flex items-center gap-1">
+                            <i data-lucide="gavel" class="w-3 h-3"></i> Standard Pool
+                        </span>
+                        <span id="stat-std-count" class="text-[9px] font-bold text-gray-400 bg-black/40 px-1.5 py-0.5 rounded border border-gray-800">0 items</span>
+                    </div>
+                    <h2 id="stat-std-auction-pool" class="text-lg font-black text-amber-400 font-mono mt-2">₱0</h2>
+                </div>
+                <div onclick="switchTab('premium')" class="bg-[#1e1e1e] border border-amber-500/30 p-3.5 rounded-2xl flex flex-col justify-between cursor-pointer active:scale-95 transition-transform hover:border-amber-400 shadow-md">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] uppercase font-bold text-amber-300 flex items-center gap-1">
+                            <i data-lucide="crown" class="w-3 h-3 text-amber-400"></i> Premium Pool
+                        </span>
+                        <span id="stat-prem-count" class="text-[9px] font-bold text-amber-400/80 bg-black/40 px-1.5 py-0.5 rounded border border-amber-500/20">0 items</span>
+                    </div>
+                    <h2 id="stat-prem-auction-pool" class="text-lg font-black text-amber-300 font-mono mt-2">₱0</h2>
                 </div>
             </div>
 
@@ -663,13 +685,13 @@
 
         async function seedInitialActivityFeed() {
             try {
-                // Fetch all bidding cards without strict filter limits first
+                // Clean 2-query fetch: avoids PostgREST syntax errors completely
                 const [{ data: orders }, { data: allCards }] = await Promise.all([
-                    supabaseClient.from('Orders').select('*').order('created_at', { ascending: false }).limit(5),
-                    supabaseClient.from('cards').select('*').in('type', ['bidding', 'bid', 'Bidding', 'Bid', 'premium', 'premium_bidding', 'Premium', 'Premium_Bidding']).order('id', { ascending: false })
+                    supabaseClient.from('Orders').select('*').order('id', { ascending: false }).limit(5),
+                    supabaseClient.from('cards').select('*').order('id', { ascending: false })
                 ]);
 
-                // 1. Seed Orders
+                // 1. Seed Orders Feed
                 orderActivityLogs = [];
                 (orders || []).forEach(o => {
                     const itemsArr = safeParseArray(o.items_ordered);
@@ -688,34 +710,52 @@
                     });
                 });
 
+                // 2. Seed Standard Bids Feed (JavaScript Filter)
                 bidActivityLogs = [];
+                const stdCards = (allCards || []).filter(c => {
+                    const t = (c.type || '').toLowerCase().trim();
+                    const isStd = t === 'bidding' || t === 'bid' || t === 'standard' || t === 'standard_bidding';
+                    const hasBid = c.top_bidder && c.top_bidder !== 'No bids yet';
+                    return isStd && hasBid;
+                }).slice(0, 5);
+
+                stdCards.forEach(c => {
+                    const rawTime = c.updated_at || c.created_at;
+                    const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
+
+                    bidActivityLogs.push({
+                        type: 'bid',
+                        icon: 'gavel',
+                        badgeText: 'BID',
+                        name: c.top_bidder,
+                        subtitle: `Top bid on ${c.name}`,
+                        price: `₱${Number(c.price || 0).toLocaleString()}`,
+                        timeStr: dt
+                    });
+                });
+
+                // 3. Seed Premium Bids Feed (JavaScript Filter)
                 premiumActivityLogs = [];
+                const premCards = (allCards || []).filter(c => {
+                    const t = (c.type || '').toLowerCase().trim();
+                    const isPrem = t === 'premium' || t === 'premium_bidding';
+                    const hasBid = c.top_bidder && c.top_bidder !== 'No bids yet';
+                    return isPrem && hasBid;
+                }).slice(0, 5);
 
-                // 2. Filter & Seed Bids Dynamically in JavaScript
-                (allCards || []).forEach(c => {
-                    const bidder = c.top_bidder ? String(c.top_bidder).trim() : '';
-                    if (bidder && bidder.toLowerCase() !== 'no bids yet' && bidder !== '') {
-                        const rawTime = c.updated_at || c.created_at;
-                        const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
-                        const cardType = String(c.type || '').toLowerCase();
-                        const isPrem = cardType.includes('premium');
+                premCards.forEach(c => {
+                    const rawTime = c.updated_at || c.created_at;
+                    const dt = rawTime ? getPSTDateTimeString(new Date(rawTime)) : 'Active';
 
-                        const logItem = {
-                            type: 'bid',
-                            icon: isPrem ? 'crown' : 'gavel',
-                            badgeText: isPrem ? '👑 PREMIUM' : 'BID',
-                            name: bidder,
-                            subtitle: `Top bid on ${c.name}`,
-                            price: `₱${Number(c.price || 0).toLocaleString()}`,
-                            timeStr: dt
-                        };
-
-                        if (isPrem) {
-                            if (premiumActivityLogs.length < 5) premiumActivityLogs.push(logItem);
-                        } else {
-                            if (bidActivityLogs.length < 5) bidActivityLogs.open ? null : bidActivityLogs.push(logItem);
-                        }
-                    }
+                    premiumActivityLogs.push({
+                        type: 'bid',
+                        icon: 'crown',
+                        badgeText: '👑 PREMIUM',
+                        name: c.top_bidder,
+                        subtitle: `Top bid on ${c.name}`,
+                        price: `₱${Number(c.price || 0).toLocaleString()}`,
+                        timeStr: dt
+                    });
                 });
 
             } catch (e) {
@@ -992,7 +1032,7 @@
                 const { data: cards } = await supabaseClient
                     .from('cards')
                     .select('*')
-                    .in('type', ['bidding', 'bid', 'Bidding', 'Bid'])
+                    .in('type', ['bidding', 'bid', 'Bidding', 'Bid', 'standard', 'standard_bidding', 'Standard', 'Standard_Bidding'])
                     .order('id', { ascending: false });
 
                 if (!cards || cards.length === 0) {
@@ -1084,7 +1124,7 @@
                 ]);
 
                 let pendingCount = 0;
-                let pendingRevenue = 0;
+                let pendingOrdersTotal = 0;
                 let completedSales = 0;
 
                 (orders || []).forEach(ord => {
@@ -1093,34 +1133,61 @@
                     
                     if (!ord.order_status || ord.order_status === 'Pending') {
                         pendingCount++;
-                        pendingRevenue += orderTotal;
+                        pendingOrdersTotal += orderTotal;
                     } else if (ord.order_status === 'Processed' || ord.order_status === 'Shipped') {
                         completedSales += orderTotal;
                     }
                 });
 
                 let activeAuctionVal = 0;
+                let stdAuctionVal = 0;
+                let stdAuctionCount = 0;
+                let premAuctionVal = 0;
+                let premAuctionCount = 0;
+
                 (auctions || []).forEach(card => {
                     const val = Number(card.price || 0);
+                    const type = (card.type || '').toLowerCase().trim();
                     activeAuctionVal += val;
-                    if (card.top_bidder && card.top_bidder !== 'No bids yet') {
-                        pendingRevenue += val;
+
+                    if (type === 'premium' || type === 'premium_bidding') {
+                        premAuctionVal += val;
+                        premAuctionCount++;
+                    } else {
+                        stdAuctionVal += val;
+                        stdAuctionCount++;
                     }
                 });
 
+                // Pending Collections = Pending Store Orders + Standard Pool + Premium Pool
+                let pendingRevenue = pendingOrdersTotal + stdAuctionVal + premAuctionVal;
+
                 let sumStock = (totalCards || []).reduce((acc, curr) => acc + Number(curr.stock || 0), 0);
 
-                document.getElementById('stat-pending-orders').innerText = pendingCount;
-                document.getElementById('stat-active-auctions').innerText = auctions?.length || 0;
-                document.getElementById('stat-total-stock').innerText = `${sumStock} Items`;
-                document.getElementById('stat-pending-revenue').innerText = `₱${pendingRevenue.toLocaleString()}`;
-                document.getElementById('stat-completed-sales').innerText = `₱${completedSales.toLocaleString()}`;
-                document.getElementById('stat-auction-value').innerText = `₱${activeAuctionVal.toLocaleString()} pool`;
+                // Main Store Metric Displays
+                if (document.getElementById('stat-pending-orders')) document.getElementById('stat-pending-orders').innerText = pendingCount;
+                if (document.getElementById('stat-active-auctions')) document.getElementById('stat-active-auctions').innerText = auctions?.length || 0;
+                if (document.getElementById('stat-total-stock')) document.getElementById('stat-total-stock').innerText = `${sumStock} Items`;
+                if (document.getElementById('stat-pending-revenue')) document.getElementById('stat-pending-revenue').innerText = `₱${pendingRevenue.toLocaleString()}`;
+                if (document.getElementById('stat-completed-sales')) document.getElementById('stat-completed-sales').innerText = `₱${completedSales.toLocaleString()}`;
+                if (document.getElementById('stat-auction-value')) document.getElementById('stat-auction-value').innerText = `₱${activeAuctionVal.toLocaleString()} pool`;
+
+                // Standard Auction Pool
+                const stdPoolEl = document.getElementById('stat-std-auction-pool');
+                const stdCountEl = document.getElementById('stat-std-count');
+                if (stdPoolEl) stdPoolEl.innerText = `₱${stdAuctionVal.toLocaleString()}`;
+                if (stdCountEl) stdCountEl.innerText = `${stdAuctionCount} item${stdAuctionCount === 1 ? '' : 's'}`;
+
+                // Premium Auction Pool
+                const premPoolEl = document.getElementById('stat-prem-auction-pool');
+                const premCountEl = document.getElementById('stat-prem-count');
+                if (premPoolEl) premPoolEl.innerText = `₱${premAuctionVal.toLocaleString()}`;
+                if (premCountEl) premCountEl.innerText = `${premAuctionCount} item${premAuctionCount === 1 ? '' : 's'}`;
 
             } catch (e) {
                 console.warn("Metrics calculation issue:", e);
             }
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         async function archiveAuction(id) {
