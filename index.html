@@ -26,6 +26,55 @@
         ::-webkit-scrollbar-track { background: #121212; }
         ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
+        /* Golden Aura Glow for Premium Cards */
+        .golden-glow-card {
+            background: linear-gradient(180deg, #1f1b13 0%, #141310 100%);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.18), inset 0 0 15px rgba(245, 158, 11, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .golden-glow-card:hover {
+            border-color: rgba(245, 158, 11, 0.75);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.35), inset 0 0 20px rgba(245, 158, 11, 0.1);
+        }
+
+        /* Premium Gold Button Effect */
+        .golden-button-glow {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.35);
+            transition: all 0.2s ease;
+        }
+        .golden-button-glow:hover {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+        }
+
+        /* Remove Native Browser Number Input Arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* --- PUT IT HERE INSIDE THE STYLE BLOCK --- */
+        @keyframes cardFlipLoop {
+            0% { transform: perspective(1000px) rotateY(0deg); }
+            100% { transform: perspective(1000px) rotateY(360deg); }
+        }
+        .animate-card-flip {
+            animation: cardFlipLoop 8s linear infinite;
+            transform-style: preserve-3d;
+        }
+        .zoom-container:hover .animate-card-flip {
+            animation-play-state: paused;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
     </style>
 </head>
 <body class="bg-[#121212] text-gray-100 font-sans min-h-screen flex flex-col">
@@ -75,17 +124,21 @@
         <div class="bg-[#181818] border-b border-gray-800 sticky top-0 lg:static z-50 shadow-md lg:shadow-none">
             <div class="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 py-2 lg:py-0">
                 <!-- Tabs Left Side -->
-                <div class="flex gap-2 sm:gap-4 shrink-0 overflow-x-auto whitespace-nowrap custom-scrollbar">
-                    <button onclick="changeListingSection('sale')" id="tab-section-sale" class="py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all">
+                <!-- Sub-Bar Header Navigation Tabs -->
+                <div class="flex gap-2 sm:gap-3 shrink-0 overflow-x-auto whitespace-nowrap custom-scrollbar">
+                    <button onclick="changeListingSection('sale')" id="tab-section-sale" class="py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all">
                         <i data-lucide="shopping-bag" class="w-4 h-4"></i> Buy Now (Sale)
                     </button>
-                    <button onclick="changeListingSection('bidding')" id="tab-section-bidding" class="py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all">
-                        <i data-lucide="gavel" class="w-4 h-4"></i> Live Auction (Bidding)
+                    <button onclick="changeListingSection('bidding')" id="tab-section-bidding" class="py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all">
+                        <i data-lucide="gavel" class="w-4 h-4"></i> Standard Auction
+                    </button>
+                    <button onclick="changeListingSection('premium')" id="tab-section-premium" class="py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-transparent text-amber-500 hover:text-amber-400 flex items-center gap-2 transition-all">
+                        <span class="text-sm">👑</span> Premium Auction
                     </button>
                 </div>
 
                 <!-- Anti-Snipe Text Right Side (Mobile-Optimized Compact Ticker) -->
-                <div id="nav-anti-snipe-notice" class="hidden items-center gap-2 lg:gap-3 text-[10px] sm:text-xs lg:text-sm text-red-500 font-black tracking-wider uppercase bg-red-950/20 p-1 sm:p-2 rounded-md lg:rounded-lg border border-red-500/10 overflow-hidden w-full flex-1 min-w-0 my-1 lg:my-0">
+                <div id="nav-anti-snipe-notice" class="hidden items-center gap-2 text-[10px] sm:text-xs text-red-500 font-black tracking-wider uppercase bg-red-950/20 px-2 py-1 rounded-lg border border-red-500/10 overflow-hidden w-full flex-1 min-w-0 my-0.5">
                     <style>
                         @keyframes seamless-marquee {
                             0% { transform: translateX(0); }
@@ -95,7 +148,7 @@
                             display: inline-flex;
                             white-space: nowrap;
                             gap: 2rem;
-                            animation: seamless-marquee 30s linear infinite;
+                            animation: seamless-marquee 40s linear infinite;
                             will-change: transform;
                         }
                         .animate-marquee-seamless:hover {
@@ -110,7 +163,7 @@
                     </div>
                     
                     <div class="flex-1 overflow-hidden relative h-5 flex items-center">
-                        <div class="animate-marquee-seamless font-black cursor-pointer">
+                        <div id="marquee-text-container" class="animate-marquee-seamless font-black cursor-pointer">
                             <span>YOU CANNOT BID IN THE LAST 5 MINUTES ON A SPECIFIC ITEM UNLESS YOU HAVE PLACED A BID ON THAT ITEM EARLIER. SNIPE BIDS WILL NOT BE ACCEPTED BY THE SYSTEM.</span>
                             <span aria-hidden="true">YOU CANNOT BID IN THE LAST 5 MINUTES ON A SPECIFIC ITEM UNLESS YOU HAVE PLACED A BID ON THAT ITEM EARLIER. SNIPE BIDS WILL NOT BE ACCEPTED BY THE SYSTEM</span>
                         </div>
@@ -237,7 +290,72 @@
                 <span id="results-count">Loading cards from inventory database...</span>
                 <span>Currency: <strong class="text-red-400">PHP (₱)</strong></span>
             </div>
+            <!-- Standard Grid for Buy Now & Standard Auctions -->
             <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4"></div>
+
+            <!-- 👑 Floating War Room Chat Bubble & Panel (Appears only on Premium Auction Tab) -->
+            <div id="floating-war-room-wrapper" class="fixed bottom-5 right-5 z-50 hidden flex-col items-end pointer-events-none">
+                <!-- Minimized Floating Bubble Trigger -->
+                <button id="war-room-bubble" onclick="toggleWarRoomMinimize()" class="pointer-events-auto golden-button-glow flex items-center justify-center w-14 h-14 rounded-full text-black shadow-2xl hover:scale-110 transition-transform cursor-pointer relative group">
+                    <span class="text-2xl">👑</span>
+                    <span id="war-room-bubble-dot" class="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-black rounded-full animate-pulse"></span>
+                </button>
+
+                <!-- Maximized Chat Panel (Responsive width for mobile and desktop) -->
+                <div id="war-room-panel" class="hidden pointer-events-auto flex-col w-[92vw] sm:w-[380px] h-[460px] bg-[#141310] border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md transition-all duration-300 mb-3">
+                    <!-- Chat Header -->
+                    <div class="bg-gradient-to-r from-amber-950/80 to-[#141310] border-b border-amber-500/30 p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-base">👑</span>
+                            <div>
+                                <h3 class="text-xs font-black uppercase tracking-wider text-amber-400">War Room Chat</h3>
+                                <span id="war-room-online-count" class="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> 1 collector online
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div id="war-room-status-badge" class="flex items-center gap-1 text-[9px] font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                                <span id="war-room-dot" class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span> 
+                                <span id="war-room-badge-text">LIVE</span>
+                            </div>
+                            <!-- Minimize Button -->
+                            <button onclick="toggleWarRoomMinimize()" class="text-gray-400 hover:text-white bg-black/40 hover:bg-black/80 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold transition-colors">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Message Log Scroll Area -->
+                    <div id="war-room-messages" class="flex-1 p-3 overflow-y-auto space-y-2.5 custom-scrollbar text-xs flex flex-col bg-[#100f0d]/95">
+                        <div class="text-center text-gray-500 text-[11px] italic py-4">Connecting to battlefield chat...</div>
+                    </div>
+
+                    <!-- Chat Input Form -->
+                    <form id="war-room-form" onsubmit="sendWarRoomMessage(event)" class="p-2.5 bg-[#141310] border-t border-amber-500/20 flex flex-col gap-2">
+                        <!-- Expanded Messenger-Style Quick Emoji Bar -->
+                        <div class="flex items-center justify-between px-2 pb-1.5 text-base sm:text-lg select-none overflow-x-auto custom-scrollbar gap-1">
+                            <button type="button" onclick="insertEmoji('❤️')" class="hover:scale-125 transition-transform p-0.5">❤️</button>
+                            <button type="button" onclick="insertEmoji('👍')" class="hover:scale-125 transition-transform p-0.5">👍</button>
+                            <button type="button" onclick="insertEmoji('😂')" class="hover:scale-125 transition-transform p-0.5">😂</button>
+                            <button type="button" onclick="insertEmoji('😮')" class="hover:scale-125 transition-transform p-0.5">😮</button>
+                            <button type="button" onclick="insertEmoji('😢')" class="hover:scale-125 transition-transform p-0.5">😢</button>
+                            <button type="button" onclick="insertEmoji('🔥')" class="hover:scale-125 transition-transform p-0.5">🔥</button>
+                            <button type="button" onclick="insertEmoji('👏')" class="hover:scale-125 transition-transform p-0.5">👏</button>
+                            <button type="button" onclick="insertEmoji('🙏')" class="hover:scale-125 transition-transform p-0.5">🙏</button>
+                            <button type="button" onclick="insertEmoji('👑')" class="hover:scale-125 transition-transform p-0.5">👑</button>
+                            <button type="button" onclick="insertEmoji('💯')" class="hover:scale-125 transition-transform p-0.5">💯</button>
+                        </div>
+                        
+                        <div class="flex gap-2 w-full">
+                            <input type="text" id="war-room-input" autocomplete="off" placeholder="Taunt bidders or hype the drop..." maxlength="200" class="flex-1 bg-[#1c1b18] border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 placeholder:text-gray-500 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <button type="submit" id="war-room-submit-btn" class="golden-button-glow px-3 py-2 rounded-xl text-black font-extrabold text-xs uppercase tracking-wider transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
+                                Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -390,7 +508,8 @@
                             <label class="block text-[10px] text-gray-500 mb-1 uppercase font-bold">Listing Type</label>
                             <select id="inv-type" onchange="toggleAdminBiddingFields(this.value)" class="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white">
                                 <option value="sale">Buy Now (Sale)</option>
-                                <option value="bidding">Live Auction (Bidding)</option>
+                                <option value="bidding">Standard Auction (Bidding)</option>
+                                <option value="premium">👑 Premium Auction</option>
                             </select>
                         </div>
                         <div id="inv-stock-container">
@@ -897,28 +1016,90 @@
             activeListingSection = section;
             const saleTab = document.getElementById('tab-section-sale');
             const biddingTab = document.getElementById('tab-section-bidding');
+            const premiumTab = document.getElementById('tab-section-premium');
             const navNotice = document.getElementById('nav-anti-snipe-notice');
+            const marqueeContainer = document.getElementById('marquee-text-container');
+
+            // Standard Auction Marquee Text
+            const standardRuleText = "YOU CANNOT BID IN THE LAST 5 MINUTES ON A SPECIFIC ITEM UNLESS YOU HAVE PLACED A BID ON THAT ITEM EARLIER. SNIPE BIDS WILL NOT BE ACCEPTED BY THE SYSTEM.";
+
+            // Premium Auction Combined Rules Marquee Text
+            const premiumRuleText = "🛡️ ANTI-SNIPING RULE: YOU CANNOT BID IN THE LAST 5 MINUTES UNLESS YOU PLACED A QUALIFICATION BID EARLIER. ⚡ DYNAMIC EXTENSION: BIDS PLACED IN THE FINAL 1 MINUTE WILL AUTOMATICALLY EXTEND THE CLOSING TIME BY 3 MINUTES!";
+
+            // Reset default tab styling
+            saleTab.className = "py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
+            biddingTab.className = "py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
+            premiumTab.className = "py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-transparent text-amber-500/60 hover:text-amber-400 flex items-center gap-2 transition-all";
 
             if (section === 'sale') {
-                saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
-                biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
+                saleTab.className = "py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
                 if (navNotice) navNotice.style.display = 'none';
-            } else {
-                biddingTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
-                saleTab.className = "py-3 px-4 sm:px-6 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 transition-all";
+            } else if (section === 'bidding') {
+                biddingTab.className = "py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-red-600 text-red-500 flex items-center gap-2 transition-all";
                 if (navNotice) navNotice.style.display = 'flex';
+                if (marqueeContainer) {
+                    marqueeContainer.innerHTML = `
+                        <span>${standardRuleText}</span>
+                        <span aria-hidden="true">${standardRuleText}</span>
+                    `;
+                }
+            } else if (section === 'premium') {
+                premiumTab.className = "py-3 px-3 sm:px-5 text-xs sm:text-sm font-bold border-b-2 border-amber-500 text-amber-400 shadow-[0_4px_12px_rgba(245,158,11,0.2)] flex items-center gap-2 transition-all";
+                if (navNotice) navNotice.style.display = 'flex';
+                if (marqueeContainer) {
+                    marqueeContainer.innerHTML = `
+                        <span>${premiumRuleText}</span>
+                        <span aria-hidden="true">${premiumRuleText}</span>
+                    `;
+                }
             }
             renderGrid();
+            initWarRoomChat(); // ✅ ADD THIS LINE HERE
         }
 
         async function fetchLiveInventory(forceRender = false) {
             let nextItems = [];
+            let claimsMap = {};
+            let boCountsMap = {};
+
+            if (supabaseClient) {
+                try {
+                    // Fetch claims mapping
+                    const { data: claimsData } = await supabaseClient.from('standard_auction_claims').select('*');
+                    if (claimsData) {
+                        claimsData.forEach(row => {
+                            if (!claimsMap[row.card_id]) {
+                                claimsMap[row.card_id] = { sb: false, dibs: false, bo: false };
+                            }
+                            const type = String(row.action_type || '').toLowerCase();
+                            if (claimsMap[row.card_id][type] !== undefined) {
+                                claimsMap[row.card_id][type] = true;
+                            }
+                        });
+                    }
+
+                    // Fetch custom BO count mapping
+                    const { data: historyData } = await supabaseClient.from('bid_history').select('card_id, bidder, amount');
+                    if (historyData) {
+                        historyData.forEach(row => {
+                            if (Number(row.amount) > 0 && String(row.bidder || '').includes('[BO +')) {
+                                boCountsMap[row.card_id] = (boCountsMap[row.card_id] || 0) + 1;
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn("Failed to fetch claims/history mapping:", e);
+                }
+            }
+
             if (!supabaseClient) {
                 nextItems = DEMO_FALLBACK_ITEMS.map(item => {
                     const existing = items.find(i => i.id === item.id);
                     return {
                         ...item,
                         stock: getLocalStock(item.id, item.stock),
+                        claims: claimsMap[item.id] || { sb: false, dibs: false, bo: false },
+                        boCount: boCountsMap[item.id] || 0,
                         viewState: existing?.viewState || item.viewState || 'front'
                     };
                 });
@@ -933,6 +1114,8 @@
                             return {
                                 ...item,
                                 stock: getLocalStock(item.id, item.stock),
+                                claims: claimsMap[item.id] || { sb: false, dibs: false, bo: false },
+                                boCount: boCountsMap[item.id] || 0,
                                 viewState: existing?.viewState || item.viewState || 'front'
                             };
                         });
@@ -950,10 +1133,15 @@
                                 rarity: c.rarity || "N/A",
                                 condition: c.condition || "Near Mint",
                                 price: Number(c.price || 0),
+                                sb_price: Number(c.sb_price || c.price || 0),
+                                dibs_price: Number(c.dibs_price || 0),
+                                bo_price: Number(c.bo_price || c.price || 0),
                                 type: normalizedType,
                                 top_bidder: c.top_bidder || null,
                                 bidding_ends_at: c.bidding_ends_at || null,
                                 stock: Math.min(defaultStock, getLocalStock(c.id, defaultStock)),
+                                claims: claimsMap[c.id] || { sb: false, dibs: false, bo: false },
+                                boCount: boCountsMap[c.id] || 0,
                                 frontImg: c.front_img || c.frontImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                                 backImg: c.back_img || c.backImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                                 viewState: existing?.viewState || 'front'
@@ -967,6 +1155,8 @@
                         return {
                             ...item,
                             stock: getLocalStock(item.id, item.stock),
+                            claims: claimsMap[item.id] || { sb: false, dibs: false, bo: false },
+                            boCount: boCountsMap[item.id] || 0,
                             viewState: existing?.viewState || item.viewState || 'front'
                         };
                     });
@@ -1517,12 +1707,18 @@
                     if (error) throw error;
         
                     if (data) {
-                        card.price = Number(data.price);
-                        card.top_bidder = data.top_bidder;
-                        card.bidding_ends_at = data.bidding_ends_at;
-                        appendBidToHistory(cardId, data.top_bidder, Number(data.price));
-                        
-                        delete activeBiddingErrorTrackingLedger[cardId];
+                        // 🛡️ Array-Safe Extractor: Handles both Object {} and Array [{}] RPC returns
+                        const resCard = Array.isArray(data) ? data[0] : data;
+
+                        if (resCard) {
+                            card.price = Number(resCard.price);
+                            card.top_bidder = resCard.top_bidder;
+                            card.bidding_ends_at = resCard.bidding_ends_at; // 👈 Correctly extracts new extended end timestamp!
+                            appendBidToHistory(cardId, resCard.top_bidder, Number(resCard.price));
+                            
+                            delete activeBiddingErrorTrackingLedger[cardId];
+                            renderGrid(); // 👈 Re-renders card with new extended timer
+                        }
                     }
         
                     pendingCustomBidInputs[cardId] = "";
@@ -1780,7 +1976,9 @@
             const biddingEndsContainer = document.getElementById('inv-bidding-ends-container');
             const priceLabel = document.getElementById('inv-price-label');
 
-            if (type === 'bidding') {
+            const isAuction = (type === 'bidding' || type === 'premium');
+
+            if (isAuction) {
                 stockContainer.classList.add('hidden');
                 biddingEndsContainer.classList.remove('hidden');
                 priceLabel.innerText = "Starting Bid Amount (₱)";
@@ -2704,6 +2902,15 @@
             const rowObj = items.find(i => i.id === id);
             if (rowObj) {
                 rowObj.viewState = view;
+                rowObj.isManual = true; // Stops auto-flip and locks static view for zooming/inspecting
+                renderGrid();
+            }
+        };
+
+        window.resetAutoFlip = function(id) {
+            const rowObj = items.find(i => i.id === id);
+            if (rowObj) {
+                rowObj.isManual = false; // Resumes the infinite auto-flip loop
                 renderGrid();
             }
         };
@@ -2733,10 +2940,14 @@
             const search = document.getElementById('search-input').value.toLowerCase().trim();
             const rarity = document.getElementById('rarity-select').value;
             const sortBy = document.getElementById('sort-select').value;
+
             let filtered = items.filter(i => {
+                const itemType = (i.type || 'sale').toLowerCase().trim();
+                
                 const matchesSection =
-                    (activeListingSection === 'sale' && (i.type === 'sale' || !i.type)) ||
-                    (activeListingSection === 'bidding' && (i.type === 'bidding' || i.type === 'bid'));
+                    (activeListingSection === 'sale' && (itemType === 'sale' || !itemType)) ||
+                    (activeListingSection === 'bidding' && (itemType === 'bidding' || itemType === 'bid')) ||
+                    (activeListingSection === 'premium' && (itemType === 'premium' || itemType === 'premium_bidding'));
 
                 const matchesSearch =
                     String(i.name || '').toLowerCase().includes(search) ||
@@ -2748,6 +2959,7 @@
 
                 return matchesSection && matchesSearch && matchesRarity;
             });
+
             if (sortBy === 'price-asc') filtered.sort((a, b) => Number(a.price) - Number(b.price));
             else if (sortBy === 'price-desc') filtered.sort((a, b) => Number(b.price) - Number(a.price));
 
@@ -2763,149 +2975,228 @@
                 const safeRarity = escapeHtml(item.rarity);
                 const safeCondition = escapeHtml(item.condition || 'Near Mint');
                 const topBidderName = escapeHtml(item.top_bidder || 'No bids yet');
-                const selectedIncrement = pendingBidSelections[item.id] || "10";
-                const customBidValue = pendingCustomBidInputs[item.id] || "";
                 
+                const isSale = activeListingSection === 'sale';
+                const isBidding = activeListingSection === 'bidding';
+                const isPremium = activeListingSection === 'premium';
+
+                // --- 👑 DYNAMIC CONTAINER STYLING ---
                 const div = document.createElement('div');
-                div.className = `bg-[#1e1e1e] border border-gray-800 rounded-xl p-2 sm:p-3 flex flex-col group relative ${soldOut && activeListingSection === 'sale' ? 'opacity-40 select-none' : ''}`;
+                div.className = `rounded-2xl p-3 flex flex-col group relative transition-all duration-300 ${
+                    isPremium 
+                        ? 'golden-glow-card' 
+                        : 'bg-[#1e1e1e] border border-gray-800 hover:border-gray-700 shadow-xl'
+                } ${soldOut && isSale ? 'opacity-40 select-none' : ''}`;
 
                 let actionMarkup = '';
                 let biddingHeaderMarkup = '';
-                let imageConflictOverlay = '';
-                let inputHighlightClass = 'border-gray-700 focus:border-red-500';
 
-                if (activeListingSection === 'sale') {
+                // --- 1. BUY NOW (SALE) CONTROLS ---
+                if (isSale) {
                     actionMarkup = soldOut
                         ? `<button disabled class="bg-gray-800 text-xs text-gray-500 px-3 py-1.5 rounded cursor-not-allowed">Sold Out</button>`
                         : (inCartCount > 0
-                            ? `
-                            <div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
+                            ? `<div class="flex items-center bg-[#2a2a2a] border border-gray-700 rounded overflow-hidden">
                                 <button type="button" onclick="removeFromCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">-</button>
                                 <span class="px-2 font-mono font-bold text-xs text-red-400">${inCartCount}</span>
                                 <button type="button" onclick="addToCart(${item.id})" class="px-2.5 py-1.5 text-gray-400 hover:text-white font-bold text-xs">+</button>
-                            </div>`
+                               </div>`
                             : `<button type="button" onclick="addToCart(${item.id})" class="bg-red-600 hover:bg-red-700 text-xs text-white px-4 py-1.5 rounded font-semibold">Add</button>`);
-                } else {
-                    const conflictMetrics = activeBiddingErrorTrackingLedger[item.id];
-                    if (conflictMetrics) {
-                        imageConflictOverlay = `
-                            <div data-conflict-id="${item.id}" class="absolute inset-x-0 top-24 z-30 bg-gradient-to-r from-red-600 to-red-700 border-y border-red-400 text-white font-black px-2 py-1.5 text-[10px] text-center uppercase tracking-widest shadow-xl animate-pulse flex items-center justify-center gap-1 pointer-events-none select-none">
-                                <i data-lucide="zap" class="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 shrink-0"></i>
-                                <span data-conflict-text-id="${item.id}">Outbid! Enter ≥ ${formatPHP(conflictMetrics.truePrice + 10)}</span>
-                            </div>
-                        `;
-                        inputHighlightClass = 'border-red-500 ring-2 ring-red-500/40 animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.5)] bg-red-950/10';
-                    }
 
+                // --- 2. STANDARD AUCTION CONTROLS (SB / DIBS / BO) ---
+                } else if (isBidding) {
+                    const claims = item.claims || { sb: false, dibs: false, bo: false };
+                    
+                    const sbDisabled = claims.sb ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-blue-600 active:bg-blue-700 text-white font-extrabold shadow-md shadow-blue-950/40';
+                    const dibsDisabled = claims.dibs ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-purple-600 active:bg-purple-700 text-white font-extrabold shadow-md shadow-purple-950/40';
+                    const boDisabled = claims.bo ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-amber-500 active:bg-amber-600 text-black font-black shadow-md shadow-amber-950/40';
+                    
+                    const currentHighestPrice = Number(item.price || item.bo_price || 0);
+
+                    // 👑 Highest Bidder Banner Pinned to Absolute Top (top-2)
                     biddingHeaderMarkup = `
-                        <div class="absolute top-2 sm:top-12 left-2 z-20 bg-yellow-950/80 border border-yellow-500/30 text-yellow-400 font-bold px-2.5 py-1 rounded text-[11px] shadow flex items-center gap-1.5 pointer-events-none">
-                            <i data-lucide="crown" class="w-4 h-4"></i> Highest Bidder:
-                            <span class="text-white" data-bidder-id="${item.id}">${topBidderName}</span>
+                        <div class="absolute top-2 left-2 right-2 z-20 bg-amber-950/85 border border-amber-500/40 text-amber-300 font-bold px-3 py-1.5 rounded-lg text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-sm">
+                            <span class="text-amber-400">👑</span>
+                            <span class="text-white font-bold">Highest Bidder:</span>
+                            <span class="text-amber-200 font-semibold truncate" data-bidder-id="${item.id}">${topBidderName}</span>
                         </div>
-                        <div class="absolute bottom-12 right-2 z-20 bg-black/80 border border-gray-800 rounded px-2 py-1 pointer-events-none" data-timer-expiry="${item.bidding_ends_at || ''}">
+                        <div class="absolute bottom-11 right-2 z-20 bg-black/85 border border-white/10 p-2 rounded-lg text-right backdrop-blur-md shadow-lg" data-timer-expiry="${item.bidding_ends_at || ''}"></div>
+                    `;
+
+                    const boRemaining = Math.max(0, 3 - (item.boCount || 0));
+
+                    actionMarkup = `
+                        <div class="mb-2.5 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-white">Current Bid: </span>
+                                <span class="text-xs sm:text-sm font-black text-green-400 font-mono" data-price-id="${item.id}">${formatPHP(item.price)}</span>
+                            </div>
+                            ${claims.bo ? `
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider ${boRemaining === 0 ? 'text-red-400 bg-red-950/60 border-red-500/40' : 'text-amber-300 bg-amber-950/60 border-amber-500/40'} border px-2 py-0.5 rounded-full shadow-sm">
+                                    ⚡ BO+ Left: ${boRemaining}/3
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <div class="flex flex-col gap-2 w-full text-xs">
+                            <div class="grid grid-cols-3 gap-1.5 w-full">
+                                <button type="button" ${claims.sb ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'SB', ${item.sb_price})" class="${sbDisabled} py-2 px-1 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border border-white/10 whitespace-nowrap">
+                                    ${claims.sb ? `<span class="font-mono text-xs sm:text-sm font-bold opacity-95">CLAIMED</span>` : `<span class="text-xs sm:text-sm font-black uppercase">SB:</span><span class="font-mono text-xs sm:text-sm font-bold opacity-95">${formatPHP(item.sb_price)}</span>`}
+                                </button>
+                                <button type="button" ${claims.dibs ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'DIBS', ${item.dibs_price})" class="${dibsDisabled} py-2 px-1 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border border-white/10 whitespace-nowrap">
+                                    ${claims.dibs ? `<span class="font-mono text-xs sm:text-sm font-bold opacity-95">CLAIMED</span>` : `<span class="text-xs sm:text-sm font-black uppercase">DIBS:</span><span class="font-mono text-xs sm:text-sm font-bold opacity-95">${formatPHP(item.dibs_price)}</span>`}
+                                </button>
+                                <button type="button" ${claims.bo ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'BO', ${item.bo_price})" class="${boDisabled} py-2 px-1 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border border-white/10 whitespace-nowrap">
+                                    ${claims.bo ? `<span class="font-mono text-xs sm:text-sm font-bold opacity-95">CLAIMED</span>` : `<span class="text-xs sm:text-sm font-black uppercase">BO:</span><span class="font-mono text-xs sm:text-sm font-bold opacity-95">${formatPHP(item.bo_price)}</span>`}
+                                </button>
+                            </div>
+
+                            <div class="flex gap-1.5 w-full">
+                                <select id="custom-increment-${item.id}" class="flex-1 bg-[#222] border border-gray-700 rounded-xl px-2.5 py-2 text-white focus:outline-none focus:border-red-500 font-mono text-xs sm:text-sm cursor-pointer shadow-inner">
+                                    <option value="10">BO + ₱10 (${formatPHP(currentHighestPrice + 10)})</option>
+                                    <option value="20">BO + ₱20 (${formatPHP(currentHighestPrice + 20)})</option>
+                                    <option value="50">BO + ₱50 (${formatPHP(currentHighestPrice + 50)})</option>
+                                    <option value="100">BO + ₱100 (${formatPHP(currentHighestPrice + 100)})</option>
+                                </select>
+                                <button type="button" onclick="placeCustomStandardBid(${item.id}, ${currentHighestPrice})" class="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider shrink-0 shadow-md transition-transform active:scale-95">
+                                    Bid
+                                </button>
+                            </div>
+
+                            <button type="button" onclick="openBidHistoryModal(${item.id})" class="w-full text-center bg-[#222] hover:bg-[#2c2c2c] border border-gray-700 text-gray-300 hover:text-white py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 shadow">
+                                <i data-lucide="history" class="w-3.5 h-3.5 text-amber-400"></i> Transparent Bid History
+                            </button>
                         </div>
                     `;
-                    const isAuctionEnded = item.bidding_ends_at && safeParseBiddingTime(item.bidding_ends_at).getTime() < Date.now();
-                    if (isAuctionEnded) {
-                        actionMarkup = `
-                            <div class="flex gap-1.5 mt-2 w-full text-xs">
-                                <div class="flex-1 text-center bg-red-950/40 border border-red-900/30 text-red-400 font-bold py-2.5 rounded-lg uppercase tracking-wider select-none flex items-center justify-center">
-                                    Bidding Closed
-                                </div>
-                                <button type="button" onclick="openBidHistoryModal(${item.id})" class="flex-1 text-center bg-[#242424] hover:bg-[#2c2c2c] text-gray-400 hover:text-white border border-gray-700/60 rounded-lg py-2.5 text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
-                                    <i data-lucide="history" class="w-3.5 h-3.5 text-yellow-500"></i> Bid History
-                                </button>
-                            </div>
-                        `;
-                    } else {
-                        const bidIncrements = [10, 20, 50, 100, 200, 500];
-                        const selectOptions = bidIncrements.map(val =>
-                            `<option value="${val}" ${String(val) === String(selectedIncrement) ? 'selected' : ''} class="text-gray-100 bg-[#2a2a2a] font-mono font-bold">+₱${val}</option>`
-                        ).join('');
-                        actionMarkup = `
-                            <div class="flex flex-col gap-2 mt-2 w-full text-xs">
-                                <!-- Side-by-side grid on mobile, stacks vertically (flex-col) on tablet/desktop (sm and up) -->
-                                <div class="grid grid-cols-2 sm:flex sm:flex-col gap-2 w-full">
-                                    
-                                    <!-- Preset Increment Layout Piece -->
-                                    <div class="flex gap-1.5 w-full">
-                                        <select id="bid-select-${item.id}" onchange="pendingBidSelections[item.id] = this.value" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 min-w-0 focus:outline-none transition-all font-mono font-bold text-xs">
-                                            ${selectOptions}
-                                        </select>
-                                        <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-red-600 hover:bg-red-700 font-bold px-3 py-1.5 rounded text-white transition-colors shrink-0">Bid</button>
-                                    </div>
-                                    
-                                    <!-- Custom Bid Entry Layout Piece -->
-                                    <div class="flex gap-1.5 w-full">
-                                        <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[item.id] = this.value" placeholder="${conflictMetrics ? '≥ ' + (conflictMetrics.truePrice + 10) : 'Total Bid'}" class="bg-[#2a2a2a] border ${inputHighlightClass} rounded p-1.5 text-white flex-1 min-w-0 focus:outline-none font-mono transition-all text-xs">
-                                        <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-yellow-600 hover:bg-yellow-700 font-bold px-2.5 py-1.5 rounded text-white text-[10px] sm:text-xs transition-colors whitespace-nowrap shrink-0">
-                                            <!-- Responsive helper toggles label lengths automatically -->
-                                            <span class="sm:hidden">Custom</span>
-                                            <span class="hidden sm:inline">Custom Bid</span>
-                                        </button>
-                                    </div>
-                                    
-                                </div>
 
-                                <button type="button" onclick="openBidHistoryModal(${item.id})" class="mt-0.5 w-full text-center bg-[#242424] hover:bg-[#2c2c2c] text-gray-400 hover:text-white border border-gray-700/60 rounded py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
-                                    <i data-lucide="history" class="w-3.5 h-3.5 text-yellow-500"></i> Transparent Bid History
+                // --- 3. 👑 PREMIUM AUCTION CONTROLS (LUXURY GOLD THEME) ---
+                } else if (isPremium) {
+                    const selectedIncrement = pendingBidSelections[item.id] || "20";
+                    const customBidValue = pendingCustomBidInputs[item.id] || "";
+
+                    biddingHeaderMarkup = `
+                        <div class="absolute top-2 left-2 right-2 z-20 bg-gradient-to-r from-amber-950/95 to-yellow-950/95 border border-amber-400/60 text-amber-300 font-bold px-3 py-1.5 rounded-lg text-xs shadow-xl flex items-center gap-1.5 backdrop-blur-md">
+                            <span class="text-amber-400">👑</span>
+                            <span class="text-amber-200 font-bold">Highest Bidder:</span>
+                            <span class="text-white font-extrabold truncate" data-bidder-id="${item.id}">${topBidderName}</span>
+                        </div>
+                        <div class="absolute bottom-11 right-2 z-20 bg-black/90 border border-amber-500/30 p-2 rounded-lg text-right backdrop-blur-md shadow-xl" data-timer-expiry="${item.bidding_ends_at || ''}"></div>
+                    `;
+
+                    actionMarkup = `
+                        <div class="mb-2.5 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs sm:text-sm font-bold text-gray-300">Current Bid: </span>
+                                <span class="text-xs sm:text-sm font-black text-amber-400 font-mono" data-price-id="${item.id}">${formatPHP(item.price)}</span>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-950/60 border border-amber-500/40 px-2 py-0.5 rounded-full">👑 VIP Auction</span>
+                        </div>
+
+                        <div class="flex flex-col gap-2 w-full text-xs">
+                            <!-- Row 1: Custom Bid Input & Custom Bid Button -->
+                            <div class="flex gap-1.5 w-full">
+                                <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[item.id] = this.value" placeholder="Enter Custom Bid (₱)" class="flex-1 bg-[#222] border border-amber-500/30 rounded-xl px-2.5 py-2 text-white focus:outline-none focus:border-amber-400 font-mono text-xs shadow-inner">
+                                <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-amber-950/80 hover:bg-amber-900 border border-amber-500/50 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs uppercase tracking-wider shrink-0 transition-all active:scale-95">
+                                    Custom Bid
                                 </button>
                             </div>
-                        `;
-                    }
+
+                            <!-- Row 2: History Button moved to the front (left), followed by Dropdown and Bid button -->
+                            <div class="flex gap-1.5 w-full items-center">
+                                <button type="button" onclick="openBidHistoryModal(${item.id})" class="bg-amber-950/60 hover:bg-amber-900 border border-amber-500/30 text-amber-300 font-bold px-2.5 py-2 rounded-xl text-[11px] uppercase tracking-wider shrink-0 transition-all flex items-center gap-1 shadow">
+                                    <i data-lucide="history" class="w-3 h-3 text-amber-400"></i> History
+                                </button>
+                                <select id="bid-select-${item.id}" onchange="pendingBidSelections[item.id] = this.value" class="flex-1 bg-[#222] border border-amber-500/40 rounded-xl px-2 py-2 text-amber-200 focus:outline-none focus:border-amber-400 font-mono font-bold text-xs cursor-pointer shadow-inner min-w-0">
+                                    <option value="20" ${selectedIncrement === '20' ? 'selected' : ''}>+₱20</option>
+                                    <option value="50" ${selectedIncrement === '50' ? 'selected' : ''}>+₱50</option>
+                                    <option value="100" ${selectedIncrement === '100' ? 'selected' : ''}>+₱100</option>
+                                    <option value="200" ${selectedIncrement === '200' ? 'selected' : ''}>+₱200</option>
+                                </select>
+                                <button type="button" onclick="placeListingBid(${item.id}, false)" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-black px-3 py-2 rounded-xl text-xs uppercase tracking-wider shrink-0 shadow transition-all active:scale-95">
+                                    Bid
+                                </button>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 div.innerHTML = `
-                    <div class="relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none">
+                    <!-- CARD IMAGE CONTAINER WITH INFINITE FRONT/BACK FLIP LOOP -->
+                    <div class="zoom-container relative bg-[#121212] aspect-[3/4] rounded-lg overflow-hidden mb-3 border border-gray-900 select-none" style="perspective: 1000px;">
                         ${biddingHeaderMarkup}
-                        ${imageConflictOverlay}
-                        <img
-                            src="${dynamicImgSrc}"
-                            alt="${safeName}"
-                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';"
-                            onclick="launchZoomModal(this.src)"
-                            class="relative z-10 w-full h-full object-cover cursor-zoom-in hover:scale-105 transition-transform duration-200"
-                        >
-                        <div class="absolute bottom-2 left-2 z-20 bg-black/80 border border-gray-700 text-white px-2 py-0.5 rounded text-[10px] hidden sm:flex items-center gap-1 pointer-events-none">
-                            <i data-lucide="zoom-in" class="w-3 h-3"></i>
-                            <span>Zoom</span>
+                        
+                        ${isPremium && !item.isManual ? `
+                            <!-- Infinite 3D Front-to-Back Flip Loop (Pauses on Hover) -->
+                            <div class="w-full h-full animate-card-flip" style="transform-style: preserve-3d; position: relative;">
+                                <div class="absolute inset-0 w-full h-full backface-hidden">
+                                    <img src="${escapeHtml(item.frontImg)}" alt="${safeName}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="absolute inset-0 w-full h-full backface-hidden" style="transform: rotateY(180deg);">
+                                    <img src="${escapeHtml(item.backImg)}" alt="${safeName} Back" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                        ` : `
+                            <!-- Static View (Activated when Front/Back toggle is clicked for zoom/inspection) -->
+                            <div class="w-full h-full">
+                                <img
+                                    src="${dynamicImgSrc}"
+                                    alt="${safeName}"
+                                    style="transform: rotate(${item.rotation || 0}deg); transition: transform 0.3s ease;"
+                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';"
+                                    onclick="launchZoomModal(this.src)"
+                                    class="zoom-image relative z-10 w-full h-full object-cover cursor-zoom-in"
+                                >
+                            </div>
+                        `}
+
+                        <!-- Stock Badge (Only on Buy Now / Sale tab) -->
+                        ${isSale ? `
+                            <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 text-white font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none">
+                                Stock: ${item.stock}
+                            </div>
+                        ` : ''}
+
+                        <!-- Rarity & Condition Stacked on Bottom Left (ONLY for Premium Bidding) -->
+                        ${isPremium ? `
+                            <div class="absolute bottom-2 left-2 z-20 flex flex-col gap-1 items-start pointer-events-none">
+                                <span class="text-[10px] font-bold tracking-wide uppercase text-amber-400 bg-amber-950/85 border border-amber-500/40 px-1.5 py-0.5 rounded shadow-lg">${safeCondition}</span>
+                                <span class="bg-amber-400 text-black font-black text-[10px] font-mono px-2 py-0.5 rounded shadow">${safeRarity}</span>
+                            </div>
+                        ` : `
+                            <!-- Standard placement for Sale & Standard Auctions -->
+                            <span class="absolute ${isSale ? 'top-2 right-2' : 'bottom-2 left-2'} z-20 bg-red-600 text-white font-bold text-[10px] font-mono px-2 py-0.5 rounded shadow pointer-events-none">${safeRarity}</span>
+                        `}
+
+                        <!-- Front/Back Toggle Pill & Resume Auto-Flip Button -->
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl items-center">
+                            <button type="button" onclick="togglePhoto(${item.id}, 'front')" class="${item.viewState !== 'back' && item.isManual ? (isPremium ? 'bg-amber-500 text-black font-black' : 'bg-red-600 text-white font-bold') : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
+                            <button type="button" onclick="togglePhoto(${item.id}, 'back')" class="${item.viewState === 'back' && item.isManual ? (isPremium ? 'bg-amber-500 text-black font-black' : 'bg-red-600 text-white font-bold') : 'text-gray-400'} px-2 py-0.5 rounded-full uppercase text-[9px]">Back</button>
+                            ${isPremium && item.isManual ? `
+                                <button type="button" onclick="resetAutoFlip(${item.id})" class="text-amber-400 hover:text-white px-1.5 py-0.5 rounded-full uppercase text-[10px] font-bold transition-colors" title="Resume Auto-Flip">🔄</button>
+                            ` : ''}
                         </div>
-                        <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none ${activeListingSection === 'bidding' ? 'hidden sm:block' : ''}">
-                            ${activeListingSection === 'sale' ? 'Stock: ' + item.stock : 'Auction'}
-                        </div>
-                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 bg-black/80 px-2 py-1 rounded-full flex gap-1 text-[10px] border border-white/10 shadow-xl">
-                            <button type="button" onclick="togglePhoto(${item.id}, 'front')" class="${item.viewState !== 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Front</button>
-                            <button type="button" onclick="togglePhoto(${item.id}, 'back')" class="${item.viewState === 'back' ? 'bg-red-600 text-white' : 'text-gray-400'} px-2 py-0.5 rounded-full font-bold uppercase text-[9px]">Back</button>
-                        </div>
-                        <span class="absolute top-2 right-2 z-20 bg-red-600 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded text-white shadow pointer-events-none">${safeRarity}</span>
                     </div>
+
+                    <!-- META & PRICE AREA -->
                     <div class="flex flex-col justify-between flex-1 w-full">
-                        <!-- Grid layout active ONLY during Bidding Section on mobile devices -->
-                        <div class="${activeListingSection === 'bidding' ? 'grid grid-cols-2 sm:block' : 'block'} w-full items-baseline">
-                            
-                            <!-- Header Info Line (Set and Condition) -->
-                            <div class="${activeListingSection === 'bidding' ? 'col-span-2' : ''} flex justify-between items-center w-full mb-1">
-                                <!-- Boosted font size, weight, and color visibility for the card set code -->
+                        <div>
+                            <!-- Original Set & Condition header ONLY for Sale & Standard -->
+                            ${!isPremium ? `
+                            <div class="flex justify-between items-center w-full mb-1">
                                 <span class="text-xs font-mono font-bold text-gray-400 tracking-wide">${safeSet}</span>
                                 <span class="text-[10px] font-bold tracking-wide uppercase text-amber-400 bg-amber-950/40 border border-amber-900/30 px-1.5 py-0.5 rounded">${safeCondition}</span>
                             </div>
-                            
-                            <!-- Card Name Heading -->
-                            <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400 ${activeListingSection === 'bidding' ? 'col-start-1 row-start-2' : ''} min-w-0 pr-2">${safeName}</h3>
-                            
-                            <!-- Live Auction Price Display Element -->
-                            ${activeListingSection === 'bidding' ? `
-                                <div class="col-start-2 row-start-2 text-right sm:text-left sm:mt-2 sm:pt-2 sm:border-t sm:border-gray-800/50">
-                                    <span class="text-xs sm:text-sm font-bold text-gray-100 inline-block" data-price-id="${item.id}">
-                                        Current Bid: ${formatPHP(item.price)}
-                                    </span>
-                                </div>
                             ` : ''}
+                            
+                            <!-- Card Name with Inline Set Code ONLY for Premium Bidding -->
+                            <div class="flex items-center justify-between gap-2 ${isPremium ? 'mb-1' : ''}">
+                                <h3 class="text-sm font-semibold truncate text-white transition-colors group-hover:text-red-400 min-w-0">${safeName}</h3>
+                                ${isPremium ? `<span class="text-xs font-mono font-bold text-gray-400 tracking-wide shrink-0">${safeSet}</span>` : ''}
+                            </div>
                         </div>
                         
-                        <!-- Lower Core Interactive Controls Section -->
-                        <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50 ${activeListingSection === 'bidding' ? 'sm:border-t-0 sm:pt-0 sm:mt-0' : ''}">
-                            ${activeListingSection === 'sale' ? `
+                        <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
+                            ${isSale ? `
                                 <div class="flex justify-between items-center gap-3">
                                     <span class="text-sm font-bold text-gray-100" data-price-id="${item.id}">
                                         ${formatPHP(item.price)}
@@ -2921,9 +3212,9 @@
                 grid.appendChild(div);
             });
 
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
-
+        
         document.getElementById('admin-inventory-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!supabaseClient) {
@@ -2935,7 +3226,7 @@
             const backVal = document.getElementById('inv-back').value.trim();
             const typeVal = document.getElementById('inv-type').value;
             const biddingEndsVal = document.getElementById('inv-bidding-ends').value;
-            const normalizedDbType = typeVal === 'bidding' ? 'bidding' : 'sale';
+            const isAuction = (typeVal === 'bidding' || typeVal === 'premium');
 
             const cardPayload = {
                 name: document.getElementById('inv-name').value,
@@ -2946,9 +3237,9 @@
                 condition: document.getElementById('inv-condition').value,
                 front_img: frontVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                 back_img: backVal || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
-                type: normalizedDbType,
-                bidding_ends_at: typeVal === 'bidding' ? (biddingEndsVal ? safeParseBiddingTime(biddingEndsVal).toISOString() : null) : null,
-                top_bidder: typeVal === 'bidding' ? 'No bids yet' : null
+                type: isAuction ? typeVal : 'sale',
+                bidding_ends_at: isAuction ? (biddingEndsVal ? safeParseBiddingTime(biddingEndsVal).toISOString() : null) : null,
+                top_bidder: isAuction ? 'No bids yet' : null
             };
             const { error } = await supabaseClient.from('cards').insert([cardPayload]);
             if(error) {
@@ -2998,6 +3289,7 @@
                     el.innerHTML = incomingMarkupOutput;
                 }
             });
+            checkWarRoomAuctionStatus(); // ✅ ADD THIS LINE HERE (Evaluates chat open/close every second)
         }, 1000);
 
             async function runSafeInventoryPollingLoop() {
@@ -3082,68 +3374,21 @@
                             
                             const dbType = (payload.new.type || "sale").toLowerCase().trim();
                             const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
-                            
-                            const typeChanged = items[targetIndex].type !== normalizedType;
 
                             items[targetIndex].price = Number(payload.new.price);
                             items[targetIndex].top_bidder = payload.new.top_bidder;
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
                             items[targetIndex].type = normalizedType; 
-                            appendBidToHistory(payload.new.id, payload.new.top_bidder || 'No bids yet', Number(payload.new.price));
 
                             if (currentUserProfile && payload.new.top_bidder === currentUserProfile.name) {
                                 delete activeBiddingErrorTrackingLedger[payload.new.id];
-                                const conflictElement = document.querySelector(`[data-conflict-id="${payload.new.id}"]`);
-                                if (conflictElement) conflictElement.remove();
-                                
-                                const inputElement = document.getElementById(`custom-bid-${payload.new.id}`);
-                                if (inputElement) {
-                                    inputElement.placeholder = "Enter Total Bid (₱)";
-                                    inputElement.className = "bg-[#2a2a2a] border border-gray-700 focus:border-red-500 rounded p-1.5 text-white flex-1 focus:outline-none font-mono transition-all";
-                                }
-                                const selectEl = document.getElementById(`bid-select-${payload.new.id}`);
-                                if (selectEl) {
-                                    selectEl.className = "bg-[#2a2a2a] border border-gray-700 focus:border-red-500 rounded p-1.5 text-white flex-1 focus:outline-none transition-all";
-                                }
-                            } else if (activeBiddingErrorTrackingLedger[payload.new.id]) {
-                                activeBiddingErrorTrackingLedger[payload.new.id].truePrice = Number(payload.new.price);
-                                activeBiddingErrorTrackingLedger[payload.new.id].trueBidder = payload.new.top_bidder;
-                                
-                                const conflictTextNode = document.querySelector(`[data-conflict-text-id="${payload.new.id}"]`);
-                                if (conflictTextNode) {
-                                    conflictTextNode.innerText = `Outbid! Enter ≥ ${formatPHP(Number(payload.new.price) + 10)}`;
-                                }
-                                const inputElement = document.getElementById(`custom-bid-${payload.new.id}`);
-                                if (inputElement) {
-                                    inputElement.placeholder = 'Required ≥ ' + (Number(payload.new.price) + 10);
-                                }
-                            }
-
-                            if (typeChanged) {
-                                renderGrid();
-                                if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
-                                return; 
-                            }
-
-                            if (currentUserProfile && 
-                                currentUserProfile.name === oldBidderName && 
-                                currentUserProfile.name !== newBidderName) {
-                                
+                            } else if (currentUserProfile && currentUserProfile.name === oldBidderName && currentUserProfile.name !== newBidderName) {
                                 showCustomToast(`💥 OUTBID NOTICE: Someone topped your bid on "${currentCardName}"! Current high: ${formatPHP(Number(payload.new.price))}`, "error");
-                                
                                 delete activeBiddingErrorTrackingLedger[payload.new.id];
-                                renderGrid();
                             }
-                            
-                            const bidderElement = document.querySelector(`[data-bidder-id="${payload.new.id}"]`);
-                            const priceElement = document.querySelector(`[data-price-id="${payload.new.id}"]`);
-                            
-                            if (bidderElement) {
-                                bidderElement.innerText = payload.new.top_bidder || 'No bids yet';
-                            }
-                            if (priceElement) {
-                                priceElement.innerText = 'Current Bid: ' + formatPHP(Number(payload.new.price));
-                            }
+
+                            renderGrid();
+                            if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
                         }
                     })
                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'cards' }, (payload) => {
@@ -3152,9 +3397,16 @@
                     .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'cards' }, (payload) => {
                         fetchLiveInventory(true);
                     })
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'standard_auction_claims' }, (payload) => {
+                        fetchLiveInventory(true);
+                    })
+                    // 👇 NEW LISTENER ADDED HERE (Instant BO Count Sync)
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'bid_history' }, (payload) => {
+                        fetchLiveInventory(true);
+                    })
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'Orders' }, (payload) => {
                         if (payload.eventType === 'UPDATE' && payload.new) {
-                             const updatedOrder = payload.new;
+                            const updatedOrder = payload.new;
                             const targetIndex = localOrdersBackup.findIndex(o => String(o.id) === String(updatedOrder.id));
                             
                             if (targetIndex !== -1) {
@@ -3563,6 +3815,494 @@
 
         })(); // <--- Main application closing bracket block wall
 
+            let chatSubscription = null;
+
+            // 1. Dual-Language Profanity Filter (English + Tagalog)
+            function containsProfanity(text) {
+                if (!text) return false;
+                const cleanText = text.toLowerCase()
+                    .replace(/[@]/g, 'a').replace(/[3]/g, 'e').replace(/[1!]/g, 'i')
+                    .replace(/[0]/g, 'o').replace(/[$]/g, 's').replace(/[^a-z0-9]/g, '');
+
+                const blacklist = [
+                    'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'cunt', 'pussy', 'dick', 'cock', 'motherfucker', 'slut', 'whore', 'fag', 'retard',
+                    'putangina', 'putang', 'gago', 'tanga', 'pucha', 'puta', 'kupal', 'ulol', 'hayop', 'tarantado', 'bopol', 'bobo', 'leche', 'punyeta', 'kantot', 'etits', 'pepe', 'burat', 'titi'
+                ];
+
+                for (let word of blacklist) {
+                    if (cleanText.includes(word.replace(/[^a-z0-9]/g, ''))) return true;
+                }
+                return false;
+            }
+
+            let isWarRoomMinimized = true; // Starts collapsed as a bubble so it never blocks mobile screens
+
+            function toggleWarRoomMinimize() {
+                isWarRoomMinimized = !isWarRoomMinimized;
+                const bubble = document.getElementById('war-room-bubble');
+                const panel = document.getElementById('war-room-panel');
+
+                if (isWarRoomMinimized) {
+                    if (bubble) bubble.style.display = 'flex';
+                    if (panel) panel.style.display = 'none';
+                } else {
+                    if (bubble) bubble.style.display = 'none';
+                    if (panel) panel.style.display = 'flex';
+                    
+                    // Auto-scroll chat to the latest message when opened
+                    const messages = document.getElementById('war-room-messages');
+                    if (messages) messages.scrollTop = messages.scrollHeight;
+                }
+            }
+
+            let warRoomChannel = null;
+
+        // Track active users using Supabase Presence
+        function setupWarRoomPresence() {
+            if (!supabaseClient || !currentUserProfile) return;
+
+            if (warRoomChannel) {
+                supabaseClient.removeChannel(warRoomChannel);
+            }
+
+            warRoomChannel = supabaseClient.channel('war-room-presence', {
+                config: {
+                    presence: {
+                        key: currentUserProfile.id || 'guest',
+                    },
+                },
+            });
+
+            warRoomChannel
+                .on('presence', { event: 'sync' }, () => {
+                    const state = warRoomChannel.presenceState();
+                    const onlineCount = Object.keys(state).length;
+                    
+                    const countEl = document.getElementById('war-room-online-count');
+                    if (countEl) {
+                        countEl.innerHTML = `
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> 
+                            ${onlineCount} collector${onlineCount === 1 ? '' : 's'} online
+                        `;
+                    }
+                })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await warRoomChannel.track({
+                            online_at: new Date().toISOString(),
+                            username: currentUserProfile.name || 'Collector'
+                        });
+                    }
+                });
+        }
+
+        function initWarRoomChat() {
+            const wrapper = document.getElementById('floating-war-room-wrapper');
+            if (!wrapper) return;
+
+            if (activeListingSection === 'premium') {
+                wrapper.style.display = 'flex';
+                
+                const bubble = document.getElementById('war-room-bubble');
+                const panel = document.getElementById('war-room-panel');
+                if (isWarRoomMinimized) {
+                    if (bubble) bubble.style.display = 'flex';
+                    if (panel) panel.style.display = 'none';
+                } else {
+                    if (bubble) bubble.style.display = 'none';
+                    if (panel) panel.style.display = 'flex';
+                }
+
+                // 🔒 Guard: Restrict chat input to logged-in users only
+                const inputEl = document.getElementById('war-room-input');
+                const btnEl = document.getElementById('war-room-submit-btn');
+                if (!currentUserProfile || currentUserProfile.id === 'guest') {
+                    if (inputEl) {
+                        inputEl.disabled = true;
+                        inputEl.placeholder = "Sign in to chat in the War Room...";
+                    }
+                    if (btnEl) btnEl.disabled = true;
+                }
+
+                loadChatMessages();
+                subscribeToChatRealtime();
+                setupWarRoomPresence();
+                checkWarRoomAuctionStatus();
+            } else {
+                wrapper.style.display = 'none';
+                if (chatSubscription && supabaseClient) {
+                    supabaseClient.removeChannel(chatSubscription);
+                    chatSubscription = null;
+                }
+                if (warRoomChannel && supabaseClient) {
+                    supabaseClient.removeChannel(warRoomChannel);
+                    warRoomChannel = null;
+                }
+            }
+        }
+
+            // 3. Automatic Status Evaluator: Opens/Closes chat based on active auction timers
+            function checkWarRoomAuctionStatus() {
+                if (activeListingSection !== 'premium') return;
+
+                const premiumItems = items.filter(i => {
+                    const type = (i.type || '').toLowerCase();
+                    return type === 'premium' || type === 'premium_bidding';
+                });
+
+                let hasActiveAuctions = false;
+                if (premiumItems.length > 0) {
+                    hasActiveAuctions = premiumItems.some(item => {
+                        if (!item.bidding_ends_at) return false;
+                        const expiryMs = safeParseBiddingTime(item.bidding_ends_at).getTime();
+                        return expiryMs > Date.now();
+                    });
+                }
+
+                const inputEl = document.getElementById('war-room-input');
+                const btnEl = document.getElementById('war-room-submit-btn');
+                const subtitleEl = document.getElementById('war-room-status-subtitle');
+                const badgeTextEl = document.getElementById('war-room-badge-text');
+                const dotEl = document.getElementById('war-room-dot');
+                const badgeContainer = document.getElementById('war-room-status-badge');
+
+                if (!inputEl) return;
+
+                if (hasActiveAuctions) {
+                    inputEl.disabled = false;
+                    inputEl.placeholder = "War Room Chat...";
+                    if (btnEl) btnEl.disabled = false;
+                    if (subtitleEl) subtitleEl.innerText = "Bidding active • Chat open";
+                    if (badgeTextEl) badgeTextEl.innerText = "LIVE";
+                    if (dotEl) dotEl.className = "w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse";
+                    if (badgeContainer) badgeContainer.className = "flex items-center gap-1.5 text-[9px] font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full";
+                } else {
+                    inputEl.disabled = true;
+                    inputEl.placeholder = "War Room Closed: All auctions have ended.";
+                    if (btnEl) btnEl.disabled = true;
+                    if (subtitleEl) subtitleEl.innerText = "Auctions concluded";
+                    if (badgeTextEl) badgeTextEl.innerText = "CLOSED";
+                    if (dotEl) dotEl.className = "w-1.5 h-1.5 bg-red-500 rounded-full";
+                    if (badgeContainer) badgeContainer.className = "flex items-center gap-1.5 text-[9px] font-mono font-bold bg-red-950/80 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full";
+                }
+            }
+
+            // 4. Load & Subscribe to Chat
+            async function loadChatMessages() {
+                const container = document.getElementById('war-room-messages');
+                if (!container || !supabaseClient) return;
+
+                try {
+                    const { data, error } = await supabaseClient.from('live_chat').select('*').order('created_at', { ascending: true }).limit(50);
+                    if (error) throw error;
+
+                    container.innerHTML = '';
+                    if (!data || data.length === 0) {
+                        container.innerHTML = `<div class="text-center text-gray-500 text-[11px] italic py-4">No messages yet. Start the chat!</div>`;
+                        return;
+                    }
+                    data.forEach(msg => appendChatMessage(msg));
+                    container.scrollTop = container.scrollHeight;
+                } catch (err) {
+                    console.error("Chat load error:", err);
+                }
+            }
+
+            // Robust helper to check if a message consists purely of emojis
+            function isOnlyEmoji(str) {
+                if (!str) return false;
+                const cleaned = str.trim();
+                const emojiRegex = /^[\p{Extended_Pictographic}\p{Emoji_Component}\p{Symbol}\s]+$/u;
+                return emojiRegex.test(cleaned) && Array.from(cleaned).length <= 6;
+            }
+
+            // Chat renderer supporting both regular text bubbles and large standalone emojis
+            function appendChatMessage(msg) {
+                const container = document.getElementById('war-room-messages');
+                if (!container) return;
+
+                const isMe = currentUserProfile && currentUserProfile.name === msg.username;
+                const timeFormatted = new Date(msg.created_at).toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Manila' });
+                
+                const onlyEmoji = isOnlyEmoji(msg.message);
+
+                const bubble = document.createElement('div');
+                bubble.className = `flex flex-col space-y-0.5 max-w-[90%] ${isMe ? 'self-end items-end' : 'self-start items-start'} animate-fade-in`;
+                
+                if (onlyEmoji) {
+                    // Large Messenger-style standalone emoji display
+                    bubble.innerHTML = `
+                        <div class="flex items-center gap-1.5 text-[9px] px-1">
+                            <span class="font-bold ${isMe ? 'text-amber-400' : 'text-gray-400'}">${escapeHtml(msg.username)}</span>
+                        </div>
+                        <div class="text-3xl sm:text-4xl py-1 px-1 drop-shadow-md select-none leading-none">
+                            ${escapeHtml(msg.message)}
+                        </div>
+                    `;
+                } else {
+                    // Standard text message bubble format (works for all normal text and mixed chats)
+                    bubble.innerHTML = `
+                        <div class="flex items-center gap-1.5 text-[10px]">
+                            <span class="font-bold ${isMe ? 'text-amber-400' : 'text-gray-400'}">${escapeHtml(msg.username)}</span>
+                            <span class="text-gray-600 font-mono">${timeFormatted}</span>
+                        </div>
+                        <div class="${isMe ? 'bg-amber-600/30 border border-amber-500/40 text-amber-100 rounded-tr-none' : 'bg-[#22211e] border border-gray-800 text-gray-200 rounded-tl-none'} px-3 py-2 rounded-xl text-xs font-medium leading-relaxed break-words shadow-sm">
+                            ${escapeHtml(msg.message)}
+                        </div>
+                    `;
+                }
+                container.appendChild(bubble);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            function subscribeToChatRealtime() {
+                if (!supabaseClient || chatSubscription) return;
+                chatSubscription = supabaseClient
+                    .channel('public:live_chat')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_chat' }, (payload) => {
+                        if (payload && payload.new) appendChatMessage(payload.new);
+                    })
+                    .subscribe();
+            }
+
+            async function sendWarRoomMessage(e) {
+                e.preventDefault();
+                if (!currentUserProfile || currentUserProfile.id === 'guest') {
+                    showCustomToast("⚠️ Sign in to chat in the War Room!", "error");
+                    openAuthModal();
+                    return;
+                }
+
+                const input = document.getElementById('war-room-input');
+                const text = input.value.trim();
+                if (!text) return;
+
+                if (containsProfanity(text)) {
+                    showCustomToast("⚠️ Message blocked: Profanity and curse words are prohibited.", "error");
+                    input.value = '';
+                    return;
+                }
+
+                try {
+                    const { error } = await supabaseClient.from('live_chat').insert([{
+                        user_id: currentUserProfile.id,
+                        username: currentUserProfile.name,
+                        message: text
+                    }]);
+                    if (error) throw error;
+                    input.value = '';
+                } catch (err) {
+                    showCustomToast(`Failed to send: ${err.message}`, "error");
+                }
+            }
+            function insertEmoji(emoji) {
+                const input = document.getElementById('war-room-input');
+                if (!input) return;
+                input.value += emoji;
+                input.focus();
+            }
+
+            // 🌐 Fetch active claims globally from Supabase instead of local storage
+            async function getStandardClaims(cardId) {
+                if (!supabaseClient) return { sb: false, dibs: false, bo: false };
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('standard_auction_claims')
+                        .select('action_type')
+                        .eq('card_id', cardId);
+
+                    if (error) throw error;
+
+                    const claims = { sb: false, dibs: false, bo: false };
+                    if (data) {
+                        data.forEach(row => {
+                            const type = String(row.action_type || '').toLowerCase();
+                            if (claims[type] !== undefined) claims[type] = true;
+                        });
+                    }
+                    return claims;
+                } catch(e) {
+                    console.warn("Could not fetch standard claims from cloud:", e);
+                    return { sb: false, dibs: false, bo: false };
+                }
+            }
+
+// 🔒 Secure Cloud-Synced Claim for SB, DIBS, or BO
+        window.claimStandardAction = async function(cardId, action, tierAmount) {
+            if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) {
+                showCustomToast("⚠️ Only registered accounts can claim auction slots! Please sign in.", "error");
+                openAuthModal();
+                return;
+            }
+
+            const card = items.find(i => i.id === cardId);
+            if (!card) return;
+
+            if (card.bidding_ends_at) {
+                const biddingEndTimeMs = safeParseBiddingTime(card.bidding_ends_at).getTime();
+                if (biddingEndTimeMs <= Date.now()) {
+                    showCustomToast("This auction bidding window has already closed!", "error");
+                    return;
+                }
+            }
+
+            const liveClaims = await getStandardClaims(cardId);
+            if (liveClaims[action.toLowerCase()]) {
+                showCustomToast(`${action} has already been claimed by another collector!`, "error");
+                renderGrid();
+                return;
+            }
+
+            const currentHigh = Number(card.price || 0);
+            if (tierAmount <= currentHigh && currentHigh > 0) {
+                showCustomToast(`Claim amount must beat the current high price of ${formatPHP(currentHigh)}!`, "error");
+                return;
+            }
+
+            const confirmed = await askCustomConfirmation(`Confirm ${action}`, `Are you sure you want to claim ${action} for ${formatPHP(tierAmount)} on ${card.name}?`);
+            if (!confirmed) return;
+
+            const bidderName = currentUserProfile.name || "Collector";
+            const userId = currentUserProfile.id;
+            const topBidderString = `${bidderName} [${action}]`;
+
+            if (supabaseClient) {
+                try {
+                    const { error: insertErr } = await supabaseClient
+                        .from('standard_auction_claims')
+                        .insert([{
+                            card_id: cardId,
+                            action_type: action,
+                            collector_name: bidderName,
+                            user_id: userId
+                        }]);
+
+                    if (insertErr) {
+                        showCustomToast(`❌ Too late! ${action} was just claimed by someone else.`, "error");
+                        renderGrid();
+                        return;
+                    }
+
+                    if (!card.claims) card.claims = { sb: false, dibs: false, bo: false };
+                    card.claims[action.toLowerCase()] = true;
+
+                    // Updating 'cards' automatically triggers the database logging row
+                    await supabaseClient
+                        .from('cards')
+                        .update({ 
+                            price: tierAmount,
+                            top_bidder: topBidderString
+                        })
+                        .eq('id', cardId);
+
+                    card.top_bidder = topBidderString;
+                    card.price = tierAmount;
+
+                    renderGrid();
+                    showCustomToast(`Successfully claimed ${action} at ${formatPHP(tierAmount)}!`, "success");
+
+                } catch (err) {
+                    console.error("Claim transaction failed:", err);
+                    showCustomToast(`Claim failed: ${err.message}`, "error");
+                }
+            } else {
+                card.top_bidder = topBidderString;
+                card.price = tierAmount;
+                renderGrid();
+                showCustomToast(`Successfully claimed ${action}!`, "success");
+            }
+        };
+                
+        // 🔒 Secure Custom Standard Bid (Normal Auction Only)
+        window.placeCustomStandardBid = async function(cardId, basePrice) {
+            try {
+                if (!currentUserProfile || currentUserProfile.id === 'guest' || currentUserProfile.id === null) {
+                    showCustomToast("⚠️ Only registered accounts can place custom bids! Please sign in.", "error");
+                    openAuthModal();
+                    return;
+                }
+
+                const card = items.find(i => i.id === cardId);
+                if (!card) {
+                    showCustomToast("Card item not found.", "error");
+                    return;
+                }
+
+                if (supabaseClient) {
+                    const { data: existingBids, error: countErr } = await supabaseClient
+                        .from('bid_history')
+                        .select('id, bidder, amount')
+                        .eq('card_id', cardId);
+
+                    if (!countErr && existingBids) {
+                        const customBoCount = existingBids.filter(b => Number(b.amount) > 0 && String(b.bidder || '').includes('[BO +')).length;
+                        if (customBoCount >= 3) {
+                            showCustomToast("Maximum BO increase reached!", "error");
+                            return;
+                        }
+                    }
+                }
+
+                if (card.bidding_ends_at) {
+                    const biddingEndTimeMs = safeParseBiddingTime(card.bidding_ends_at).getTime();
+                    if (biddingEndTimeMs <= Date.now()) {
+                        showCustomToast("This auction bidding window has already closed!", "error");
+                        return;
+                    }
+                }
+
+                const selectEl = document.getElementById(`custom-increment-${cardId}`);
+                if (!selectEl) {
+                    showCustomToast("Increment selector not found.", "error");
+                    return;
+                }
+                const incrementVal = Number(selectEl.value);
+
+                const currentHighestPrice = Number(card.price || card.bo_price || card.sb_price || basePrice || 0);
+                const totalBidAmount = currentHighestPrice + incrementVal;
+
+                if (totalBidAmount <= currentHighestPrice) {
+                    showCustomToast(`Bid calculation error: Must exceed current price of ${formatPHP(currentHighestPrice)}!`, "error");
+                    return;
+                }
+
+                const bidderName = currentUserProfile.name || "Collector";
+                
+                // 💡 CALCULATE EXTRA AMOUNT ABOVE INITIAL BO BASE PRICE
+                const initialBoBase = Number(card.bo_price || basePrice || 0);
+                const extraAboveBO = Math.max(0, totalBidAmount - initialBoBase);
+                const newTopBidderStr = `${bidderName} [BO + ${formatPHP(extraAboveBO)}]`;
+
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
+                        .from('cards')
+                        .update({ 
+                            price: totalBidAmount,
+                            top_bidder: newTopBidderStr
+                        })
+                        .eq('id', cardId);
+
+                    if (error) throw error;
+
+                    card.price = totalBidAmount;
+                    card.top_bidder = newTopBidderStr;
+                    card.boCount = (card.boCount || 0) + 1; // 👈 ADD THIS LINE HERE!
+
+                    renderGrid();
+                    showCustomToast(`Bid of ${formatPHP(totalBidAmount)} successfully placed!`, "success");
+                } else {
+                    card.price = totalBidAmount;
+                    card.top_bidder = newTopBidderStr;
+                    renderGrid();
+                    showCustomToast(`Bid of ${formatPHP(totalBidAmount)} successfully placed!`, "success");
+                }
+            } catch (err) {
+                console.error("Custom standard bid error:", err);
+                showCustomToast(`Bid failed: ${err.message || 'Unknown error'}`, "error");
+            }
+        };
+
+            
     </script>
 
 <!-- DYNAMIC INTERACTIVE CHATBOT POPUP MODAL -->
