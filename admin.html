@@ -665,8 +665,16 @@
             try {
                 const [{ data: orders }, { data: stdCards }, { data: premCards }] = await Promise.all([
                     supabaseClient.from('Orders').select('*').order('id', { ascending: false }).limit(5),
-                    supabaseClient.from('cards').select('*').in('type', ['bidding', 'bid', 'Bidding', 'Bid']).order('id', { ascending: false }).limit(5),
-                    supabaseClient.from('cards').select('*').in('type', ['premium', 'premium_bidding', 'Premium', 'Premium_Bidding']).order('id', { ascending: false }).limit(5)
+                    supabaseClient.from('cards').select('*')
+                        .in('type', ['bidding', 'bid', 'Bidding', 'Bid'])
+                        .not('top_bidder', 'is', null)
+                        .neq('top_bidder', 'No bids yet')
+                        .order('updated_at', { ascending: false }).limit(5),
+                    supabaseClient.from('cards').select('*')
+                        .in('type', ['premium', 'premium_bidding', 'Premium', 'Premium_Bidding'])
+                        .not('top_bidder', 'is', null)
+                        .neq('top_bidder', 'No bids yet')
+                        .order('updated_at', { ascending: false }).limit(5)
                 ]);
 
                 // 1. Seed Orders
