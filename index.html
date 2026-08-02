@@ -3105,6 +3105,10 @@
                     `;
 
                     const boRemaining = Math.max(0, 3 - (item.boCount || 0));
+                    const isBoMaxed = Boolean(claims.bo && boRemaining <= 0);
+
+                    // ⚡ Check if auction time has expired
+                    const isExpired = item.bidding_ends_at ? (new Date(item.bidding_ends_at).getTime() <= Date.now()) : false;
 
                     actionMarkup = `
                         <div class="mb-2.5 flex justify-between items-center">
@@ -3121,26 +3125,32 @@
 
                         <div class="flex flex-col gap-2 w-full text-xs">
                             <div class="grid grid-cols-3 gap-1.5 w-full">
-                                <button type="button" ${claims.sb ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'SB', ${item.sb_price})" class="${sbDisabled} py-2 px-1 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border border-white/10 whitespace-nowrap">
-                                    ${claims.sb ? `<span class="font-mono text-xs sm:text-sm font-bold opacity-95">CLAIMED</span>` : `<span class="text-xs sm:text-sm font-black uppercase">SB:</span><span class="font-mono text-xs sm:text-sm font-bold opacity-95">${formatPHP(item.sb_price)}</span>`}
+                                <button type="button" ${(claims.sb || isExpired) ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'SB', ${item.sb_price})" class="${(claims.sb || isExpired) ? 'opacity-40 cursor-not-allowed pointer-events-none bg-zinc-800 text-zinc-500 border border-zinc-700/50' : sbDisabled} py-1.5 px-0.5 rounded-lg transition-all active:scale-95 flex items-center justify-center whitespace-nowrap overflow-hidden">
+                                    ${claims.sb ? '<span class="font-mono text-[11px] font-bold opacity-95">CLAIMED</span>' : '<span class="text-[11px] font-black uppercase">SB:</span><span class="font-mono text-[11px] font-bold ml-0.5">' + formatPHP(item.sb_price) + '</span>'}
                                 </button>
-                                <button type="button" ${claims.dibs ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'DIBS', ${item.dibs_price})" class="${dibsDisabled} py-2 px-1 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border border-white/10 whitespace-nowrap">
-                                    ${claims.dibs ? `<span class="font-mono text-xs sm:text-sm font-bold opacity-95">CLAIMED</span>` : `<span class="text-xs sm:text-sm font-black uppercase">DIBS:</span><span class="font-mono text-xs sm:text-sm font-bold opacity-95">${formatPHP(item.dibs_price)}</span>`}
+                                <button type="button" ${(claims.dibs || isExpired) ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'DIBS', ${item.dibs_price})" class="${(claims.dibs || isExpired) ? 'opacity-40 cursor-not-allowed pointer-events-none bg-zinc-800 text-zinc-500 border border-zinc-700/50' : dibsDisabled} py-1.5 px-0.5 rounded-lg transition-all active:scale-95 flex items-center justify-center whitespace-nowrap overflow-hidden">
+                                    ${claims.dibs ? '<span class="font-mono text-[11px] font-bold opacity-95">CLAIMED</span>' : '<span class="text-[11px] font-black uppercase">DIBS:</span><span class="font-mono text-[11px] font-bold ml-0.5">' + formatPHP(item.dibs_price) + '</span>'}
                                 </button>
-                                <button type="button" ${claims.bo ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'BO', ${item.bo_price})" class="${boDisabled} py-2 px-1 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1 border border-white/10 whitespace-nowrap">
-                                    ${claims.bo ? `<span class="font-mono text-xs sm:text-sm font-bold opacity-95">CLAIMED</span>` : `<span class="text-xs sm:text-sm font-black uppercase">BO:</span><span class="font-mono text-xs sm:text-sm font-bold opacity-95">${formatPHP(item.bo_price)}</span>`}
+                                <button type="button" ${(claims.bo || isExpired) ? 'disabled' : ''} onclick="claimStandardAction(${item.id}, 'BO', ${item.bo_price})" class="${(claims.bo || isExpired) ? 'opacity-40 cursor-not-allowed pointer-events-none bg-zinc-800 text-zinc-500 border border-zinc-700/50' : boDisabled} py-1.5 px-0.5 rounded-lg transition-all active:scale-95 flex items-center justify-center whitespace-nowrap overflow-hidden">
+                                    ${claims.bo ? '<span class="font-mono text-[11px] font-bold opacity-95">CLAIMED</span>' : '<span class="text-[11px] font-black uppercase">BO:</span><span class="font-mono text-[11px] font-bold ml-0.5">' + formatPHP(item.bo_price) + '</span>'}
                                 </button>
                             </div>
 
                             <div class="flex gap-1.5 w-full">
-                                <select id="custom-increment-${item.id}" ${!canBid ? 'disabled' : ''} class="flex-1 border rounded-xl px-2.5 py-2 font-mono text-xs sm:text-sm shadow-inner transition-all ${selectClass}">
-                                    <option value="10">BO + ₱10 (${formatPHP(currentHighestPrice + 10)})</option>
-                                    <option value="20">BO + ₱20 (${formatPHP(currentHighestPrice + 20)})</option>
-                                    <option value="50">BO + ₱50 (${formatPHP(currentHighestPrice + 50)})</option>
-                                    <option value="100">BO + ₱100 (${formatPHP(currentHighestPrice + 100)})</option>
-                                </select>
-                                <button type="button" ${!canBid ? 'disabled' : ''} onclick="placeCustomStandardBid(${item.id}, ${currentHighestPrice})" class="${bidBtnClass} px-4 py-2 rounded-xl text-xs uppercase tracking-wider shrink-0 transition-all">
-                                    Bid
+                                <div class="relative flex-1">
+                                    <input type="number" 
+                                        id="custom-bid-${item.id}" 
+                                        min="10"
+                                        step="10"
+                                        placeholder="Amount will add to BO (Min ₱10)" 
+                                        ${(isBoMaxed || isExpired) ? 'disabled' : ''} 
+                                        class="${(isBoMaxed || isExpired) ? 'opacity-40 cursor-not-allowed bg-zinc-800/50 border-zinc-800 text-zinc-500' : 'bg-zinc-900/90 border-zinc-700 text-amber-400 focus:border-amber-500'} w-full font-mono text-[11px] rounded-xl px-3 py-2 focus:outline-none border transition-colors placeholder:text-zinc-500 placeholder:text-[10px] sm:placeholder:text-[11px]" />
+                                </div>
+                                <button type="button" 
+                                        ${(isBoMaxed || isExpired) ? 'disabled' : ''} 
+                                        onclick="placeCustomStandardBid(${item.id})" 
+                                        class="${(isBoMaxed || isExpired) ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-500 pointer-events-none border border-zinc-700/50' : 'bg-red-600 hover:bg-red-500 text-white'} font-bold px-3 py-1.5 rounded-lg transition-colors text-xs whitespace-nowrap">
+                                    ${isExpired ? 'ENDED' : (isBoMaxed ? 'MAXED' : 'BID')}
                                 </button>
                             </div>
 
@@ -4341,34 +4351,33 @@
                     return;
                 }
 
-                const card = items.find(i => i.id === cardId);
+                const card = items.find(i => String(i.id) === String(cardId));
                 if (!card) {
                     showCustomToast("Card item not found.", "error");
                     return;
                 }
 
-                // Guard: Ensure BO is claimed first
+                // 1. Guard: Ensure BO is claimed first
                 const claims = card.claims || { sb: false, dibs: false, bo: false };
                 if (!claims.bo) {
                     showCustomToast("⚠️ Custom bidding unlocks only after BO is claimed!", "error");
                     return;
                 }
-                
-                if (supabaseClient) {
-                    const { data: existingBids, error: countErr } = await supabaseClient
-                        .from('bid_history')
-                        .select('id, bidder, amount')
-                        .eq('card_id', cardId);
 
-                    if (!countErr && existingBids) {
-                        const customBoCount = existingBids.filter(b => Number(b.amount) > 0 && String(b.bidder || '').includes('[BO +')).length;
-                        if (customBoCount >= 3) {
-                            showCustomToast("Maximum BO increase reached!", "error");
-                            return;
-                        }
-                    }
+                // 2. ⚡ ANTI-MONOPOLY CHECK: Prevent same bidder from bidding consecutively
+                const currentUserName = currentUserProfile?.name || window.currentBidderName || "Collector";
+                if (card.top_bidder && card.top_bidder === currentUserName) {
+                    showCustomToast("⚠️ YOU ARE ALREADY TOP BIDDER: Wait for another collector to bid!", "warning");
+                    return;
                 }
 
+                // 3. ⚡ MAX BO+ COUNT CHECK
+                if ((card.boCount || 0) >= 3) {
+                    showCustomToast("❌ MAX LIMIT REACHED: Maximum 3 BO+ bids reached!", "error");
+                    return;
+                }
+
+                // 4. Guard: Check bidding expiry time
                 if (card.bidding_ends_at) {
                     const biddingEndTimeMs = safeParseBiddingTime(card.bidding_ends_at).getTime();
                     if (biddingEndTimeMs <= Date.now()) {
@@ -4377,29 +4386,24 @@
                     }
                 }
 
-                const selectEl = document.getElementById(`custom-increment-${cardId}`);
-                if (!selectEl) {
-                    showCustomToast("Increment selector not found.", "error");
+                // 5. ⚡ INPUT VALIDATION: Minimum ₱10 check
+                const inputEl = document.getElementById(`custom-bid-${cardId}`);
+                const incrementVal = Number(inputEl ? inputEl.value : 0);
+
+                if (isNaN(incrementVal) || incrementVal < 10) {
+                    showCustomToast("❌ MINIMUM BID INCREMENT: Must be at least ₱10!", "error");
                     return;
                 }
-                const incrementVal = Number(selectEl.value);
 
+                // 6. Calculate new total bid amount
                 const currentHighestPrice = Number(card.price || card.bo_price || card.sb_price || basePrice || 0);
                 const totalBidAmount = currentHighestPrice + incrementVal;
-
-                if (totalBidAmount <= currentHighestPrice) {
-                    showCustomToast(`Bid calculation error: Must exceed current price of ${formatPHP(currentHighestPrice)}!`, "error");
-                    return;
-                }
-
-                const bidderName = currentUserProfile.name || "Collector";
-                const newTopBidderStr = bidderName;
 
                 if (supabaseClient) {
                     const { data, error } = await supabaseClient.rpc('place_bid_secure', {
                         p_card_id: cardId,
                         p_bid_amount: totalBidAmount,
-                        p_bidder_name: newTopBidderStr
+                        p_bidder_name: currentUserName
                     });
 
                     if (error) throw error;
@@ -4414,16 +4418,23 @@
                             renderGrid();
                         }
                     }
+
+                    // Clear input box on success
+                    if (inputEl) inputEl.value = '';
+
                     showCustomToast(`Bid of ${formatPHP(totalBidAmount)} successfully placed!`, "success");
                 } else {
+                    // Local fallback
                     card.price = totalBidAmount;
-                    card.top_bidder = newTopBidderStr;
+                    card.top_bidder = currentUserName;
+                    card.boCount = (card.boCount || 0) + 1;
                     renderGrid();
-                    showCustomToast(`Bid of ${formatPHP(totalBidAmount)} successfully placed!`, "success");
+                    if (inputEl) inputEl.value = '';
+                    showCustomToast(`Bid of ${formatPHP(totalBidAmount)} placed (Local)!`, "success");
                 }
             } catch (err) {
-                console.error("Custom standard bid error:", err);
-                showCustomToast(`Bid failed: ${err.message || 'Unknown error'}`, "error");
+                console.error("Custom bid error:", err);
+                showCustomToast(err.message || "Failed to place custom bid.", "error");
             }
         };
 
