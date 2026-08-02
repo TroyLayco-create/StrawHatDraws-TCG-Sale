@@ -888,13 +888,17 @@
             if (!dateStr) return new Date(0);
             let str = String(dateStr).trim().replace(' ', 'T');
 
-            // Enhanced offset detector: handles Z, +00, +00:00, +08, +08:00, etc.
-            if (/(Z|[+-]\d{2}(?::?\d{2})?)$/i.test(str)) {
-                return new Date(str);
+            // 1. If string lacks an offset, explicitly anchor to Philippine Standard Time (+08:00)
+            if (!/(Z|[+-]\d{2}(?::?\d{2})?)$/i.test(str)) {
+                str += str.includes('T') ? '+08:00' : 'T00:00:00+08:00';
             }
 
-            // For plain un-offset strings -> strictly anchor to Philippine Standard Time (+08:00)
-            return new Date(str.includes('T') ? str + '+08:00' : str + 'T00:00:00+08:00');
+            // 2. Normalize short offsets (+08 or +00) to (+08:00 or +00:00) for iOS Safari support
+            str = str.replace(/([+-]\d{2})$/, '$1:00');
+
+            // 3. Parse date safely and check for Invalid Date
+            const parsedDate = new Date(str);
+            return isNaN(parsedDate.getTime()) ? new Date(0) : parsedDate;
         }
         
         function formatPHP(num) {
@@ -3099,7 +3103,7 @@
                             <span class="text-white font-bold">Highest Bidder:</span>
                             <span class="text-amber-200 font-semibold truncate" data-bidder-id="${item.id}">${topBidderName}</span>
                         </div>
-                        <div class="absolute bottom-11 right-2 z-20 bg-black/85 border border-white/10 p-2 rounded-lg text-right backdrop-blur-md shadow-lg" data-timer-expiry="${item.bidding_ends_at || ''}"></div>
+                        <div class="absolute bottom-11 right-2 z-20 bg-black/85 border border-white/10 p-2 rounded-lg text-right backdrop-blur-md shadow-lg" data-timer-id="${item.id}" data-timer-expiry="${item.bidding_ends_at || ''}"></div>
                     `;
 
                     const boRemaining = Math.max(0, 3 - (item.boCount || 0));
@@ -3159,7 +3163,7 @@
                             <span class="text-amber-200 font-bold">Highest Bidder:</span>
                             <span class="text-white font-extrabold truncate" data-bidder-id="${item.id}">${topBidderName}</span>
                         </div>
-                        <div class="absolute bottom-11 right-2 z-20 bg-black/90 border border-amber-500/30 p-2 rounded-lg text-right backdrop-blur-md shadow-xl" data-timer-expiry="${item.bidding_ends_at || ''}"></div>
+                        <div class="absolute bottom-11 right-2 z-20 bg-black/90 border border-amber-500/30 p-2 rounded-lg text-right backdrop-blur-md shadow-xl" data-timer-id="${item.id}" data-timer-expiry="${item.bidding_ends_at || ''}"></div>
                     `;
 
                     actionMarkup = `
@@ -3445,7 +3449,7 @@
                 supabaseClient
                     .channel('live-auction-stream')
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cards' }, (payload) => {
-                        const targetIndex = items.findIndex(i => i.id === payload.new.id);
+                        const targetIndex = items.findIndex(i => String(i.id) === String(payload.new.id));
                         if (targetIndex !== -1) {
                             const oldBidderName = items[targetIndex].top_bidder;
                             const newBidderName = payload.new.top_bidder;
@@ -3454,10 +3458,26 @@
                             const dbType = (payload.new.type || "sale").toLowerCase().trim();
                             const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
 
+                            const oldPrice = items[targetIndex].price;
                             items[targetIndex].price = Number(payload.new.price);
                             items[targetIndex].top_bidder = payload.new.top_bidder;
                             items[targetIndex].bidding_ends_at = payload.new.bidding_ends_at;
-                            items[targetIndex].type = normalizedType; 
+                            items[targetIndex].type = normalizedType;
+
+                            // ⚡ Sync BO+ counter across all screens when price increases
+                            if (Number(payload.new.price) > oldPrice) {
+                                items[targetIndex].boCount = (items[targetIndex].boCount || 0) + 1;
+                            }
+
+                            // ⚡ Seamless Realtime Targeted DOM Updates (No full grid re-render needed)
+                            const priceEls = document.querySelectorAll(`[data-price-id="${payload.new.id}"]`);
+                            priceEls.forEach(el => el.innerText = formatPHP(Number(payload.new.price)));
+
+                            const bidderEls = document.querySelectorAll(`[data-bidder-id="${payload.new.id}"]`);
+                            bidderEls.forEach(el => el.innerText = escapeHtml(payload.new.top_bidder || 'No bids yet'));
+
+                            const timerEls = document.querySelectorAll(`[data-timer-id="${payload.new.id}"]`);
+                            timerEls.forEach(el => el.setAttribute('data-timer-expiry', payload.new.bidding_ends_at || ''));
 
                             if (currentUserProfile && payload.new.top_bidder === currentUserProfile.name) {
                                 delete activeBiddingErrorTrackingLedger[payload.new.id];
@@ -3466,7 +3486,12 @@
                                 delete activeBiddingErrorTrackingLedger[payload.new.id];
                             }
 
-                            renderGrid();
+                            // Only re-render full grid if user is not actively typing in an input field
+                            const activeEl = document.activeElement;
+                            const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
+                            if (!isTyping) {
+                                renderGrid();
+                            }
                             if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
                         }
                     })
@@ -4244,7 +4269,7 @@
 
             const bidderName = currentUserProfile.name || "Collector";
             const userId = currentUserProfile.id;
-            const topBidderString = `${bidderName} [${action}]`;
+            const topBidderString = bidderName;
 
             if (supabaseClient) {
                 try {
@@ -4341,28 +4366,27 @@
                 }
 
                 const bidderName = currentUserProfile.name || "Collector";
-                
-                // 💡 CALCULATE EXTRA AMOUNT ABOVE INITIAL BO BASE PRICE
-                const initialBoBase = Number(card.bo_price || basePrice || 0);
-                const extraAboveBO = Math.max(0, totalBidAmount - initialBoBase);
-                const newTopBidderStr = `${bidderName} [BO + ${formatPHP(extraAboveBO)}]`;
+                const newTopBidderStr = bidderName;
 
                 if (supabaseClient) {
-                    const { error } = await supabaseClient
-                        .from('cards')
-                        .update({ 
-                            price: totalBidAmount,
-                            top_bidder: newTopBidderStr
-                        })
-                        .eq('id', cardId);
+                    const { data, error } = await supabaseClient.rpc('place_bid_secure', {
+                        p_card_id: cardId,
+                        p_bid_amount: totalBidAmount,
+                        p_bidder_name: newTopBidderStr
+                    });
 
                     if (error) throw error;
 
-                    card.price = totalBidAmount;
-                    card.top_bidder = newTopBidderStr;
-                    card.boCount = (card.boCount || 0) + 1; // 👈 ADD THIS LINE HERE!
-
-                    renderGrid();
+                    if (data) {
+                        const resCard = Array.isArray(data) ? data[0] : data;
+                        if (resCard) {
+                            card.price = Number(resCard.price);
+                            card.top_bidder = resCard.top_bidder;
+                            card.bidding_ends_at = resCard.bidding_ends_at;
+                            card.boCount = (card.boCount || 0) + 1;
+                            renderGrid();
+                        }
+                    }
                     showCustomToast(`Bid of ${formatPHP(totalBidAmount)} successfully placed!`, "success");
                 } else {
                     card.price = totalBidAmount;
