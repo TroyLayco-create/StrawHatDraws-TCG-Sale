@@ -3079,7 +3079,7 @@
                     const claims = item.claims || { sb: false, dibs: false, bo: false };
                     
                     // Check if all 3 tiers (SB, DIBS, BO) are claimed
-                    const canBid = claims.sb && claims.dibs && claims.bo;
+                    const canBid = claims.bo;
                     
                     const sbDisabled = claims.sb ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-blue-600 active:bg-blue-700 text-white font-extrabold shadow-md shadow-blue-950/40';
                     const dibsDisabled = claims.dibs ? 'opacity-40 cursor-not-allowed bg-[#181818] text-gray-500 border-gray-800' : 'bg-purple-600 active:bg-purple-700 text-white font-extrabold shadow-md shadow-purple-950/40';
@@ -4299,13 +4299,13 @@
                     return;
                 }
 
-                // Guard: Ensure SB, DIBS, and BO are all claimed first
+                // Guard: Ensure BO is claimed first
                 const claims = card.claims || { sb: false, dibs: false, bo: false };
-                if (!claims.sb || !claims.dibs || !claims.bo) {
-                    showCustomToast("⚠️ Custom bidding unlocks only after SB, DIBS, and BO are all claimed!", "error");
+                if (!claims.bo) {
+                    showCustomToast("⚠️ Custom bidding unlocks only after BO is claimed!", "error");
                     return;
                 }
-
+                
                 if (supabaseClient) {
                     const { data: existingBids, error: countErr } = await supabaseClient
                         .from('bid_history')
