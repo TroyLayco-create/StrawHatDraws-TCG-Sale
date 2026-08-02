@@ -361,21 +361,23 @@
 
         // 🛡️ Mobile-Safe Parser: Truncates 6-digit microseconds (.223318 -> .223) for iOS/PWA WebKit compatibility
         function safeParseBiddingTime(dateStr) {
-            if (!dateStr) return new Date();
+            if (!dateStr) return new Date(0);
             let str = String(dateStr).trim().replace(' ', 'T');
 
             // 1. Truncate microsecond precision (>3 fractional digits)
             str = str.replace(/(\.\d{3})\d+/, '$1');
 
-            // 2. Normalize shorthand offsets (e.g., +00 -> +00:00)
-            str = str.replace(/([+-]\d{2})$/, '$1:00');
-
-            // 3. Parse offset or anchor un-offset strings to Philippine Standard Time (+08:00)
-            if (/(Z|[+-]\d{2}(?::?\d{2})?)$/i.test(str)) {
-                return new Date(str);
+            // 2. If string lacks an offset, explicitly anchor to Philippine Standard Time (+08:00)
+            if (!/(Z|[+-]\d{2}(?::?\d{2})?)$/i.test(str)) {
+                str += str.includes('T') ? '+08:00' : 'T00:00:00+08:00';
             }
 
-            return new Date(str.includes('T') ? str + '+08:00' : str + 'T00:00:00+08:00');
+            // 3. Normalize shorthand offsets (e.g., +08 or +00 -> +08:00 or +00:00) for iOS/Safari
+            str = str.replace(/([+-]\d{2})$/, '$1:00');
+
+            // 4. Safely parse and guard against Invalid Date
+            const parsedDate = new Date(str);
+            return isNaN(parsedDate.getTime()) ? new Date(0) : parsedDate;
         }
 
         // 🛡️ Mobile-Safe Formatter: Accepts both strings or Date objects and formats cleanly to PHT
@@ -700,7 +702,7 @@
                     const price = Number(payload.new.price || 0);
                     const cardName = payload.new.name || 'Card';
                     const isPremium = ['premium', 'premium_bidding'].includes(itemType);
-                    const rawTime = payload.new.updated_at || payload.new.bidding_ends_at || new Date();
+                    const rawTime = new Date(); // Captures the exact moment the live bid event arrives in PHT
                     
                     const uniqueBidKey = `${payload.new.id}-${bidder}-${price}`;
                     if (processedBids.has(uniqueBidKey)) return;
@@ -772,35 +774,63 @@
                 const seenStdCards = new Set();
                 const seenPremCards = new Set();
 
-                // 2 & 3. Seed Bids Feeds using exact timestamps from bid_history
-                (bidHistory || []).forEach(b => {
-                    const card = cardsMap[b.card_id];
-                    if (!card) return;
+                // 2 & 3. Seed Bids Feeds using bid_history WITH fallback to active cards
+                if (bidHistory && bidHistory.length > 0) {
+                    bidHistory.forEach(b => {
+                        const card = cardsMap[b.card_id];
+                        if (!card) return;
+
+                        const t = (card.type || '').toLowerCase().trim();
+                        const isPrem = t === 'premium' || t === 'premium_bidding';
+                        const dt = b.timestamp ? getPSTDateTimeString(safeParseBiddingTime(b.timestamp)) : 'Active';
+
+                        const item = {
+                            type: 'bid',
+                            icon: isPrem ? 'crown' : 'gavel',
+                            badgeText: isPrem ? '👑 PREMIUM' : 'BID',
+                            name: b.bidder || 'Collector',
+                            subtitle: `Top bid on ${card.name}`,
+                            price: `₱${Number(b.amount || 0).toLocaleString()}`,
+                            timeStr: dt
+                        };
+
+                        if (isPrem) {
+                            if (!seenPremCards.has(b.card_id) && premiumActivityLogs.length < 5) {
+                                seenPremCards.add(b.card_id);
+                                premiumActivityLogs.push(item);
+                            }
+                        } else {
+                            if (!seenStdCards.has(b.card_id) && bidActivityLogs.length < 5) {
+                                seenStdCards.add(b.card_id);
+                                bidActivityLogs.push(item);
+                            }
+                        }
+                    });
+                }
+
+                // 🛡️ FALLBACK: Pull top bidders directly from active cards if bid_history has no standard logs
+                (allCards || []).forEach(card => {
+                    if (!card.top_bidder || card.top_bidder === 'No bids yet') return;
 
                     const t = (card.type || '').toLowerCase().trim();
                     const isPrem = t === 'premium' || t === 'premium_bidding';
-                    const dt = b.timestamp ? getPSTDateTimeString(safeParseBiddingTime(b.timestamp)) : 'Active';
 
-                    const item = {
+                    const fallbackItem = {
                         type: 'bid',
                         icon: isPrem ? 'crown' : 'gavel',
                         badgeText: isPrem ? '👑 PREMIUM' : 'BID',
-                        name: b.bidder || 'Collector',
+                        name: card.top_bidder,
                         subtitle: `Top bid on ${card.name}`,
-                        price: `₱${Number(b.amount || 0).toLocaleString()}`,
-                        timeStr: dt
+                        price: `₱${Number(card.price || 0).toLocaleString()}`,
+                        timeStr: 'Active High Bid'
                     };
 
-                    if (isPrem) {
-                        if (!seenPremCards.has(b.card_id) && premiumActivityLogs.length < 5) {
-                            seenPremCards.add(b.card_id);
-                            premiumActivityLogs.push(item);
-                        }
-                    } else {
-                        if (!seenStdCards.has(b.card_id) && bidActivityLogs.length < 5) {
-                            seenStdCards.add(b.card_id);
-                            bidActivityLogs.push(item);
-                        }
+                    if (isPrem && premiumActivityLogs.length < 5 && !seenPremCards.has(card.id)) {
+                        seenPremCards.add(card.id);
+                        premiumActivityLogs.push(fallbackItem);
+                    } else if (!isPrem && bidActivityLogs.length < 5 && !seenStdCards.has(card.id)) {
+                        seenStdCards.add(card.id);
+                        bidActivityLogs.push(fallbackItem);
                     }
                 });
 
