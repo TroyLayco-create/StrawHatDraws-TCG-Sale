@@ -1089,15 +1089,9 @@
                         });
                     }
 
-                    // Fetch custom BO count mapping
-                    const { data: historyData } = await supabaseClient.from('bid_history').select('card_id, bidder, amount');
-                    if (historyData) {
-                        historyData.forEach(row => {
-                            if (Number(row.amount) > 0 && String(row.bidder || '').includes('[BO +')) {
-                                boCountsMap[row.card_id] = (boCountsMap[row.card_id] || 0) + 1;
-                            }
-                        });
-                    }
+                    // Fetch bid history for BO+ count calculation
+                    var { data: historyData } = await supabaseClient.from('bid_history').select('card_id, bidder, amount');
+
                 } catch (e) {
                     console.warn("Failed to fetch claims/history mapping:", e);
                 }
@@ -1136,7 +1130,11 @@
                             const defaultStock = Number(c.stock || 0);
                             const dbType = (c.type || "sale").toLowerCase().trim();
                             const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
-
+                            // ⚡ Calculate BO+ count dynamically
+                            const cardBoPrice = Number(c.bo_price || c.price || 0);
+                            const cardBoCount = (cardBoPrice > 0 && typeof historyData !== 'undefined' && Array.isArray(historyData))
+                                ? historyData.filter(h => String(h.card_id) === String(c.id) && Number(h.amount) > cardBoPrice).length
+                                : 0;
                             return {
                                 id: c.id,
                                 name: c.name || "Unnamed Card",
@@ -1152,7 +1150,7 @@
                                 bidding_ends_at: c.bidding_ends_at || null,
                                 stock: Math.min(defaultStock, getLocalStock(c.id, defaultStock)),
                                 claims: claimsMap[c.id] || { sb: false, dibs: false, bo: false },
-                                boCount: boCountsMap[c.id] || 0,
+                                boCount: Math.min(3, cardBoCount),
                                 frontImg: c.front_img || c.frontImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                                 backImg: c.back_img || c.backImg || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
                                 viewState: existing?.viewState || 'front'
@@ -3115,7 +3113,7 @@
                                 <span class="text-xs sm:text-sm font-black text-green-400 font-mono" data-price-id="${item.id}">${formatPHP(item.price)}</span>
                             </div>
                             ${claims.bo ? `
-                                <span class="text-[10px] font-extrabold uppercase tracking-wider ${boRemaining === 0 ? 'text-red-400 bg-red-950/60 border-red-500/40' : 'text-amber-300 bg-amber-950/60 border-amber-500/40'} border px-2 py-0.5 rounded-full shadow-sm">
+                                <span data-bo-id="${item.id}" class="text-[10px] font-extrabold uppercase tracking-wider ${boRemaining === 0 ? 'text-red-400 bg-red-950/60 border border-red-500/50' : 'text-amber-400 bg-amber-950/60 border border-amber-500/50'} px-2 py-0.5 rounded-full inline-flex items-center gap-1">
                                     ⚡ BO+ Left: ${boRemaining}/3
                                 </span>
                             ` : ''}
@@ -3466,7 +3464,7 @@
 
                             // ⚡ Sync BO+ counter across all screens when price increases
                             if (Number(payload.new.price) > oldPrice) {
-                                items[targetIndex].boCount = (items[targetIndex].boCount || 0) + 1;
+                                items[targetIndex].boCount = Math.min(3, (items[targetIndex].boCount || 0) + 1);
                             }
 
                             // ⚡ Seamless Realtime Targeted DOM Updates (No full grid re-render needed)
@@ -3479,6 +3477,17 @@
                             const timerEls = document.querySelectorAll(`[data-timer-id="${payload.new.id}"]`);
                             timerEls.forEach(el => el.setAttribute('data-timer-expiry', payload.new.bidding_ends_at || ''));
 
+                            // ⚡ Live BO Counter DOM Update
+                            const boEls = document.querySelectorAll(`[data-bo-id="${payload.new.id}"]`);
+                            const currentBoCount = items[targetIndex].boCount || 0;
+                            const remainingBO = Math.max(0, 3 - currentBoCount);
+                            boEls.forEach(el => {
+                                if (currentBoCount >= 3) {
+                                    el.innerText = 'MAX LIMIT';
+                                } else {
+                                    el.innerText = `⚡ BO+ Left: ${remainingBO}/3`;
+                                }
+                            });
                             if (currentUserProfile && payload.new.top_bidder === currentUserProfile.name) {
                                 delete activeBiddingErrorTrackingLedger[payload.new.id];
                             } else if (currentUserProfile && currentUserProfile.name === oldBidderName && currentUserProfile.name !== newBidderName) {
@@ -3493,6 +3502,24 @@
                                 renderGrid();
                             }
                             if (window.renderAdminBidsLedger) window.renderAdminBidsLedger();
+                        }
+                    })
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'standard_auction_claims' }, (payload) => {
+                        const cardId = payload.new.card_id;
+                        const actionType = (payload.new.action_type || '').toLowerCase(); // 'sb', 'dibs', 'bo'
+
+                        // 1. Update in-memory item state
+                        const targetIndex = items.findIndex(item => String(item.id) === String(cardId));
+                        if (targetIndex !== -1) {
+                            if (!items[targetIndex].claims) items[targetIndex].claims = {};
+                            items[targetIndex].claims[actionType] = true;
+                        }
+
+                        // 2. Refresh UI for all connected bidders (protecting active typing)
+                        const activeEl = document.activeElement;
+                        const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT');
+                        if (!isTyping) {
+                            renderGrid();
                         }
                     })
                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'cards' }, (payload) => {
