@@ -1698,20 +1698,14 @@
                 openAuthModal();
                 return;
             }
-        
+
             const card = items.find(i => i.id === cardId);
             if (!card) return;
-        
+
             // --- 🔒 TIMEZONE-SAFE ANTI-SNIPE GATEKEEPER MECHANISM ---
             const fiveMinutesInMs = 5 * 60 * 1000;
-            
-            // 1. Parse database end time into absolute UTC epoch milliseconds (PHT anchored)
             const biddingEndTimeMs = safeParseBiddingTime(card.bidding_ends_at).getTime();
-            
-            // 2. Current global UTC epoch milliseconds (device timezone independent)
             const currentGlobalUtc = Date.now();
-            
-            // 3. Absolute remaining time until auction closes
             const timeRemainingPST = biddingEndTimeMs - currentGlobalUtc;
 
             if (card.bidding_ends_at && timeRemainingPST < 0) {
@@ -1722,7 +1716,6 @@
             if (card.bidding_ends_at && timeRemainingPST > 0 && timeRemainingPST <= fiveMinutesInMs) {
                 if (supabaseClient) {
                     try {
-                        // Scan the public history ledger to check if this specific user bid previously
                         const { data: historicalBids, error: historyErr } = await supabaseClient
                             .from('bid_history')
                             .select('id')
@@ -1738,13 +1731,13 @@
                         }
                     } catch (err) {
                         console.error("Gatekeeper verification error:", err);
-                        showCustomToast("Security gatekeeper verification error. Try again.", "error");
+                        showCustomToast(`Security gatekeeper verification error: ${err.message || "Try again."}`, "error");
                         return;
                     }
                 }
             }
             // --- END OF GATEKEEPER CHECK ---
-        
+
             let bidAmount = 0;
             if (isCustom) {
                 const customVal = Number(document.getElementById(`custom-bid-${cardId}`).value);
@@ -1761,12 +1754,12 @@
                 }
                 bidAmount = Number(card.price) + selectVal;
             }
-        
+
             if (bidAmount <= Number(card.price)) {
                 showCustomToast(`Your bid must be higher than the current highest bid of ${formatPHP(card.price)}!`, "error");
                 return;
             } 
-        
+
             const bidderName = currentUserProfile.name || "Collector";
             if (supabaseClient) {
                 try {
@@ -1776,25 +1769,27 @@
                         p_bidder_name: bidderName
                     });
                     if (error) throw error;
-        
+
                     if (data) {
-                        // 🛡️ Array-Safe Extractor: Handles both Object {} and Array [{}] RPC returns
                         const resCard = Array.isArray(data) ? data[0] : data;
 
                         if (resCard) {
                             card.price = Number(resCard.price);
                             card.top_bidder = resCard.top_bidder;
-                            card.bidding_ends_at = resCard.bidding_ends_at; // 👈 Correctly extracts new extended end timestamp!
+                            card.bidding_ends_at = resCard.bidding_ends_at;
                             appendBidToHistory(cardId, resCard.top_bidder, Number(resCard.price));
                             
                             delete activeBiddingErrorTrackingLedger[cardId];
-                            renderGrid(); // 👈 Re-renders card with new extended timer
+                            renderGrid();
                         }
                     }
-        
+
                     pendingCustomBidInputs[cardId] = "";
                     showCustomToast(`Bid successfully placed! Current high bid is now ${formatPHP(bidAmount)}.`, "success");
                 } catch(err) {
+                    console.error("Bidding process error:", err);
+
+                    // Re-sync card status from database
                     const { data: freshCloudCard } = await supabaseClient
                         .from('cards')
                         .select('price, top_bidder')
@@ -1811,9 +1806,10 @@
                             attemptedBid: bidAmount 
                         };
                         renderGrid();
-                    } else {
-                        showCustomToast(err.message || "Bid failed.", "error");
                     }
+
+                    // ALWAYS display the exact error message to the client
+                    showCustomToast(`Bid failed: ${err.message || 'Server RPC rejection'}`, "error");
                 }
             } else {
                 card.price = bidAmount;
@@ -3178,7 +3174,7 @@
                         <div class="flex flex-col gap-2 w-full text-xs">
                             <!-- Row 1: Custom Bid Input & Custom Bid Button -->
                             <div class="flex gap-1.5 w-full">
-                                <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[item.id] = this.value" placeholder="Enter Custom Bid (₱)" class="flex-1 bg-[#222] border border-amber-500/30 rounded-xl px-2.5 py-2 text-white focus:outline-none focus:border-amber-400 font-mono text-xs shadow-inner">
+                                <input type="number" id="custom-bid-${item.id}" value="${escapeHtml(customBidValue)}" oninput="pendingCustomBidInputs[item.id] = this.value" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); placeListingBid(${item.id}, true); }" placeholder="Enter Custom Bid (₱)" class="flex-1 bg-[#222] border border-amber-500/30 rounded-xl px-2.5 py-2 text-white focus:outline-none focus:border-amber-400 font-mono text-xs shadow-inner">
                                 <button type="button" onclick="placeListingBid(${item.id}, true)" class="bg-amber-950/80 hover:bg-amber-900 border border-amber-500/50 text-amber-300 font-bold px-3 py-2 rounded-xl text-xs uppercase tracking-wider shrink-0 transition-all active:scale-95">
                                     Custom Bid
                                 </button>
