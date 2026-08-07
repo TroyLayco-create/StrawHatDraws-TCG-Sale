@@ -360,7 +360,7 @@
                         </div>
                         
                         <div class="flex gap-2 w-full">
-                            <input type="text" id="war-room-input" autocomplete="off" placeholder="Taunt bidders or hype the drop..." maxlength="200" class="flex-1 bg-[#1c1b18] border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 placeholder:text-gray-500 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <input type="text" id="war-room-input" autocomplete="off" placeholder="Type Here..." maxlength="200" class="flex-1 bg-[#1c1b18] border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 placeholder:text-gray-500 disabled:opacity-40 disabled:cursor-not-allowed">
                             <button type="submit" id="war-room-submit-btn" class="golden-button-glow px-3 py-2 rounded-xl text-black font-extrabold text-xs uppercase tracking-wider transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
                                 Send
                             </button>
@@ -494,6 +494,10 @@
                 <p class="text-xs text-gray-400">Sign in using your master Supabase administrator email credentials to unlock catalog write permissions.</p>
                 <input type="email" id="admin-email-input" placeholder="Admin Email" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
                 <input type="password" id="admin-pass-input" placeholder="Admin Account Password" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
+                
+                <!-- 🛡️ CLOUDFLARE TURNSTILE WIDGET FOR ADMIN -->
+                <div class="cf-turnstile flex justify-center my-3" data-sitekey="0x4AAAAAAEDnIYOW_KG0tl4d" data-theme="dark"></div>
+
                 <button onclick="verifyAdminAuth()" class="w-full bg-red-600 hover:bg-red-700 font-bold text-xs py-2.5 rounded shadow uppercase tracking-wider flex items-center justify-center gap-2"><i class="w-4 h-4" data-lucide="unlock"></i> Establish Secure Sync</button>
             </div>
 
@@ -2072,9 +2076,15 @@
         async function verifyAdminAuth() {
             const email = document.getElementById('admin-email-input').value.trim();
             const password = document.getElementById('admin-pass-input').value;
+            const captchaToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : null;
 
             if (!supabaseClient) {
                 showCustomToast("Security Breach: Secure connection required.", "error");
+                return;
+            }
+
+            if (!captchaToken) {
+                showCustomToast("Please complete the Turnstile security check.", "error");
                 return;
             }
 
@@ -2084,7 +2094,11 @@
             }
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+                    email, 
+                    password,
+                    options: { captchaToken } 
+                });
                 if (error) throw error;
 
                 if (data?.user?.email?.toLowerCase() !== ALLOWED_ADMIN_EMAIL.toLowerCase()) {
@@ -2093,12 +2107,27 @@
                     return;
                 }
 
+                // 🟢 Unlock the entire workspace AND the Master Bidding Ledger at once
                 document.getElementById('admin-auth-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
+                
+                // Hide second login box and reveal ledger
+                if (document.getElementById('admin-login-section')) {
+                    document.getElementById('admin-login-section').style.display = 'none';
+                }
+                if (document.getElementById('master-bidding-ledger')) {
+                    document.getElementById('master-bidding-ledger').style.display = 'block';
+                }
+
                 await renderAdminOrdersLedger();
                 await window.renderAdminBidsLedger();
                 await populateAdminConditionsDropdown();
+
+                showCustomToast("Master Admin Authenticated!", "success");
             } catch(err) {
+                if (typeof turnstile !== 'undefined' && typeof turnstile.reset === 'function') {
+                    turnstile.reset();
+                }
                 showCustomToast(`Access Denied: ${err.message}`, 'error');
             }
         }
@@ -2503,8 +2532,9 @@
                     group.bids.forEach(b => {
                         cardIds.push(b.card_id);
                         const card = items.find(i => i.id == b.card_id);
-                        const nameDisplay = card ? `${card.name} (${card.set})` : `Card Reference #${b.card_id}`;
-                        cardsListHTML += `<div class="text-[11px] text-amber-400 font-medium">${escapeHtml(nameDisplay)} <span class="text-gray-400 font-mono">(${formatPHP(b.amount)})</span></div>`;
+                        // Checks: 1) Active memory, 2) Name returned by RPC query, 3) Fallback ID
+                        const cardName = card ? `${card.name} (${card.set})` : (b.card_name || b.name ? `${b.card_name || b.name} (${b.set_code || b.set || ''})` : `Card Reference #${b.card_id}`);
+                        cardsListHTML += `<div class="text-[11px] text-amber-400 font-medium">${escapeHtml(cardName)} <span class="text-gray-400 font-mono">(${formatPHP(b.amount)})</span></div>`;
                     });
                     cardsListHTML += '</div>';
 
@@ -3107,7 +3137,7 @@
 
                     // ⚡ Force inputs to remain active and unlocked during overtime
                     inputEl.disabled = false;
-                    inputEl.placeholder = "Taunt bidders or hype the drop...";
+                    inputEl.placeholder = "Type Here...";
                     inputEl.className = "flex-1 bg-[#1c1b18] border border-amber-500/20 text-xs rounded-xl px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500/50";
 
                     submitBtn.disabled = false;
@@ -4242,19 +4272,7 @@
             function checkWarRoomAuctionStatus() {
                 if (activeListingSection !== 'premium') return;
 
-                const premiumItems = items.filter(i => {
-                    const type = (i.type || '').toLowerCase();
-                    return type === 'premium' || type === 'premium_bidding';
-                });
-
-                let hasActiveAuctions = false;
-                if (premiumItems.length > 0) {
-                    hasActiveAuctions = premiumItems.some(item => {
-                        if (!item.bidding_ends_at) return false;
-                        const expiryMs = safeParseBiddingTime(item.bidding_ends_at).getTime();
-                        return expiryMs > Date.now();
-                    });
-                }
+                const { allBiddingEnded, isChatExpired } = getWarRoomExpiryStatus();
 
                 const inputEl = document.getElementById('war-room-input');
                 const btnEl = document.getElementById('war-room-submit-btn');
@@ -4265,15 +4283,10 @@
 
                 if (!inputEl) return;
 
-                if (hasActiveAuctions) {
-                    inputEl.disabled = false;
-                    inputEl.placeholder = "War Room Chat...";
-                    if (btnEl) btnEl.disabled = false;
-                    if (subtitleEl) subtitleEl.innerText = "Bidding active • Chat open";
-                    if (badgeTextEl) badgeTextEl.innerText = "LIVE";
-                    if (dotEl) dotEl.className = "w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse";
-                    if (badgeContainer) badgeContainer.className = "flex items-center gap-1.5 text-[9px] font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full";
-                } else {
+                const isLoggedIn = currentUserProfile && currentUserProfile.id !== 'guest';
+
+                if (isChatExpired) {
+                    // Bidding ended AND 10-minute post-auction overtime has elapsed
                     inputEl.disabled = true;
                     inputEl.placeholder = "War Room Closed: All auctions have ended.";
                     if (btnEl) btnEl.disabled = true;
@@ -4281,6 +4294,24 @@
                     if (badgeTextEl) badgeTextEl.innerText = "CLOSED";
                     if (dotEl) dotEl.className = "w-1.5 h-1.5 bg-red-500 rounded-full";
                     if (badgeContainer) badgeContainer.className = "flex items-center gap-1.5 text-[9px] font-mono font-bold bg-red-950/80 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full";
+                } else if (allBiddingEnded) {
+                    // Bidding ended, but inside 10-minute overtime window
+                    inputEl.disabled = !isLoggedIn;
+                    inputEl.placeholder = isLoggedIn ? "Type Here..." : "Sign in to chat in the War Room...";
+                    if (btnEl) btnEl.disabled = !isLoggedIn;
+                    if (subtitleEl) subtitleEl.innerText = "Overtime chat active";
+                    if (badgeTextEl) badgeTextEl.innerText = "OVERTIME";
+                    if (dotEl) dotEl.className = "w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse";
+                    if (badgeContainer) badgeContainer.className = "flex items-center gap-1.5 text-[9px] font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full";
+                } else {
+                    // Bidding active
+                    inputEl.disabled = !isLoggedIn;
+                    inputEl.placeholder = isLoggedIn ? "War Room Chat..." : "Sign in to chat in the War Room...";
+                    if (btnEl) btnEl.disabled = !isLoggedIn;
+                    if (subtitleEl) subtitleEl.innerText = "Bidding active • Chat open";
+                    if (badgeTextEl) badgeTextEl.innerText = "LIVE";
+                    if (dotEl) dotEl.className = "w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse";
+                    if (badgeContainer) badgeContainer.className = "flex items-center gap-1.5 text-[9px] font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full";
                 }
             }
 
