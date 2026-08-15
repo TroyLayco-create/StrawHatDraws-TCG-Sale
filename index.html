@@ -206,6 +206,20 @@
                 </select>
             </div>
 
+            <!-- 🏆 FB AUCTION UPDATES QUICKLAUNCH -->
+            <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-2.5 shadow-inner">
+                <h4 class="text-gray-200 text-xs font-bold tracking-wide uppercase flex items-center gap-1.5">
+                    <i data-lucide="gavel" class="w-4 h-4 text-amber-500"></i> FB Auction Updates
+                </h4>
+                <p class="text-[13px] text-gray-400 leading-relaxed">
+                    View official tabulated bidding reports and audit trails from FB bidding.
+                </p>
+                <a href="https://troylayco-create.github.io/auction-transparency/" target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-[#2a2a2a] hover:bg-amber-600 hover:text-black border border-gray-700 hover:border-amber-500 text-gray-200 font-bold text-xs py-2 rounded-lg transition-all shadow uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    Open Portal <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+            <!-- 👆 END OF QUICKLAUNCH BLOCK 👆 -->
+
             <!-- ITEM 1: FEATURED CARDS WIDGET[cite: 1] -->
             <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-3 shadow-inner">
                 <div class="flex justify-between items-center">
@@ -240,21 +254,6 @@
                 </div>
             </div>
 
-            <!-- ITEM 3: DYNAMIC OFFICIAL BANDAI ROADMAP -->
-            <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-3 shadow-inner">
-                <div class="flex items-center text-amber-500 space-x-2">
-                    <!-- Lucide megaphone icon equivalent / standard text emoji styling -->
-                    <span class="text-gray-200 text-xs font-bold tracking-wide uppercase flex items-center gap-1.5">
-                        📢 News and Updates
-                    </span>
-                </div>
-                
-                <!-- Dynamic Timeline Elements Target Injection Layer -->
-                <div id="bandaiRoadmapContainer" class="space-y-3">
-                    <div class="text-gray-500 text-[11px] italic text-center py-2">Loading upcoming release roadmap...</div>
-                </div>
-            </div>
-
             <!-- ITEM 3.5: VIDEO PULLS CONTENT HUB -->
             <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-3 shadow-inner">
                 <h4 class="text-gray-200 text-xs font-bold tracking-wide uppercase flex items-center gap-1.5">
@@ -266,17 +265,6 @@
                 <a href="https://www.tiktok.com/@strawhatdraws05?_r=1&_t=ZS-97l2oBL7Q1t" target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-semibold text-xs py-2 rounded-lg transition-colors shadow uppercase tracking-wider">
                     Watch Videos
                 </a>
-            </div>
-
-            <!-- ITEM 4: DYNAMIC HELP WIDGET CALLOUT CONTAINER -->
-            <div id="helpBoxWrapper" class="bg-[#161616] border border-dashed border-red-900/40 rounded-lg p-3 text-center space-y-2 hidden">
-                <div class="space-y-0.5">
-                    <h4 id="helpBoxTitle" class="text-gray-100 text-[15px] font-bold tracking-wide">...</h4>
-                    <p id="helpBoxDescription" class="text-gray-400 text-[12px] leading-relaxed max-w-[200px] mx-auto">...</p>
-                </div>
-                <button id="helpBoxButton" class="w-full bg-transparent hover:bg-red-950/20 border border-red-500 hover:border-red-400 text-red-400 font-bold uppercase tracking-wider text-[12px] py-1.5 rounded-md transition-colors">
-                    ...
-                </button>
             </div>
             
             <div id="buyer-tracker-box" class="hidden border border-red-500/20 bg-red-950/10 p-3.5 rounded-lg space-y-2.5 text-xs sm:col-span-2 lg:col-span-1">
@@ -3963,7 +3951,7 @@
                             100% { transform: translateY(-50%); }
                         }
                         .run-marquee-vertical {
-                            animation: marqueeScrollUp 45s linear infinite;
+                            animation: marqueeScrollUp 60s linear infinite;
                         }
                         .marquee-hover-zone:hover .run-marquee-vertical,
                         .marquee-hover-zone:active .run-marquee-vertical {
@@ -4678,32 +4666,6 @@
         });
             
     </script>
-
-<!-- DYNAMIC INTERACTIVE CHATBOT POPUP MODAL -->
-<div id="chatbotModal" class="fixed bottom-4 right-4 w-[330px] sm:w-[360px] h-[480px] bg-[#161616] border border-gray-800 rounded-xl shadow-2xl z-[9999] flex flex-col hidden overflow-hidden animate-fade-in transition-all duration-200">
-    
-    <div class="p-3 border-b border-gray-800 flex justify-between items-center bg-[#1a1a1a]">
-        <div class="flex items-center space-x-2.5">
-            <div class="relative">
-                <span class="text-xl">🤖</span>
-                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#1a1a1a] rounded-full"></span>
-            </div>
-            <div>
-                <h3 class="text-gray-200 text-[11px] font-bold uppercase tracking-wider leading-none">StrawHat Helper Desk</h3>
-                <span class="text-[9px] text-emerald-400 font-medium">Automated • Online</span>
-            </div>
-        </div>
-        <div class="flex items-center space-x-1">
-            <button id="closeChatbot" class="text-gray-500 hover:text-red-400 text-xs font-bold p-1.5 rounded-lg hover:bg-red-950/20 transition-colors">
-                ✕
-            </button>
-        </div>
-    </div>
-
-    <div id="chatbotQAContent" class="flex-1 p-3 overflow-y-auto bg-[#131313] text-[13px] flex flex-col justify-between">
-        <p class="text-gray-500 italic text-center py-4">Booting dialogue matrix...</p>
-    </div>
-</div>
 
 </body>
 </html>
