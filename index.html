@@ -206,10 +206,10 @@
                 </select>
             </div>
 
-            <!-- 🏆 FB AUCTION RECORD QUICKLAUNCH -->
+            <!-- 🏆 FB AUCTION UPDATES QUICKLAUNCH -->
             <div class="bg-[#161616] border border-gray-800/80 rounded-lg p-3.5 space-y-2.5 shadow-inner">
                 <h4 class="text-gray-200 text-xs font-bold tracking-wide uppercase flex items-center gap-1.5">
-                    <i data-lucide="gavel" class="w-4 h-4 text-amber-500"></i> FB AUCTION RECORD
+                    <i data-lucide="gavel" class="w-4 h-4 text-amber-500"></i> FB Auction Updates
                 </h4>
                 <p class="text-[13px] text-gray-400 leading-relaxed">
                     View official tabulated bidding reports and audit trails from FB bidding.
@@ -401,7 +401,14 @@
                 </div>
 
                 <!-- 🛡️ CLOUDFLARE TURNSTILE WIDGET (Registration Only) -->
-                <div id="turnstile-wrapper" class="cf-turnstile flex justify-center my-3" data-sitekey="0x4AAAAAAEDnIYOW_KG0tl4d" data-theme="dark"></div>
+                <div id="turnstile-wrapper" 
+                    class="cf-turnstile flex justify-center my-3" 
+                    data-sitekey="0x4AAAAAAEDnIYOW_KG0tl4d" 
+                    data-theme="dark"
+                    data-callback="onAuthTurnstileSuccess"
+                    data-expired-callback="onAuthTurnstileExpired"
+                    data-error-callback="onAuthTurnstileExpired">
+                </div>
 
                 <button type="submit" id="auth-submit-btn" class="w-full bg-red-600 hover:bg-red-700 font-bold py-2.5 rounded text-white mt-2 tracking-wide uppercase flex items-center justify-center gap-2">Confirm</button>
                 
@@ -484,7 +491,13 @@
                 <input type="password" id="admin-pass-input" placeholder="Admin Account Password" class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-2.5 text-xs w-full focus:outline-none text-white">
                 
                 <!-- 🛡️ CLOUDFLARE TURNSTILE WIDGET FOR ADMIN -->
-                <div class="cf-turnstile flex justify-center my-3" data-sitekey="0x4AAAAAAEDnIYOW_KG0tl4d" data-theme="dark"></div>
+                <div class="cf-turnstile flex justify-center my-3" 
+                    data-sitekey="0x4AAAAAAEDnIYOW_KG0tl4d" 
+                    data-theme="dark"
+                    data-callback="onAdminTurnstileSuccess"
+                    data-expired-callback="onAdminTurnstileExpired"
+                    data-error-callback="onAdminTurnstileExpired">
+                </div>
 
                 <button onclick="verifyAdminAuth()" class="w-full bg-red-600 hover:bg-red-700 font-bold text-xs py-2.5 rounded shadow uppercase tracking-wider flex items-center justify-center gap-2"><i class="w-4 h-4" data-lucide="unlock"></i> Establish Secure Sync</button>
             </div>
@@ -1356,12 +1369,22 @@
             form.dispatchEvent(submitEvent);
         };
 
-        // Global variable to keep track of the widget instance
-        window.turnstileWidgetId = null;
+        // ✅ REPLACE WITH DIRECT TOKEN STATE HANDLERS:
+        let authTurnstileToken = null;
+        let adminTurnstileToken = null;
 
-        // Official Cloudflare Explicit Callback
-        window.onloadTurnstileCallback = function() {
-            window.renderTurnstileWidget();
+        window.onAuthTurnstileSuccess = function(token) {
+            authTurnstileToken = token;
+        };
+        window.onAuthTurnstileExpired = function() {
+            authTurnstileToken = null;
+        };
+
+        window.onAdminTurnstileSuccess = function(token) {
+            adminTurnstileToken = token;
+        };
+        window.onAdminTurnstileExpired = function() {
+            adminTurnstileToken = null;
         };
 
         window.renderTurnstileWidget = function() {
@@ -1525,7 +1548,7 @@
             const lastReg = localStorage.getItem('shd_last_reg_timestamp');
             if (isRegisterMode && lastReg && (Date.now() - Number(lastReg) < 30000)) {
                 const secondsLeft = Math.ceil((30000 - (Date.now() - Number(lastReg))) / 1000);
-                showCustomToast(`Anti-Spam active. Please wait ${secondsLeft}s before submitting another registration form Simon.`, "error");
+                showCustomToast(`Anti-Spam active. Please wait ${secondsLeft}s before submitting another registration form.`, "error");
                 return;
             }
 
@@ -1558,6 +1581,7 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i data-lucide="loader" class="animate-spin w-4 h-4 mr-2"></i> Syncing Secure Credentials...`;
             lucide.createIcons();
+
             try {
                 if (!supabaseClient) {
                     currentUserProfile = {
@@ -1572,21 +1596,21 @@
                     return;
                 }
 
+                // 🟢 Read token stored by onAuthTurnstileSuccess callback
+                const captchaToken = authTurnstileToken || (typeof turnstile !== 'undefined' ? turnstile.getResponse() : null);
+
+                if (!captchaToken && supabaseClient) {
+                    showCustomToast("Please complete the Turnstile security check.", "error");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHTML;
+                    return;
+                }
+
                 if (isRegisterMode) {
-                    // Extract Turnstile security token
-                    const captchaToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : null;
-
-                    if (!captchaToken && supabaseClient) {
-                        showCustomToast("Please complete the Turnstile security check before registering.", "error");
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalHTML;
-                        return;
-                    }
-
                     const { data, error } = await supabaseClient.auth.signUp({
                         email, password,
                         options: {
-                            captchaToken: captchaToken, // 👈 Passes Turnstile token to Supabase
+                            captchaToken: captchaToken,
                             emailRedirectTo: window.location.origin + window.location.pathname,
                             data: {
                                 name,
@@ -1608,31 +1632,19 @@
                     
                     closeAuthModal();
                 } else {
-                    // 🛡️ 1. Extract Turnstile token for Sign In mode
-                    const captchaToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : null;
-
-                    // 🛡️ 2. Prevent submission if token is missing while Supabase Captcha is enabled
-                    if (!captchaToken && supabaseClient) {
-                        showCustomToast("Please complete the Turnstile security check before signing in.", "error");
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalHTML;
-                        return;
-                    }
-
-                    // 🛡️ 3. Pass captchaToken into signInWithPassword options
                     const { error } = await supabaseClient.auth.signInWithPassword({ 
                         email, 
                         password,
                         options: {
-                            captchaToken: captchaToken // 👈 Attaches token to Supabase request
+                            captchaToken: captchaToken
                         }
                     });
 
                     if (error) {
-                        // Reset Turnstile widget so user can attempt again if password was wrong
                         if (typeof turnstile !== 'undefined' && typeof turnstile.reset === 'function') {
                             turnstile.reset();
                         }
+                        authTurnstileToken = null; // 🟢 Reset saved token on error
                         throw error;
                     }
 
@@ -2064,7 +2076,9 @@
         async function verifyAdminAuth() {
             const email = document.getElementById('admin-email-input').value.trim();
             const password = document.getElementById('admin-pass-input').value;
-            const captchaToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : null;
+            
+            // 🟢 Read token stored by onAdminTurnstileSuccess callback
+            const captchaToken = adminTurnstileToken || (typeof turnstile !== 'undefined' ? turnstile.getResponse() : null);
 
             if (!supabaseClient) {
                 showCustomToast("Security Breach: Secure connection required.", "error");
@@ -2095,11 +2109,10 @@
                     return;
                 }
 
-                // 🟢 Unlock the entire workspace AND the Master Bidding Ledger at once
+                // 🟢 Unlock the workspace & Master Bidding Ledger
                 document.getElementById('admin-auth-gate').classList.add('hidden');
                 document.getElementById('admin-workspace').classList.remove('hidden');
                 
-                // Hide second login box and reveal ledger
                 if (document.getElementById('admin-login-section')) {
                     document.getElementById('admin-login-section').style.display = 'none';
                 }
@@ -2116,6 +2129,7 @@
                 if (typeof turnstile !== 'undefined' && typeof turnstile.reset === 'function') {
                     turnstile.reset();
                 }
+                adminTurnstileToken = null; // 🟢 Reset saved token on error
                 showCustomToast(`Access Denied: ${err.message}`, 'error');
             }
         }
