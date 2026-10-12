@@ -1145,6 +1145,14 @@
                             const defaultStock = Number(c.stock || 0);
                             const dbType = (c.type || "sale").toLowerCase().trim();
                             const normalizedType = dbType === 'bid' ? 'bidding' : dbType;
+
+                            // 🏷️ Calculate Discounted Price
+                            const rawPrice = Number(c.price || 0);
+                            const discountPercent = Number(c.discount || 0);
+                            const effectivePrice = discountPercent > 0 
+                                ? Math.round(rawPrice * (1 - discountPercent / 100)) 
+                                : rawPrice;
+
                             // ⚡ Calculate BO+ count dynamically
                             const cardBoPrice = Number(c.bo_price || c.price || 0);
                             const cardBoCount = (cardBoPrice > 0 && typeof historyData !== 'undefined' && Array.isArray(historyData))
@@ -1156,7 +1164,9 @@
                                 set: c.set_code || c.set || "OP-UNKNOWN",
                                 rarity: c.rarity || "N/A",
                                 condition: c.condition || "Near Mint",
-                                price: Number(c.price || 0),
+                                original_price: rawPrice,
+                                discount: discountPercent,
+                                price: effectivePrice, // Automatically charges the discounted amount
                                 sb_price: Number(c.sb_price || c.price || 0),
                                 dibs_price: Number(c.dibs_price || 0),
                                 bo_price: Number(c.bo_price || c.price || 0),
@@ -3471,10 +3481,30 @@
                         
                         <div class="flex flex-col mt-2 pt-2 border-t border-gray-800/50">
                             ${isSale ? `
-                                <div class="flex justify-between items-center gap-3">
-                                    <span class="text-sm font-bold text-gray-100" data-price-id="${item.id}">
-                                        ${formatPHP(item.price)}
-                                    </span>
+                                <div class="flex justify-between items-center gap-2">
+                                    <div class="flex flex-col" data-price-id="${item.id}">
+                                        ${item.discount > 0 ? `
+                                            <!-- Original Price (Strikethrough) - Scaled up -->
+                                            <span class="text-xs sm:text-sm text-gray-400 line-through font-mono">
+                                                ${formatPHP(item.original_price)}
+                                            </span>
+                                            
+                                            <!-- Current Discounted Price + DISCOUNT Tag - Scaled up -->
+                                            <div class="flex items-center gap-2 flex-wrap mt-0.5">
+                                                <span class="text-base sm:text-lg font-black text-green-400 font-mono tracking-tight">
+                                                    ${formatPHP(item.price)}
+                                                </span>
+                                                <span class="text-xs font-black uppercase tracking-wider text-red-400 bg-red-950/80 border border-red-500/50 px-2 py-0.5 rounded shadow-sm">
+                                                    ${item.discount}% DISCOUNT
+                                                </span>
+                                            </div>
+                                        ` : `
+                                            <!-- Standard Price (No Discount) - Scaled up -->
+                                            <span class="text-base sm:text-lg font-bold text-gray-100 font-mono">
+                                                ${formatPHP(item.price)}
+                                            </span>
+                                        `}
+                                    </div>
                                     <div>${actionMarkup}</div>
                                 </div>
                             ` : `
