@@ -9,7 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Cloudflare Turnstile API -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <style>
+    
+    <!-- Speed Acceleration: Preconnect to image cache & database -->
+    <link rel="preconnect" href="https://wsrv.nl" crossorigin>
+    <link rel="preconnect" href="https://vyojxqeokzdjicjxtqgv.supabase.co" crossorigin>
+    <link rel="dns-prefetch" href="https://wsrv.nl">
+    
+        <style>
         .zoom-container {
             position: relative;
             overflow: hidden;
@@ -729,6 +735,20 @@
     <script>
         const SUPABASE_URL = "https://vyojxqeokzdjicjxtqgv.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5b2p4cWVva3pkamljanh0cWd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMTU1NzUsImV4cCI6MjA5Nzc5MTU3NX0.Y0SpmB4EpGxEz446gZwPFZHVa2_UiIgJLWXEZYxRhBs";
+
+        // --- HIGH-SPEED IMAGE OPTIMIZER (SAFE FOR SPACES & %20) ---
+        function getOptimizedThumb(url, width = 450, quality = 75) {
+            if (!url || typeof url !== 'string') return url;
+            if (!url.includes('supabase.co')) return url;
+
+            try {
+                // decodeURI prevents double-encoding existing %20 spaces into %2520
+                const cleanUrl = decodeURI(url);
+                return `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=${width}&q=${quality}&output=webp`;
+            } catch (e) {
+                return url;
+            }
+        }
 
         let supabaseClient = null;
         if (SUPABASE_URL.indexOf("your-project-id") === -1 && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY_HERE") {
@@ -3223,7 +3243,7 @@
                     isPremium 
                         ? 'golden-glow-card' 
                         : 'bg-[#1e1e1e] border border-gray-800 hover:border-gray-700 shadow-xl'
-                } ${soldOut && isSale ? 'opacity-40 select-none' : ''}`;
+                } ${soldOut && isSale ? 'select-none' : ''}`;
 
                 let actionMarkup = '';
                 let biddingHeaderMarkup = '';
@@ -3413,30 +3433,37 @@
                             <!-- Infinite 3D Front-to-Back Flip Loop (Pauses on Hover) -->
                             <div class="w-full h-full animate-card-flip" style="transform-style: preserve-3d; position: relative;">
                                 <div class="absolute inset-0 w-full h-full backface-hidden">
-                                    <img src="${escapeHtml(item.frontImg)}" alt="${safeName}" class="w-full h-full object-cover">
+                                    <img src="${escapeHtml(getOptimizedThumb(item.frontImg))}" alt="${safeName}" loading="lazy" decoding="async" class="w-full h-full object-cover">
                                 </div>
                                 <div class="absolute inset-0 w-full h-full backface-hidden" style="transform: rotateY(180deg);">
-                                    <img src="${escapeHtml(item.backImg)}" alt="${safeName} Back" class="w-full h-full object-cover">
+                                    <img src="${escapeHtml(getOptimizedThumb(item.backImg))}" alt="${safeName} Back" loading="lazy" decoding="async" class="w-full h-full object-cover">
                                 </div>
                             </div>
                         ` : `
-                            <!-- Static View (Activated when Front/Back toggle is clicked for zoom/inspection) -->
-                            <div class="w-full h-full">
+                            <!-- Static View: Loads optimized thumb; bulletproof fallback prevents blank broken box -->
+                            <div class="w-full h-full relative">
                                 <img
-                                    src="${dynamicImgSrc}"
+                                    src="${escapeHtml(getOptimizedThumb(dynamicImgSrc, 450, 75))}"
                                     alt="${safeName}"
+                                    loading="lazy"
+                                    decoding="async"
                                     style="transform: rotate(${item.rotation || 0}deg); transition: transform 0.3s ease;"
-                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400';"
-                                    onclick="launchZoomModal(this.src)"
-                                    class="zoom-image relative z-10 w-full h-full object-cover cursor-zoom-in"
+                                    onerror="
+                                        if (!this.dataset.fallbackTried) {
+                                            this.dataset.fallbackTried = 'true';
+                                            this.src = '${escapeHtml(dynamicImgSrc)}';
+                                        }
+                                    "
+                                    onclick="launchZoomModal('${escapeHtml(dynamicImgSrc)}')"
+                                    class="zoom-image relative z-10 w-full h-full object-cover cursor-zoom-in ${soldOut && isSale ? 'opacity-50 brightness-50' : ''}"
                                 >
                             </div>
                         `}
 
-                        <!-- Stock Badge (Only on Buy Now / Sale tab) -->
+                        <!-- Stock Badge (Turns Red when Sold Out) -->
                         ${isSale ? `
-                            <div class="absolute top-2 left-2 z-20 bg-black/80 border border-gray-700 text-white font-bold px-2 py-0.5 rounded text-[10px] pointer-events-none">
-                                Stock: ${item.stock}
+                            <div class="absolute top-2 left-2 z-20 ${soldOut ? 'bg-red-600 text-white font-black border-red-500 shadow-md' : 'bg-black/80 text-white font-bold border-gray-700'} border px-2 py-0.5 rounded text-[10px] pointer-events-none uppercase tracking-wider">
+                                ${soldOut ? 'SOLD OUT' : `Stock: ${item.stock}`}
                             </div>
                         ` : ''}
 
@@ -3831,7 +3858,7 @@
                         
                         htmlContent += `
                             <div class="flex items-center space-x-3 bg-[#1f1f1f] border border-gray-800 p-2 rounded hover:border-gray-700 transition-colors">
-                                <img src="${item.image_url}" alt="${safeName}" class="w-10 h-14 object-cover rounded bg-[#161616] border border-gray-800 shrink-0" onerror="this.src='https://via.placeholder.com/150'">
+                                <img src="${getOptimizedThumb(item.image_url, 150)}" alt="${safeName}" loading="lazy" decoding="async" class="w-10 h-14 object-cover rounded bg-[#161616] border border-gray-800 shrink-0" onerror="this.src='https://via.placeholder.com/150'">
                                 <div class="flex-1 min-w-0 space-y-0.5">
                                     <h5 class="text-gray-200 text-[14px] font-bold truncate leading-tight">${safeName}</h5>
                                     <div class="flex items-center space-x-2 text-[12px]">
@@ -3995,7 +4022,7 @@
                             100% { transform: translateY(-50%); }
                         }
                         .run-marquee-vertical {
-                            animation: marqueeScrollUp 85s linear infinite;
+                            animation: marqueeScrollUp 200s linear infinite;
                         }
                         .marquee-hover-zone:hover .run-marquee-vertical,
                         .marquee-hover-zone:active .run-marquee-vertical {
